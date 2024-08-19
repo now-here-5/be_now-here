@@ -1,0 +1,71 @@
+name: Deploy to cloudtype
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+
+      # PostgreSQL을 먼저 기동하는 단계
+      - name: Start PostgreSQL
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: hcons/blinker
+          stage: main
+          yaml: |
+            name: postgresql
+            app: postgresql@16
+            options:
+              rootusername: ${{ secrets.CT_DB_USERNAME }}
+              rootpassword: ${{ secrets.CT_DB_PASSWORD }}
+              database: ${{ secrets.CT_DB_NAME }}
+              tz: Asia/Seoul
+            context:
+              preset: postgresql
+
+
+      # 애플리케이션을 배포하는 단계 (PostgreSQL 기동 후 실행)
+      - name: Deploy Application
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: hcons/blinker
+          stage: main
+          yaml: |
+            name: blinker-server
+            app: java@17
+            options:
+              ports: "8080"
+              env:
+                - name: DB_HOST
+                  value: ${{ secrets.CT_DB_HOST }}
+                - name: DB_PORT
+                  value: ${{ secrets.CT_DB_PORT }}
+                - name: DB_NAME
+                  value: ${{ secrets.CT_DB_NAME }}
+                - name: DB_USERNAME
+                  value: ${{ secrets.CT_DB_USERNAME }}
+                - name: DB_PASSWORD
+                  value: ${{ secrets.CT_DB_PASSWORD }}
+              start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/Blinker-0.0.1-SNAPSHOT.jar
+              buildenv: []
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
