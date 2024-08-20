@@ -20,8 +20,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest .
+        run: docker build --cache-from type=local,src=/tmp/.buildx-cache --cache-to type=local,dest=/tmp/.buildx-cache -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest .
 
       - name: Push Docker Image to OCI Registry
         run: |
@@ -36,12 +44,11 @@ jobs:
           username: ${{ secrets.PS_VM_USERNAME }}
           key: ${{ secrets.PS_VM_PRIVATE_KEY }}
           script: |
-            # PostgreSQL 상태 확인 후 필요 시 시작
-            if ! nc -z ${{ secrets.OC_DB_PV_HOST }} ${{ secrets.OC_DB_PORT }}; then
+            if systemctl is-active --quiet postgresql@14-main; then
+              echo "PostgreSQL is already running."
+            else
               echo "PostgreSQL is not running. Starting PostgreSQL..."
               sudo systemctl start postgresql
-            else
-              echo "PostgreSQL is already running."
             fi
 
       # 애플리케이션 VM 배포 단계
@@ -52,35 +59,32 @@ jobs:
           username: ${{ secrets.OCI_VM_USERNAME }}
           key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
           script: |
-            # Set deployment directory
             DEPLOYMENT_DIR="/home/username/app"
-            
-            # Check if deployment directory exists, if not, create it
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
-              sudo mkdir -p "$DEPLOYMENT_DIR"
-              sudo chown $USER:$USER "$DEPLOYMENT_DIR"
+              mkdir -p "$DEPLOYMENT_DIR"
             fi
             
-            # Change to the deployment directory
             cd "$DEPLOYMENT_DIR"
-            
-            # Log in to OCI Registry
             echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+            if ! sudo docker pull ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+              echo "Failed to pull Docker image"
+              exit 1
+            fi
             
-            # Pull the latest Docker image
-            sudo docker pull ${{ secrets.OCIR_REPOSITORY_URL }}:latest
-            
-            # Stop and remove the existing container, if any
             sudo docker stop blinker-server || true
             sudo docker rm blinker-server || true
-            
-            # Run the new container with environment variables and port binding
-            sudo docker run -d --name blinker-server \
-              -p 8080:8080 \
+
+            if ! sudo docker run -d --name blinker-server -p 8080:8080 \
               -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
               -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
-              ${{ secrets.OCIR_REPOSITORY_URL }}:latest
+              ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+              echo "Failed to run Docker container"
+              exit 1
+            fi
+
+            # Show container logs for debugging
+            sudo docker logs blinker-server
