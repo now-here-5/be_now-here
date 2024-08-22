@@ -33,10 +33,12 @@ jobs:
           echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
 
       - name: Build and Push Docker Image
-        run: docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
-                    --cache-to type=local,dest=/tmp/.buildx-cache \
-                    -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest \
-                    --push .
+        run: |
+          docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
+                              --cache-to type=local,dest=/tmp/.buildx-cache \
+                              -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest \
+                              --push .
+
 
 
       # PostgreSQL VM 접속 및 상태 확인 단계
