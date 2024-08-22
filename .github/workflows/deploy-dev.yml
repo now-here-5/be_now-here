@@ -26,7 +26,7 @@ jobs:
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          project: hcons/blinker
+          project: hcons/now-here
           stage: main
           yaml: |
             name: postgresql
@@ -45,10 +45,10 @@ jobs:
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          project: hcons/blinker
+          project: hcons/now-here
           stage: main
           yaml: |
-            name: blinker-server
+            name: now-here-server
             app: java@17
             options:
               ports: "8080"
@@ -63,7 +63,7 @@ jobs:
                   value: ${{ secrets.CT_DB_USERNAME }}
                 - name: DB_PASSWORD
                   value: ${{ secrets.CT_DB_PASSWORD }}
-              start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/Blinker-0.0.1-SNAPSHOT.jar
+              start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
               buildenv: []
             context:
               git:

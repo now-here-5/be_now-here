@@ -1,4 +1,4 @@
-package com.blinker4m.Blinker.global.response;
+package com.now_here5.now_here.global.response;
 
 import lombok.Builder;
 import lombok.Getter;

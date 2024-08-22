@@ -33,7 +33,10 @@ jobs:
           echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
 
       - name: Build and Push Docker Image
-        run: docker buildx build --cache-from type=local,src=/tmp/.buildx-cache --cache-to type=local,dest=/tmp/.buildx-cache -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest --push .
+        run:
+              docker buildx build --cache-from type=local,\
+              src=/tmp/.buildx-cache --cache-to type=local, \
+              dest=/tmp/.buildx-cache -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest --push .
 
 
 
@@ -73,9 +76,9 @@ jobs:
               exit 1
             fi
             
-            sudo docker stop blinker-server || true
-            sudo docker rm blinker-server || true
-            if ! sudo docker run -d --name blinker-server -p 8080:8080 \
+            sudo docker stop now-here-server || true
+            sudo docker rm now-here-server || true
+            if ! sudo docker run -d --name now-here-server -p 8080:8080 \
               -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
@@ -87,4 +90,4 @@ jobs:
             fi
 
             # Show container logs for debugging
-            sudo docker logs blinker-server
+            sudo docker logs now-here-server

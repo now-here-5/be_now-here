@@ -1,10 +1,10 @@
-package com.blinker4m.Blinker;
+package com.now_here5.now_here;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BlinkerApplicationTests {
+class NowHereApplicationTests {
 
 	@Test
 	void contextLoads() {
