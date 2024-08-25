@@ -20,7 +20,7 @@ public class Interaction extends CreatedDateAudit {
     private Long id;
 
     @Lob
-    @Column(name = "content", nullable = false, columnDefinition = "BIGTEXT")
+    @Column(name = "content", nullable = false)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)

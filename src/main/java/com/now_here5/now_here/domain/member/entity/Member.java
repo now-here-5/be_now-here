@@ -46,7 +46,7 @@ public abstract class Member extends FullAudit {
     private Mbti mbti;
 
     @Lob
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "notification", nullable = false)
@@ -76,6 +76,10 @@ public abstract class Member extends FullAudit {
         // 기본값 설정
         this.checkNotiTime = super.getCreatedAt();
         this.notiSetting = true;
+    }
+
+    public void updateToken(String token) {
+        this.token = token;
     }
 }
 
