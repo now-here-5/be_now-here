@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "matching", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"sender_id", "receiver_id"})
+        @UniqueConstraint(columnNames = {"sender_member_id", "sender_active", "receiver_member_id", "receiver_active"})
 })
 public class Matching extends CreatedDateAudit {
 
@@ -28,11 +28,17 @@ public class Matching extends CreatedDateAudit {
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "sender_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
+            @JoinColumn(name = "sender_active", referencedColumnName = "active", insertable = false, updatable = false)
+    })
     private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
+            @JoinColumn(name = "receiver_active", referencedColumnName = "active", insertable = false, updatable = false)
+    })
     private Member receiver;
 
     @Builder
