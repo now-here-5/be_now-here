@@ -4,11 +4,13 @@ package com.now_here5.now_here.domain.member.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 
 @Schema(description = "로그인 요청 DTO")
 @Getter
 @Builder
+@RequiredArgsConstructor
 public class LoginRequest {
 
     @Schema(description = "핸드폰 번호", example = "01012345678", required = true)
@@ -18,4 +20,5 @@ public class LoginRequest {
     
     @Schema(description = "비밀번호", example = "1234", required = true)
     private final String password;
+
 }

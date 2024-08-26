@@ -1,7 +1,7 @@
 package com.now_here5.now_here.global.security.dto;
 
 
-import com.now_here5.now_here.domain.event.entity.Event;
+import com.now_here5.now_here.domain.event.dto.EventResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,13 +10,11 @@ import lombok.Getter;
 @Getter
 public class AuthenticatedMemberDto {
 
-    private final Long userId;
-
-    private final String phoneNumber;
+    private final Long memberId;
 
     private final String nickname;
 
-    private final Event event;
+    private final EventResponse event;
 
     private final RoleNamesDto roleNamesDto;
 }

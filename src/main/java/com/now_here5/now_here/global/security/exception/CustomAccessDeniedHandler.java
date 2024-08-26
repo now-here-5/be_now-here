@@ -2,7 +2,7 @@ package com.now_here5.now_here.global.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.now_here5.now_here.global.response.ResponseForm;
-import com.now_here5.now_here.global.response.response.ResponseCode;
+import com.now_here5.now_here.global.response.ResponseCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Configuration;

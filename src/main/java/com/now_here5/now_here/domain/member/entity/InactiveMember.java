@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -25,10 +26,10 @@ public class InactiveMember extends Member {
     private Event event;
 
     @OneToMany(mappedBy = "sender")
-    private List<Matching> sentMatchings;
+    private List<Matching> sentMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "receiver")
-    private List<Matching> receivedMatchings;
+    private List<Matching> receivedMatchings = new ArrayList<>();
 
     public void setEvent(Event event) {
         this.event = event;

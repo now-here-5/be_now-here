@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Slf4j
@@ -14,19 +15,19 @@ public class MemberAuthRepository {
 
     private final EntityManager em;
 
-    public boolean isValidToken(String token, Long userId) {
+    @Transactional
+    public ActiveMember findMemberByToken(String token) {
         try {
-            ActiveMember member = em.find(ActiveMember.class, userId); // 토큰 검사 겸 멤버 영속성 컨텍스트에 저장
-
-            if (member == null) {
-                return false;
-            }else{
-                return member.getToken().equals(token);
-            }
-
+            return em.createQuery("select am from ActiveMember am " +
+                            "join fetch am.event " +
+                            "left join fetch am.memberRoleList " +
+                            "left join fetch am.event.location " +
+                            "where am.token = :token", ActiveMember.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
         } catch (Exception e) {
-            log.error("isValidToken error ={}", e.getMessage());
-            return false ; // 토큰이 유효하지 않은 것으로 간주.
+            log.error("isValidToken error ={}, token ={}", e.getMessage(),token);
+            return null ; // 토큰이 유효하지 않은 것으로 간주.
         }
     }
 
@@ -35,7 +36,6 @@ public class MemberAuthRepository {
             ActiveMember member = em.find(ActiveMember.class, userId);  // 사용자 엔터티 조회
             if (member != null) {
                 member.updateToken(newToken);
-                em.merge(member);
             } else {
                 log.error("User not found for ID: {}", userId);
             }
@@ -45,12 +45,15 @@ public class MemberAuthRepository {
         }
     }
 
-    public ActiveMember findMemberWithRolesByPhone(String phoneNumber){
+    public ActiveMember findMemberWithRolesByPhone(String phoneNumber, Long eventId){
         try {
             return em.createQuery("select am from ActiveMember am " +
-                            "join fetch am.memberRoleList " +
-                            "where am.phoneNumber = :phoneNumber", ActiveMember.class)
+                            "left join fetch am.memberRoleList " +
+                            "join fetch am.event " +
+                            "where am.phoneNumber = :phoneNumber and " +
+                            "am.event.id = :eventId ", ActiveMember.class)
                     .setParameter("phoneNumber", phoneNumber)
+                    .setParameter("eventId", eventId)
                     .getSingleResult();
         } catch (Exception e) {
             log.warn("findMemberByPhone error ={}", e.getMessage());

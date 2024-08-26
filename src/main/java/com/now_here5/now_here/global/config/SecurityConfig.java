@@ -47,14 +47,15 @@ public class SecurityConfig {
                                 // 권한 없이 접근 가능한 URL 설정
 
                                 // 매니저 대상
-                                .requestMatchers("/swagger-ui/**").hasRole(RoleName.MANAGER.name()) 
-                                .requestMatchers("/v3/api-docs/**").hasRole(RoleName.MANAGER.name())
+                                .requestMatchers("/swagger-ui/**").hasRole(RoleName.ADMIN.name())
+                                .requestMatchers("/v3/api-docs/**").hasRole(RoleName.ADMIN.name())
                                 
                                 // 비유저 대상
-                                .requestMatchers(HttpMethod.GET, "/signup/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/signup/**").permitAll()
-                                .requestMatchers(HttpMethod.PATCH, "/signup/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/login/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/event/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "*/register/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "*/login/**").permitAll()
 
 
                                 // 나머지는 인증 필요.
