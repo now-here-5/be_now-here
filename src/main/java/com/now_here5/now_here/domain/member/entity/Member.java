@@ -1,21 +1,26 @@
 package com.now_here5.now_here.domain.member.entity;
 
+import com.now_here5.now_here.domain.event.entity.Event;
+import com.now_here5.now_here.domain.matching.entity.Matching;
+import com.now_here5.now_here.domain.member.entity.role.MemberRole;
 import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member")
-public abstract class Member extends FullAudit {
+public class Member extends FullAudit  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,8 +57,8 @@ public abstract class Member extends FullAudit {
     @Column(name = "notification", nullable = false)
     private boolean notification;
 
-    @Column(name = "status", nullable = false)
-    private boolean status;
+    @Column(name = "popupStatus", nullable = false)
+    private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
 
     @Column(name = "checkNoti", nullable = false)
     private LocalDateTime checkNotiTime;
@@ -61,8 +66,26 @@ public abstract class Member extends FullAudit {
     @Column(name = "noti_setting", nullable = false)
     private boolean notiSetting;
 
-    protected Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                     Gender gender, Mbti mbti, String description, boolean notification, boolean status) {
+    @Column(name = "active", nullable = false)
+    private boolean active;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
+
+    @OneToMany(mappedBy = "sender")
+    private List<Matching> sentMatchings;
+
+    @OneToMany(mappedBy = "receiver")
+    private List<Matching> receivedMatchings;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberRole> memberRoleList;
+
+    @Builder
+    public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
+                  Gender gender, Mbti mbti, String description, boolean notification, boolean active,
+                  Event event) {
         this.token = token;
         this.birthday = birthday;
         this.phoneNumber = phoneNumber;
@@ -72,20 +95,40 @@ public abstract class Member extends FullAudit {
         this.mbti = mbti;
         this.description = description;
         this.notification = notification;
-        this.status = status;
-        // notiSetting을 초기화합니다.
+        this.active = active;
+        this.event = event;
+        this.checkNotiTime = LocalDateTime.now();
         this.notiSetting = true;
+
+        // Add this member to the event's member list if it's not already present
+        setEvent(event);
+    }
+
+    // 편의 메서드
+    public void setEvent(Event event) {
+        this.event = event;
+        if (event != null && !event.getMemberList().contains(this)) {
+            event.getMemberList().add(this);
+        }
+    }
+
+    // 상태 관리 메서드
+    public void activate() {
+        this.active = true;
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 
     @PrePersist
-    protected void onPrePersist() {
-        this.checkNotiTime = this.getCreatedAt();  // 엔티티가 영속화되기 직전에 checkNotiTime을 설정
+    protected void onCreate() {
+        this.checkNotiTime = LocalDateTime.now();
     }
 
-    public void updateToken(String token) {
-        this.token = token;
+    @PreUpdate
+    protected void onUpdate() {
+        this.checkNotiTime = LocalDateTime.now();
     }
-
-
 }
 
