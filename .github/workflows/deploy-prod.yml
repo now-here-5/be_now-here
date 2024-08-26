@@ -5,10 +5,6 @@ on:
     branches:
       - prod
 
-  pull_request:
-    branches:
-      - prod
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

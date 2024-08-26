@@ -1,6 +1,4 @@
 package com.now_here5.now_here.global.util;
-
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
 import java.util.Random;
 
 
