@@ -34,7 +34,7 @@ public class EventController {
     }
 
     @GetMapping("/detail/{event_id}")
-    public ResponseEntity<ResponseForm> getEventList(
+    public ResponseEntity<ResponseForm> getSingleEvent(
             @PathVariable(name = "event_id", required = true ) Long eventId){
 
         EventResponse eventDetail = eventService.getEventDetail(eventId);
