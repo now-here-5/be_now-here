@@ -47,8 +47,8 @@ public class SecurityConfig {
                                 // 권한 없이 접근 가능한 URL 설정
 
                                 // 매니저 대상
-                                .requestMatchers("/swagger-ui/**").hasRole(RoleName.ADMIN.name())
-                                .requestMatchers("/v3/api-docs/**").hasRole(RoleName.ADMIN.name())
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/v3/api-docs/**").permitAll()
                                 
                                 // 비유저 대상
                                 .requestMatchers(HttpMethod.GET, "/event/**").permitAll()
