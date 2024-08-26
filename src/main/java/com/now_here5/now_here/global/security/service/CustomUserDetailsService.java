@@ -1,6 +1,6 @@
 package com.now_here5.now_here.global.security.service;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
+import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.RoleNamesDto;
 import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
@@ -44,7 +44,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             Long eventId = customToken.getEventId();
 
-            ActiveMember member = memberAuthRepository.findMemberWithRolesByPhone(phone, eventId);
+            Member member = memberAuthRepository.findMemberWithRolesByPhone(phone, eventId);
 
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(member, null, new ArrayList<>()

@@ -104,6 +104,10 @@ public class Member extends FullAudit  {
         setEvent(event);
     }
 
+    public void updateToken(String newToken) {
+        this.token = newToken;
+    }
+
     // 편의 메서드
     public void setEvent(Event event) {
         this.event = event;

@@ -1,7 +1,7 @@
 package com.now_here5.now_here.domain.member.repository;
 
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
+import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +16,13 @@ public class MemberAuthRepository {
     private final EntityManager em;
 
     @Transactional
-    public ActiveMember findMemberByToken(String token) {
+    public Member findMemberByToken(String token) {
         try {
-            return em.createQuery("select am from ActiveMember am " +
+            return em.createQuery("select am from Member am " +
                             "join fetch am.event " +
                             "left join fetch am.memberRoleList " +
                             "left join fetch am.event.location " +
-                            "where am.token = :token", ActiveMember.class)
+                            "where am.token = :token", Member.class)
                     .setParameter("token", token)
                     .getSingleResult();
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public class MemberAuthRepository {
 
     public void updateTokenById(String newToken, Long userId){
         try {
-            ActiveMember member = em.find(ActiveMember.class, userId);  // 사용자 엔터티 조회
+            Member member = em.find(Member.class, userId);  // 사용자 엔터티 조회
             if (member != null) {
                 member.updateToken(newToken);
             } else {
@@ -45,13 +45,13 @@ public class MemberAuthRepository {
         }
     }
 
-    public ActiveMember findMemberWithRolesByPhone(String phoneNumber, Long eventId){
+    public Member findMemberWithRolesByPhone(String phoneNumber, Long eventId){
         try {
-            return em.createQuery("select am from ActiveMember am " +
+            return em.createQuery("select am from Member am " +
                             "left join fetch am.memberRoleList " +
                             "join fetch am.event " +
                             "where am.phoneNumber = :phoneNumber and " +
-                            "am.event.id = :eventId ", ActiveMember.class)
+                            "am.event.id = :eventId ", Member.class)
                     .setParameter("phoneNumber", phoneNumber)
                     .setParameter("eventId", eventId)
                     .getSingleResult();

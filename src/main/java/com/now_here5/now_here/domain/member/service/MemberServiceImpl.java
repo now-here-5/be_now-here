@@ -54,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
                 throw new Exception("Phone number is not verified");
             }
 
-            ActiveMember member = registerDtoToMember.converter(registerMemberRequest);
+            Member member = registerDtoToMember.converter(registerMemberRequest);
             Event event  =  eventRepository.getEventDetail(eventId);
 
             member.setEvent(event);
@@ -74,7 +74,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean inactivateMember() {
         try{
             AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
-            ActiveMember activeMember = memberRepository.findActiveMemberById(memberDto.getMemberId());
+            Member activeMember = memberRepository.findActiveMemberById(memberDto.getMemberId());
             return true; // 추후 개발
         }catch(Exception e){
             log.error("Failed to inactivate member: {}", e.getMessage());
@@ -85,9 +85,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean checkPhoneDuplicated(Long eventId, String phone) {
         try{
-            List<ActiveMember> members =  memberRepository.findActiveMemberByPhone(phone);
+            List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
 
-            for(ActiveMember member : members){
+            for(Member member : members){
                 if(member.getEvent().getId().equals(eventId)){
                     log.debug("Phone number {} is duplicated in event {} : {}",
                             phone, eventId, member.getEvent().getField());

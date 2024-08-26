@@ -2,7 +2,7 @@ package com.now_here5.now_here.domain.member.service;
 
 
 import com.now_here5.now_here.domain.event.dto.EventResponse;
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
+import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
@@ -15,14 +15,10 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Slf4j
@@ -46,7 +42,7 @@ public class MemberAuthService {
             String newToken = tokenGenerator.generateUniqueToken();
 
             Authentication authentication = authUtil.getAuthentication();
-            ActiveMember tempMember = (ActiveMember) authentication.getPrincipal();
+            Member tempMember = (Member) authentication.getPrincipal();
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
             return new TokenDto(newToken);
         } catch (Exception e) {
@@ -72,7 +68,7 @@ public class MemberAuthService {
 
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try{
-            ActiveMember member = memberAuthRepository.findMemberByToken(token);
+            Member member = memberAuthRepository.findMemberByToken(token);
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
                     .nickname(member.getNickname())

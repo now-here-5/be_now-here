@@ -1,6 +1,5 @@
 package com.now_here5.now_here.domain.member.repository;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +15,12 @@ public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
     @Override
-    public List<ActiveMember> findActiveMemberByPhone(String phoneNumber) {
+    public List<Member> findActiveMemberByPhone(String phoneNumber) {
         try{
-            return em.createQuery("select am from ActiveMember am " +
+            return em.createQuery("select am from Member am " +
                             "join fetch am.event " +
                             "where am.phoneNumber = :phoneNumber " +
-                            "and am.status = true", ActiveMember.class)
+                            "and am.active = true", Member.class)
                     .setParameter("phoneNumber", phoneNumber)
 
                     .getResultList();
@@ -42,9 +41,14 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public ActiveMember findActiveMemberById(Long memberId) {
+    public Member findActiveMemberById(Long memberId) {
         try{
-            return em.find(ActiveMember.class, memberId);
+            return em.createQuery("select am from Member am " +
+                            "join fetch am.event " +
+                            "where am.id = :memberId " +
+                            "and am.active = true", Member.class)
+                    .setParameter("memberId", memberId)
+                    .getSingleResult();
         }catch (Exception e){
             log.error("Failed to find active member: {}", e.getMessage());
             return null;
@@ -54,7 +58,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public boolean isNickNameDuplicatedWith(String nickname, Long eventId) {
         try{
-            return em.createQuery("select count(am) from ActiveMember am " +
+            return em.createQuery("select count(am) from Member am " +
                             "where am.nickname = :nickname " +
                             "and am.event.id = :eventId", Long.class)
                     .setParameter("nickname", nickname)
@@ -66,7 +70,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
-    public void add(ActiveMember activeMember) {
+    public void add(Member activeMember) {
         try{
             em.persist(activeMember);
         }catch (Exception e){
