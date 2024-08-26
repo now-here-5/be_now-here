@@ -1,0 +1,19 @@
+package com.now_here5.now_here.domain.member.service;
+
+import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
+
+public interface MemberService {
+
+    boolean sendCode(String phone);
+
+    boolean verifyCode(String phone, String code);
+
+    String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest);
+
+    boolean inactivateMember();
+
+    boolean checkPhoneDuplicated(Long eventId, String phone);
+
+    boolean checkNicknameDuplicated(Long eventId, String nickname);
+
+}

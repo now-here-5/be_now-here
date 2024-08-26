@@ -1,6 +1,6 @@
 package com.now_here5.now_here.global.response;
 
-import com.now_here5.now_here.global.response.response.ResponseCode;
+import com.now_here5.now_here.global.response.ResponseCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 

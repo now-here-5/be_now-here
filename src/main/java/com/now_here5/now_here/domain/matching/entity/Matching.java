@@ -1,10 +1,7 @@
 package com.now_here5.now_here.domain.matching.entity;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
-import com.now_here5.now_here.domain.member.entity.InactiveMember;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.entity.CreatedDateAudit;
-import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "matching", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"sender_id", "receiver_id"})
+        @UniqueConstraint(columnNames = {"sender_member_id", "sender_active", "receiver_member_id", "receiver_active"})
 })
 public class Matching extends CreatedDateAudit {
 
@@ -31,11 +28,17 @@ public class Matching extends CreatedDateAudit {
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "sender_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
+            @JoinColumn(name = "sender_active", referencedColumnName = "active", insertable = false, updatable = false)
+    })
     private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @JoinColumns({
+            @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
+            @JoinColumn(name = "receiver_active", referencedColumnName = "active", insertable = false, updatable = false)
+    })
     private Member receiver;
 
     @Builder
@@ -45,31 +48,15 @@ public class Matching extends CreatedDateAudit {
 
     public void setSender(Member sender) {
         this.sender = sender;
-        if (sender instanceof ActiveMember) {
-            ActiveMember activeSender = (ActiveMember) sender;
-            if (!activeSender.getSentMatchings().contains(this)) {
-                activeSender.getSentMatchings().add(this);
-            }
-        } else if (sender instanceof InactiveMember) {
-            InactiveMember inactiveSender = (InactiveMember) sender;
-            if (!inactiveSender.getSentMatchings().contains(this)) {
-                inactiveSender.getSentMatchings().add(this);
-            }
+        if (sender != null && !sender.getSentMatchings().contains(this)) {
+            sender.getSentMatchings().add(this);
         }
     }
 
     public void setReceiver(Member receiver) {
         this.receiver = receiver;
-        if (receiver instanceof ActiveMember) {
-            ActiveMember activeReceiver = (ActiveMember) receiver;
-            if (!activeReceiver.getReceiveMatchings().contains(this)) {
-                activeReceiver.getReceiveMatchings().add(this);
-            }
-        } else if (receiver instanceof InactiveMember) {
-            InactiveMember inactiveReceiver = (InactiveMember) receiver;
-            if (!inactiveReceiver.getReceivedMatchings().contains(this)) {
-                inactiveReceiver.getReceivedMatchings().add(this);
-            }
+        if (receiver != null && !receiver.getReceivedMatchings().contains(this)) {
+            receiver.getReceivedMatchings().add(this);
         }
     }
 }
