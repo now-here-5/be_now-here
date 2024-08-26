@@ -1,6 +1,6 @@
 package com.now_here5.now_here.domain.interaction.entity;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
+import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.entity.CreatedDateAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,14 +20,14 @@ public class Interaction extends CreatedDateAudit {
     private Long id;
 
     @Lob
-    @Column(name = "content", nullable = false, columnDefinition = "BIGTEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private ActiveMember member;
+    private Member member;
 
-    public Interaction( String content, ActiveMember member) {
+    public Interaction( String content, Member member) {
         this.content = content;
         this.member = member;
     }

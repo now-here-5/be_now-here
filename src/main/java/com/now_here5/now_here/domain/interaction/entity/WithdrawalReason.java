@@ -1,7 +1,6 @@
 package com.now_here5.now_here.domain.interaction.entity;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
-import jakarta.persistence.Column;
+import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class WithdrawalReason extends Interaction{
 
     @Builder
-    public WithdrawalReason(String content, ActiveMember member) {
+    public WithdrawalReason(String content, Member member) {
         super(content, member);
     }
 }

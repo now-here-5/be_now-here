@@ -1,9 +1,6 @@
 package com.now_here5.now_here.domain.event.entity;
 
-import com.now_here5.now_here.domain.member.entity.ActiveMember;
-import com.now_here5.now_here.domain.member.entity.Gender;
-import com.now_here5.now_here.domain.member.entity.InactiveMember;
-import com.now_here5.now_here.domain.member.entity.Mbti;
+import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,10 +37,7 @@ public class Event extends FullAudit {
     private String field;
 
     @OneToMany(mappedBy = "event",  cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ActiveMember> activeMemberList;
-
-    @OneToMany(mappedBy = "event",  cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<InactiveMember> inactiveMemberList;
+    private List<Member> memberList;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
@@ -58,16 +51,11 @@ public class Event extends FullAudit {
         this.field = field;
         this.location = location;
     }
-    public void addActiveMember(ActiveMember activeMember) {
-        activeMember.setEvent(this);
-        if (!this.activeMemberList.contains(activeMember)) {
-            this.activeMemberList.add(activeMember);
-        }
-    }
-    public void addInactiveMember(InactiveMember inactiveMember) {
-        inactiveMember.setEvent(this);
-        if (!this.inactiveMemberList.contains(inactiveMember)) {
-            this.inactiveMemberList.add(inactiveMember);
+
+    public void addMember(Member member) {
+        member.setEvent(this);
+        if (!this.memberList.contains(member)) {
+            this.memberList.add(member);
         }
     }
 }
