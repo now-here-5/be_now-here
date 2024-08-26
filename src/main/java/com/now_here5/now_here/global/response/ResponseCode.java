@@ -57,8 +57,12 @@ public enum ResponseCode {
     PHONE_VERIFY_FAIL(400, "A005", "휴대폰 인증에 실패했습니다."),
 
     // Event
+    EVENTTLIST_QUERY_SUCCESS(200, "E003", "이벤트 목록 조회에 성공했습니다."),
+    EVENTTLIST_QUERY_FAIL(400, "E003", "이벤트 목록 조회에 실패했습니다."),
     EVENT_QUERY_SUCCESS(200, "E004", "이벤트 조회에 성공했습니다."),
-    EVENT_QUERY_FAIL(200, "E004", "이벤트 조회에 실패했습니다.");
+    EVENT_QUERY_FAIL(400, "E004", "이벤트 조회에 실패했습니다."),
+    EVENT_TIME_SUCCESS(200, "E005", "이벤트 시간 조회에 성공했습니다."),
+    EVENT_TIME_FAIL(400, "E005", "이벤트 시간 조회에 실패했습니다.");
     // field
     private final int status;
     private final String code;

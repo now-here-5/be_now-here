@@ -74,6 +74,8 @@ public class MemberAuthService {
                     .nickname(member.getNickname())
                     .event(   EventResponse.builder()
                             .eventId(member.getEvent().getId())
+                            .endsAt(member.getEvent().getPeriodEnd())
+                            .startsAt(member.getEvent().getPeriodStart())
                             .eventName(member.getEvent().getField())
                             .location(member.getEvent().getLocation().getLocationName())
                             .build())
@@ -99,7 +101,5 @@ public class MemberAuthService {
 
         // 인증 처리
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
     }
-
 }
