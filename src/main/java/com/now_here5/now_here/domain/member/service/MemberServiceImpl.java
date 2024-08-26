@@ -58,7 +58,7 @@ public class MemberServiceImpl implements MemberService {
             Event event  =  eventRepository.getEventDetail(eventId);
 
             member.setEvent(event);
-            memberRepository.add(member);
+            memberRepository.save(member);
             return member.getToken();
 
         }catch(Exception e){
@@ -74,8 +74,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean inactivateMember() {
         try{
             AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
-            Member activeMember = memberRepository.findActiveMemberById(memberDto.getMemberId());
-            return true; // 추후 개발
+            return memberRepository.inactiveMember(memberDto.getMemberId());
         }catch(Exception e){
             log.error("Failed to inactivate member: {}", e.getMessage());
             return false;
@@ -86,14 +85,16 @@ public class MemberServiceImpl implements MemberService {
     public boolean checkPhoneDuplicated(Long eventId, String phone) {
         try{
             List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
-
+            log.trace("phone number {} : ",members);
             for(Member member : members){
                 if(member.getEvent().getId().equals(eventId)){
+
                     log.debug("Phone number {} is duplicated in event {} : {}",
                             phone, eventId, member.getEvent().getField());
                     return true;
                 }
             }
+            log.trace("phone number {} : ",members);
                 return false;
         } catch (Exception e) {
             return true;

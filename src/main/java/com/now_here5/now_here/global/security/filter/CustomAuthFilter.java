@@ -40,7 +40,7 @@ public class CustomAuthFilter extends GenericFilterBean {
         String customToken = resolveToken(httpServletRequest);
 
         String requestURI = httpServletRequest.getRequestURI();
-        log.trace("resolveToken : {}, requestURI : {} ",customToken, requestURI);
+        log.warn("resolveToken : {}, requestURI : {} ",customToken, requestURI);
 
         if (StringUtils.hasText(customToken)) { // 토큰이 있을 때만 검증
             AuthenticatedMemberDto memberDto = memberAuthService.getMemberByToken(customToken);

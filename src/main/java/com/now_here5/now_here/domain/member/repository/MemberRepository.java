@@ -1,5 +1,6 @@
 package com.now_here5.now_here.domain.member.repository;
 
+import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.member.entity.Member;
 
 import java.util.List;
@@ -15,5 +16,7 @@ public interface MemberRepository {
 
     boolean isNickNameDuplicatedWith(String nickname, Long eventId);
 
-    void add(Member activeMember);
+    void save(Member activeMember);
+
+
 }

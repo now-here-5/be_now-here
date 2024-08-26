@@ -50,7 +50,6 @@ public class Member extends FullAudit  {
     @Column(name = "mbti", nullable = false)
     private Mbti mbti;
 
-    @Lob
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
@@ -106,6 +105,10 @@ public class Member extends FullAudit  {
 
     public void updateToken(String newToken) {
         this.token = newToken;
+    }
+
+    public void inactivate() {
+        this.active = false;
     }
 
     // 편의 메서드
