@@ -36,4 +36,21 @@ public class EventRepositoryImpl implements EventRepository {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+    @Override
+    public List<Event> getSignedEventsByMember(boolean active, Long memberId) {
+        try{
+            return em.createQuery("select e from Member m " +
+                            "join m.event e " +
+                            "where m.id = :memberId and e.status = :active", Event.class)
+                    .setParameter("memberId", memberId)
+                    .setParameter("active", active)
+                    .getResultList();
+
+        }catch(Exception e){
+            log.error("getSignedEventsByMember error = {} ", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 }

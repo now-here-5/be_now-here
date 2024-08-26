@@ -8,4 +8,5 @@ public interface EventService {
     EventResponse getEventDetail(Long eventId);
 
     EventListResponse getEventList(boolean status);
+    
 }

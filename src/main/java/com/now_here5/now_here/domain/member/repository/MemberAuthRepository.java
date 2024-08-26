@@ -31,6 +31,7 @@ public class MemberAuthRepository {
         }
     }
 
+    @Transactional
     public void updateTokenById(String newToken, Long userId){
         try {
             Member member = em.find(Member.class, userId);  // 사용자 엔터티 조회
@@ -49,7 +50,8 @@ public class MemberAuthRepository {
         try {
             return em.createQuery("select am from Member am " +
                             "left join fetch am.memberRoleList " +
-                            "join fetch am.event " +
+                            "join fetch am.event e " +
+                            "join fetch e.location " +
                             "where am.phoneNumber = :phoneNumber and " +
                             "am.event.id = :eventId ", Member.class)
                     .setParameter("phoneNumber", phoneNumber)

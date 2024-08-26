@@ -9,4 +9,6 @@ public interface EventRepository {
     List<Event> getEventList(boolean status);
 
     Event getEventDetail(Long eventId);
+
+    List<Event> getSignedEventsByMember(boolean active, Long memberId);
 }

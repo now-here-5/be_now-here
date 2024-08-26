@@ -1,7 +1,10 @@
 package com.now_here5.now_here.domain.member.service;
 
 
+import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.dto.EventResponse;
+import com.now_here5.now_here.domain.event.repository.EventRepository;
+import com.now_here5.now_here.domain.member.dto.LoginResponse;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
@@ -33,20 +36,31 @@ public class MemberAuthService {
     private final TokenGenerator tokenGenerator;
     private final AuthUtil authUtil;
     private final ListRolesToDto listRolesToDto;
+    private final EventRepository eventRepository;
+    private final EventListToDto eventListToDto;
 
-    @Transactional
-    public TokenDto login(LoginRequest loginRequest, Long eventId) {
+
+    public LoginResponse login(LoginRequest loginRequest, Long eventId) {
 
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
-            String newToken = tokenGenerator.generateUniqueToken();
 
+            String newToken = tokenGenerator.generateUniqueToken();
             Authentication authentication = authUtil.getAuthentication();
             Member tempMember = (Member) authentication.getPrincipal();
+
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
-            return new TokenDto(newToken);
+
+            return LoginResponse.builder()
+                    .token(new TokenDto(newToken))
+                    .eventListResponse(
+                            eventListToDto.converter(
+                                    eventRepository.getSignedEventsByMember(true,tempMember.getId())
+                            )
+                    )
+                    .build();
         } catch (Exception e) {
-            log.error("save Token For Member error ={}", e.getMessage());
+            log.error("login Error ={}", e.getMessage());
             return null;
         }
     }
@@ -74,6 +88,8 @@ public class MemberAuthService {
                     .nickname(member.getNickname())
                     .event(   EventResponse.builder()
                             .eventId(member.getEvent().getId())
+                            .endsAt(member.getEvent().getPeriodEnd())
+                            .startsAt(member.getEvent().getPeriodStart())
                             .eventName(member.getEvent().getField())
                             .location(member.getEvent().getLocation().getLocationName())
                             .build())
