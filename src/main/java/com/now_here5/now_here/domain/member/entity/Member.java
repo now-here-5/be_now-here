@@ -34,7 +34,7 @@ public abstract class Member extends FullAudit {
     @Column(name = "nick_name", nullable = false, length = 8, unique = true)
     private String nickname;
 
-    @Column(name = "password", nullable = false, length = 4)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,7 @@ public abstract class Member extends FullAudit {
     private Mbti mbti;
 
     @Lob
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "notification", nullable = false)
@@ -73,13 +73,19 @@ public abstract class Member extends FullAudit {
         this.description = description;
         this.notification = notification;
         this.status = status;
-        // 기본값 설정
-        this.checkNotiTime = super.getCreatedAt();
+        // notiSetting을 초기화합니다.
         this.notiSetting = true;
+    }
+
+    @PrePersist
+    protected void onPrePersist() {
+        this.checkNotiTime = this.getCreatedAt();  // 엔티티가 영속화되기 직전에 checkNotiTime을 설정
     }
 
     public void updateToken(String token) {
         this.token = token;
     }
+
+
 }
 

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,13 +27,13 @@ public class ActiveMember extends Member {
     private Event event;
 
     @OneToMany(mappedBy = "sender")
-    private List<Matching> sentMatchings;
+    private List<Matching> sentMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "receiver")
-    private List<Matching> receiveMatchings;
+    private List<Matching> receiveMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberRole> memberRoleList;
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     // 편의 메서드
     public void setEvent(Event event) {

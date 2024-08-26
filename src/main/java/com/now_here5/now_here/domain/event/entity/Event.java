@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -41,10 +42,10 @@ public class Event extends FullAudit {
     private String field;
 
     @OneToMany(mappedBy = "event",  cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ActiveMember> activeMemberList;
+    private List<ActiveMember> activeMemberList = new ArrayList<>();
 
     @OneToMany(mappedBy = "event",  cascade=CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<InactiveMember> inactiveMemberList;
+    private List<InactiveMember> inactiveMemberList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
@@ -58,6 +59,7 @@ public class Event extends FullAudit {
         this.field = field;
         this.location = location;
     }
+
     public void addActiveMember(ActiveMember activeMember) {
         activeMember.setEvent(this);
         if (!this.activeMemberList.contains(activeMember)) {
