@@ -1,6 +1,8 @@
 package com.now_here5.now_here.domain.member.service;
 
 
+import com.now_here5.now_here.domain.event.converter.EventListToDto;
+import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
@@ -28,6 +30,9 @@ public class MemberServiceImpl implements MemberService {
     private final RegisterDtoToMember registerDtoToMember;
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
+    private final MemberAuthRepository memberAuthRepository;
+    private final EventListToDto eventListToDto;
+
 
     @Override
     public boolean sendCode(String phone) {
@@ -58,7 +63,7 @@ public class MemberServiceImpl implements MemberService {
             Event event  =  eventRepository.getEventDetail(eventId);
 
             member.setEvent(event);
-            memberRepository.add(member);
+            memberRepository.save(member);
             return member.getToken();
 
         }catch(Exception e){
@@ -74,8 +79,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean inactivateMember() {
         try{
             AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
-            Member activeMember = memberRepository.findActiveMemberById(memberDto.getMemberId());
-            return true; // 추후 개발
+            return memberRepository.inactiveMember(memberDto.getMemberId());
         }catch(Exception e){
             log.error("Failed to inactivate member: {}", e.getMessage());
             return false;
@@ -86,14 +90,16 @@ public class MemberServiceImpl implements MemberService {
     public boolean checkPhoneDuplicated(Long eventId, String phone) {
         try{
             List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
-
+            log.trace("phone number {} : ",members);
             for(Member member : members){
                 if(member.getEvent().getId().equals(eventId)){
+
                     log.debug("Phone number {} is duplicated in event {} : {}",
                             phone, eventId, member.getEvent().getField());
                     return true;
                 }
             }
+            log.trace("phone number {} : ",members);
                 return false;
         } catch (Exception e) {
             return true;
@@ -125,6 +131,17 @@ public class MemberServiceImpl implements MemberService {
         } catch (Exception e) {
             log.error("멤버 추천 실패: {}", e.getMessage());
             return List.of();
+        }
+    }
+          
+    public EventListResponse getAssignedEventsByMember() {
+        try{
+            List<Event> events =  eventRepository.getSignedEventsByMember(true,
+                    authUtil.getMemberByAuthentication().getMemberId());
+            return eventListToDto.converter(events);
+        }catch (Exception e){
+            log.error("Failed to get assigned events by member: {}", e.getMessage());
+            return null;
         }
     }
 }

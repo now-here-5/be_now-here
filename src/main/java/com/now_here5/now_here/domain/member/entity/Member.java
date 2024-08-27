@@ -22,7 +22,10 @@ import java.util.List;
 @Cacheable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "member")
+@Table(name = "member", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
+        @UniqueConstraint(columnNames = {"event_id", "nick_name"})
+})
 public class Member extends FullAudit  {
 
     @Id
@@ -108,6 +111,10 @@ public class Member extends FullAudit  {
 
     public void updateToken(String newToken) {
         this.token = newToken;
+    }
+
+    public void inactivate() {
+        this.active = false;
     }
 
     // 편의 메서드

@@ -28,8 +28,8 @@ public class RegisterDtoToMember {
                 .nickname(registerRequest.getNickname())
                 .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))
                 .notification(true)
-                .active(true) // 디폴트 : 이벤트 active
-                .mbti(MBTI.valueOf(registerRequest.getMbti().toUpperCase()))
+                .active(true)
+                .mbti(Mbti.valueOf(registerRequest.getMbti().toUpperCase()))
                 .token(tokenGenerator.generateUniqueToken())
                 .description(registerRequest.getDescription())
                 .birthday(registerRequest.getBirth())

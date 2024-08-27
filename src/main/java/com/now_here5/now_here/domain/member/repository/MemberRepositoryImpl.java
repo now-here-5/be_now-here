@@ -4,6 +4,7 @@ import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -19,12 +20,11 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public List<Member> findActiveMemberByPhone(String phoneNumber) {
         try{
-            return em.createQuery("select am from Member am " +
-                            "join fetch am.event " +
-                            "where am.phoneNumber = :phoneNumber " +
-                            "and am.active = true", Member.class)
+            return em.createQuery("select m from Member m " +
+                            "join fetch m.event " +
+                            "where m.phoneNumber = :phoneNumber " +
+                            "and m.active = true", Member.class)
                     .setParameter("phoneNumber", phoneNumber)
-
                     .getResultList();
         }catch (Exception e){
             log.error("Failed to find active member by phone number: {}", phoneNumber);
@@ -32,15 +32,26 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+
+
+
     @Override
     public boolean inactiveMember(Long memberId) {
-        try{
-            return true ; // 추후 개발
-        }catch(Exception e){
-            log.error("Failed to inactive member: {}", e.getMessage());
-            return false;
-        }
+       try {
+           em.createQuery("UPDATE Member m " +
+                           "SET m.active = false, m.token = null " +
+                           "WHERE m.id = :memberId")
+                   .setParameter("memberId", memberId)
+                   .executeUpdate();
+           em.flush();
+
+           return true;
+       }catch (Exception e){
+           log.error("Failed to inactive member: {}", e.getMessage());
+           return false;
+       }
     }
+
 
     @Override
     public Member findActiveMemberById(Long memberId) {
@@ -72,7 +83,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
-    public void add(Member activeMember) {
+    public void save(Member activeMember) {
         try{
             em.persist(activeMember);
         }catch (Exception e){

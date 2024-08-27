@@ -10,5 +10,6 @@ public interface EventService {
 
     EventListResponse getEventList(boolean status);
 
-    EventTimeResponse getEventTime();
+   EventTimeResponse getEventTime();
+
 }

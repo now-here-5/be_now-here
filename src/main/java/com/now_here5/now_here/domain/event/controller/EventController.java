@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +28,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "Event API", description = "이벤트 API")
 @RequestMapping("/event")
 public class EventController {
     private final EventService eventService;
 
-    @Operation(summary = "이벤트 목록 조회", description = "이벤트의 상태에 따라 목록을 조회합니다.")
+    @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
     @Parameters({
-            @Parameter(name = "status", required = true, example = "true", description = "이벤트 상태")
+            @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회에 실패했습니다.")
+            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패"),
     })
     @GetMapping("/list")
     public ResponseEntity<ResponseForm> getEventList(
@@ -45,21 +48,21 @@ public class EventController {
         EventListResponse eventList = eventService.getEventList(status);
 
         return eventList != null ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTTLIST_QUERY_SUCCESS, eventList)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTTLIST_QUERY_FAIL));
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_SUCCESS, eventList)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_FAIL));
     }
 
-    @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 통해 이벤트의 상세 정보를 조회합니다.")
+    @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 사용하여 이벤트의 세부 정보를 조회합니다.")
     @Parameters({
-            @Parameter(name = "event_id", required = true, example = "1", description = "이벤트 ID")
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1"))
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E002 - 이벤트 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "E002 - 이벤트 조회에 실패했습니다.")
+            @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "E006 - 이벤트 상세 조회 실패"),
     })
     @GetMapping("/detail/{event_id}")
-    public ResponseEntity<ResponseForm> getEventList(
-            @PathVariable(name = "event_id", required = true) Long eventId){
+    public ResponseEntity<ResponseForm> getSingleEvent(
+            @PathVariable(name = "event_id", required = true ) Long eventId){
 
         EventResponse eventDetail = eventService.getEventDetail(eventId);
 
@@ -67,7 +70,6 @@ public class EventController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_SUCCESS, eventDetail)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_FAIL));
     }
-
     @Operation(summary = "이벤트 남은 시간 조회", description = "현재 시간과 이벤트 종료 시간의 차이를 계산하여 남은 시간을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E003 - 이벤트 시간 조회에 성공했습니다.", content = @Content(schema = @Schema(implementation = EventTimeResponse.class))),
