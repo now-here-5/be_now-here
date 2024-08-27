@@ -3,7 +3,7 @@ package com.now_here5.now_here.domain.member.converter;
 
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.Gender;
-import com.now_here5.now_here.domain.member.entity.Mbti;
+import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import lombok.Builder;

@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
@@ -16,6 +17,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "matching", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"sender_member_id", "sender_active", "receiver_member_id", "receiver_active"})
 })
+
+// 자주 사용되는 데이터 2차 캐시
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Matching extends CreatedDateAudit {
 
     @Id

@@ -1,7 +1,9 @@
 package com.now_here5.now_here.domain.member.repository;
 
+import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,4 +92,34 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Override
+    public Member findMemberById(Long memberId) {
+        try{
+            return em.find(Member.class, memberId);
+        }catch (Exception e){
+            log.error("Failed to find member by id: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public List<Member> findMembersByEventIdAndGender(Long eventId, Gender mygender) {
+        try {
+            return em.createQuery("select am from Member am " +
+                            "join fetch am.event " +
+                            "where am.event.id = :eventId " +
+                            "and am.gender != :mygender " +
+                            "order by random()", Member.class)
+                    .setParameter("eventId", eventId)
+                    .setParameter("mygender", mygender)
+                    .setMaxResults(2)
+                    .getResultList();
+        } catch (NoResultException e) {
+            log.warn("해당하는 멤버가 없습니다 이벤트: {} 성별: {}", eventId, mygender);
+            return List.of();
+        } catch (Exception e) {
+            log.error("멤버를 찾는데 실패했습니다: {}", e.getMessage());
+            throw new RuntimeException("멤버를 찾는데 실패했습니다", e);
+        }
+    }
 }

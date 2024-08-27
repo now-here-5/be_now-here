@@ -1,8 +1,9 @@
 package com.now_here5.now_here.domain.member.repository;
 
+
+import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.member.entity.Member;
-
 import java.util.List;
 
 public interface MemberRepository {
@@ -15,8 +16,10 @@ public interface MemberRepository {
 
 
     boolean isNickNameDuplicatedWith(String nickname, Long eventId);
-
+  
+    Member findMemberById(Long memberId);
+  
+    List<Member> findMembersByEventIdAndGender(Long eventId, Gender gender);
+  
     void save(Member activeMember);
-
-
 }

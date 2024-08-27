@@ -1,5 +1,8 @@
 package com.now_here5.now_here.domain.member.controller;
 
+
+
+import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.service.MemberService;
@@ -21,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -46,7 +51,6 @@ public class MemberController {
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") Long eventId,
             @RequestParam(name = "phone") String phone) {
-
         boolean duplicated = memberService.checkPhoneDuplicated(eventId, phone);
 
         if (duplicated) {
@@ -90,8 +94,9 @@ public class MemberController {
     })
     @GetMapping("/verify/nickname/{event_id}")
     public ResponseEntity<ResponseForm> checkIfNicknameIsDuplicated(
-            @PathVariable(name = "event_id") Long eventId,
-            @RequestParam(name = "nickname") String nickname) {
+            @PathVariable(name = "event_id", required = true) Long eventId,
+            @RequestParam(name = "nickname", required = true) String nickname) {
+
 
         boolean isDuplicated = memberService.checkNicknameDuplicated(eventId, nickname);
 
@@ -110,12 +115,12 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
     })
     @PostMapping("/verify/code")
+
     public ResponseEntity<ResponseForm> verifyReceivedCode(
             @RequestParam(name = "phone") String phone,
             @RequestParam(name = "code") String code) {
 
         boolean isVerified = memberService.verifyCode(phone, code);
-
         return isVerified ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_FAIL));
@@ -149,15 +154,18 @@ public class MemberController {
 
     @PostMapping("/register/{event_id}")
     public ResponseEntity<ResponseForm> registerMember(
-            @PathVariable(name = "event_id") Long eventId,
+
+            @PathVariable(name = "event_id", required = true) Long eventId,
             @RequestBody RegisterMemberRequest registerMemberRequest) {
 
         String token = memberService.registerMember(eventId, registerMemberRequest);
+
 
         return token != null?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_FAIL));
     }
+
 
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 시도합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -168,11 +176,29 @@ public class MemberController {
     public ResponseEntity<ResponseForm> inactivateMember() {
 
         boolean inactivated = memberService.inactivateMember();
-
         return inactivated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.INACTIVATE_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.INACTIVATE_FAIL));
     }
+
+
+
+
+    @Operation(summary = "회원 추천", description = "현재 로그인한 회원의 이벤트 ID와 성별을 사용하여 회원을 추천합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "M004 - 회원 추천에 성공했습니다."),
+            @ApiResponse(responseCode = "400", description = "M004 - 회원 추천에 실패했습니다.")
+    })
+    @GetMapping("/recommend")
+    public ResponseEntity<ResponseForm> recommendMembers() {
+
+        List<MemberRecommendResponse> memberRecommendResponse = memberService.recommendMembers();
+
+        return memberRecommendResponse != null ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_RECOMMEND_SUCCESS, memberRecommendResponse)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_RECOMMEND_FAIL));
+    }
+}
 
     @Operation(summary = "회원이 참여한 이벤트 조회", description = "회원이 참여한 이벤트 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -190,3 +216,4 @@ public class MemberController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.MY_EVENTS_QUERY_FAIL));
     }
 }
+

@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
@@ -17,6 +18,8 @@ import java.util.List;
 
 @Getter
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cacheable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member", uniqueConstraints = {
@@ -51,7 +54,7 @@ public class Member extends FullAudit  {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "mbti", nullable = false)
-    private Mbti mbti;
+    private MBTI mbti;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -86,7 +89,7 @@ public class Member extends FullAudit  {
 
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                  Gender gender, Mbti mbti, String description, boolean notification, boolean active,
+                  Gender gender, MBTI mbti, String description, boolean notification, boolean active,
                   Event event) {
         this.token = token;
         this.birthday = birthday;

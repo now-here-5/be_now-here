@@ -6,9 +6,9 @@ import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
+import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.*;
-import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,6 +32,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthUtil authUtil;
     private final MemberAuthRepository memberAuthRepository;
     private final EventListToDto eventListToDto;
+
 
     @Override
     public boolean sendCode(String phone) {
@@ -110,6 +112,28 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public List<MemberRecommendResponse> recommendMembers() {
+        AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
+        Member member = memberRepository.findMemberById(authMember.getMemberId());
+        Long eventId = authMember.getEvent().getEventId();
+        Gender gender = member.getGender();
+
+        try {
+            List<Member> members = memberRepository.findMembersByEventIdAndGender(eventId, gender);
+            return members.stream()
+                    .map(m -> new MemberRecommendResponse(
+                            m.getId(),
+                            m.getMbti().toString(),
+                            m.getNickname(),
+                            m.getBirthday().toString(),
+                            m.getGender().toString()))
+                    .collect(Collectors.toUnmodifiableList());
+        } catch (Exception e) {
+            log.error("멤버 추천 실패: {}", e.getMessage());
+            return List.of();
+        }
+    }
+          
     public EventListResponse getAssignedEventsByMember() {
         try{
             List<Event> events =  eventRepository.getSignedEventsByMember(true,

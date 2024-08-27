@@ -1,5 +1,4 @@
 package com.now_here5.now_here.global.config;
-import com.now_here5.now_here.domain.member.entity.role.RoleName;
 import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandler;
 import com.now_here5.now_here.global.security.exception.CustomAuthenticationEntryPoint;
 import com.now_here5.now_here.global.security.filter.CustomAuthFilter;
@@ -49,7 +48,7 @@ public class SecurityConfig {
                                 // 매니저 대상
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
-                                
+
                                 // 비유저 대상
                                 .requestMatchers(HttpMethod.GET, "/event/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
@@ -96,3 +95,4 @@ public class SecurityConfig {
         return source;
     }
 }
+
