@@ -35,8 +35,8 @@ public class EventController {
             @Parameter(name = "status", required = true, example = "true", description = "이벤트 상태")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E003 - 이벤트 목록 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "E003 - 이벤트 목록 조회에 실패했습니다.")
+            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회에 성공했습니다."),
+            @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회에 실패했습니다.")
     })
     @GetMapping("/list")
     public ResponseEntity<ResponseForm> getEventList(
@@ -54,8 +54,8 @@ public class EventController {
             @Parameter(name = "event_id", required = true, example = "1", description = "이벤트 ID")
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E004 - 이벤트 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "E004 - 이벤트 조회에 실패했습니다.")
+            @ApiResponse(responseCode = "200", description = "E002 - 이벤트 조회에 성공했습니다."),
+            @ApiResponse(responseCode = "400", description = "E002 - 이벤트 조회에 실패했습니다.")
     })
     @GetMapping("/detail/{event_id}")
     public ResponseEntity<ResponseForm> getEventList(
@@ -70,8 +70,8 @@ public class EventController {
 
     @Operation(summary = "이벤트 남은 시간 조회", description = "현재 시간과 이벤트 종료 시간의 차이를 계산하여 남은 시간을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E005 - 이벤트 시간 조회에 성공했습니다.", content = @Content(schema = @Schema(implementation = EventTimeResponse.class))),
-            @ApiResponse(responseCode = "400", description = "E005 - 이벤트 시간 조회에 실패했습니다.")
+            @ApiResponse(responseCode = "200", description = "E003 - 이벤트 시간 조회에 성공했습니다.", content = @Content(schema = @Schema(implementation = EventTimeResponse.class))),
+            @ApiResponse(responseCode = "400", description = "E003 - 이벤트 시간 조회에 실패했습니다.")
     })
     @GetMapping("/time")
     public ResponseEntity<ResponseForm> getEventTime(){

@@ -1,7 +1,6 @@
 package com.now_here5.now_here.domain.member.dto;
 
 
-import com.now_here5.now_here.domain.member.entity.Mbti;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

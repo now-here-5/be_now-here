@@ -29,7 +29,6 @@ public class MemberAuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final MemberAuthRepository memberAuthRepository;
-    private final MemberRepository memberRepository;
     private final TokenGenerator tokenGenerator;
     private final AuthUtil authUtil;
     private final ListRolesToDto listRolesToDto;
