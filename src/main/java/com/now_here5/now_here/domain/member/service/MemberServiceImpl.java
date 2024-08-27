@@ -1,6 +1,8 @@
 package com.now_here5.now_here.domain.member.service;
 
 
+import com.now_here5.now_here.domain.event.converter.EventListToDto;
+import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
@@ -28,6 +30,7 @@ public class MemberServiceImpl implements MemberService {
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
     private final MemberAuthRepository memberAuthRepository;
+    private final EventListToDto eventListToDto;
 
     @Override
     public boolean sendCode(String phone) {
@@ -104,5 +107,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean checkNicknameDuplicated(Long eventId, String nickname) {
         return memberRepository.isNickNameDuplicatedWith(nickname, eventId);
+    }
+
+    @Override
+    public EventListResponse getAssignedEventsByMember() {
+        try{
+            List<Event> events =  eventRepository.getSignedEventsByMember(true,
+                    authUtil.getMemberByAuthentication().getMemberId());
+            return eventListToDto.converter(events);
+        }catch (Exception e){
+            log.error("Failed to get assigned events by member: {}", e.getMessage());
+            return null;
+        }
     }
 }

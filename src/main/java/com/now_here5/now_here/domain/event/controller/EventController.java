@@ -1,11 +1,19 @@
 package com.now_here5.now_here.domain.event.controller;
 
-
 import com.now_here5.now_here.domain.event.dto.EventResponse;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.service.EventService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +26,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "Event API", description = "이벤트 API")
 @RequestMapping("/event")
 public class EventController {
     private final EventService eventService;
 
+    @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패"),
+    })
     @GetMapping("/list")
     public ResponseEntity<ResponseForm> getEventList(
             @RequestParam(name = "status", required = true) boolean status){
@@ -29,10 +46,18 @@ public class EventController {
         EventListResponse eventList = eventService.getEventList(status);
 
         return eventList != null ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_SUCCESS, eventList)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_FAIL));
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_SUCCESS, eventList)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_FAIL));
     }
 
+    @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 사용하여 이벤트의 세부 정보를 조회합니다.")
+    @Parameters({
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1"))
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "E006 - 이벤트 상세 조회 실패"),
+    })
     @GetMapping("/detail/{event_id}")
     public ResponseEntity<ResponseForm> getSingleEvent(
             @PathVariable(name = "event_id", required = true ) Long eventId){
