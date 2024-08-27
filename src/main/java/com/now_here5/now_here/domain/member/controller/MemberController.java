@@ -183,8 +183,7 @@ public class MemberController {
 
 
 
-
-    @Operation(summary = "회원 추천", description = "현재 로그인한 회원의 이벤트 ID와 성별을 사용하여 회원을 추천합니다.")
+    @Operation(summary = "회원 추천", description = "현재 로그인한 회원의 이벤트 ID와 성별을 사용하여 회원을 추천합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "M004 - 회원 추천에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "M004 - 회원 추천에 실패했습니다.")

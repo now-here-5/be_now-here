@@ -12,6 +12,7 @@ import com.now_here5.now_here.global.response.ResponseForm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class InteractionController {
 
     private final InteractionService interactionService;
 
-    @Operation(summary = "피드백 작성", description = "사용자가 피드백을 작성합니다.")
+    @Operation(summary = "피드백 작성", description = "사용자가 피드백을 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "F001 - 피드백 작성에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "F001 - 피드백 작성에 실패했습니다.")
@@ -43,7 +44,7 @@ public class InteractionController {
         }
     }
 
-    @Operation(summary = "문의 작성", description = "사용자가 문의를 작성합니다.")
+    @Operation(summary = "문의 작성", description = "사용자가 문의를 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "I001 - 문의 작성에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "I001 - 문의 작성에 실패했습니다.")
@@ -59,7 +60,7 @@ public class InteractionController {
         }
     }
 
-    @Operation(summary = "탈퇴 사유 작성", description = "사용자가 탈퇴 사유를 작성합니다.")
+    @Operation(summary = "탈퇴 사유 작성", description = "사용자가 탈퇴 사유를 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "W001 - 탈퇴 사유 작성에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "W001 - 탈퇴 사유 작성에 실패했습니다.")
