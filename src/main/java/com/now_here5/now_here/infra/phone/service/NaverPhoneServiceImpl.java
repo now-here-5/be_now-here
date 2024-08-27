@@ -46,11 +46,23 @@ public class NaverPhoneServiceImpl implements PhoneService {
 
         try{
             boolean status =  memoryRepository.checkStatusBy(phone);
+
             memoryRepository.delete(phone);
             return status;
         }catch(Exception e){
             log.warn("Failed to check register code: {}", e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public String getPhoneCode(String phone) {
+        try{
+            return memoryRepository.findCheckCodeBy(phone);
+        }catch(Exception e){
+            log.warn("Failed to check register code: {}", e.getMessage());
+            return null;
+        }
+
     }
 }

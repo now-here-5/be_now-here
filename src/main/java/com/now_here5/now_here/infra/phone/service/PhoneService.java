@@ -7,4 +7,6 @@ public interface PhoneService {
     boolean verifyCode(String phone, String code);
 
     boolean isVerifiedPhone( String phone) ;
+
+    String getPhoneCode(String phone);
 }
