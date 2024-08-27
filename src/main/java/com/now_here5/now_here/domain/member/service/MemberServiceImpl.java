@@ -9,6 +9,7 @@ import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
 import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.*;
+import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;

@@ -198,7 +198,7 @@ public class MemberController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_RECOMMEND_SUCCESS, memberRecommendResponse)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_RECOMMEND_FAIL));
     }
-}
+
 
     @Operation(summary = "회원이 참여한 이벤트 조회", description = "회원이 참여한 이벤트 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
