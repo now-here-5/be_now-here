@@ -1,6 +1,9 @@
 package com.now_here5.now_here.domain.member.service;
 
+import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
+
+import java.util.List;
 
 public interface MemberService {
 
@@ -16,4 +19,5 @@ public interface MemberService {
 
     boolean checkNicknameDuplicated(Long eventId, String nickname);
 
+    List<MemberRecommendResponse> recommendMembers();
 }
