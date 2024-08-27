@@ -19,7 +19,10 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "member")
+@Table(name = "member", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
+        @UniqueConstraint(columnNames = {"event_id", "nick_name"})
+})
 public class Member extends FullAudit  {
 
     @Id
