@@ -56,7 +56,6 @@ public enum ResponseCode {
     TOGGLE_NOTIFICATION_FAIL(400, "M010", "알림 설정 변경에 실패했습니다."),
 
 
-
     // Sign-up
     SIGNUP_SUCCESS(200, "S001", "회원가입에 성공했습니다."),
     SIGNUP_FAIL(400, "S001", "회원가입에 실패했습니다."),
@@ -102,8 +101,7 @@ public enum ResponseCode {
     INQUIRY_QUERY_SUCCESS(200, "I005", "INQUIRY 조회에 성공했습니다."),
     INQUIRY_QUERY_FAIL(400, "I005", "INQUIRY 조회에 실패했습니다."),
     WITHDRAWAL_REASON_QUERY_SUCCESS(200, "I006", "WITHDRAWAL_REASON 조회에 성공했습니다."),
-    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다."),
-    ;
+    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다.");
 
     // field
     private final int status;

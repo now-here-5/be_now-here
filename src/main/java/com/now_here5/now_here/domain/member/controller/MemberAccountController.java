@@ -1,5 +1,7 @@
 package com.now_here5.now_here.domain.member.controller;
 
+import com.now_here5.now_here.domain.interaction.dto.WithdrawalReasonRequest;
+import com.now_here5.now_here.domain.interaction.service.InteractionService;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberAccountController {
     private final MemberService memberService;
     private final PhoneService phoneService;
+    private final InteractionService interactionService;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
     @Parameters({
@@ -159,21 +162,39 @@ public class MemberAccountController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_FAIL));
     }
-
-
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 시도합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "회원 탈퇴 요청",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = WithdrawalReasonRequest.class,
+                            requiredProperties = {"content"}
+                    ),
+                    examples = @ExampleObject(
+                            description = "WithdrawalReasonRequestExample",
+                            name = "WithdrawalReasonRequestExample",
+                            summary = "Example of WithdrawalReasonRequest",
+                            value = "{\"content\": \"I no longer need the service.\"}"
+                    )
+            )
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "M003 - 회원탈퇴에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "M003 - 회원탈퇴에 실패했습니다.")
     })
     @DeleteMapping("/deactivate")
-    public ResponseEntity<ResponseForm> deactivateMember() {
+    public ResponseEntity<ResponseForm> deactivateMember(@RequestBody WithdrawalReasonRequest withdrawalReasonRequest) {
 
-        boolean deactivated = memberService.deactivateMember();
-        return deactivated ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.DEACTIVATE_SUCCESS)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.DEACTIVATE_FAIL));
+        try {
+            interactionService.createWithdrawalReason(withdrawalReasonRequest);
+            if (!memberService.deactivateMember()) {
+                throw new RuntimeException("회원 탈퇴에 실패했습니다.");
+            }
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.DEACTIVATE_SUCCESS));
+        } catch (Exception e) {
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.DEACTIVATE_FAIL));
+        }
     }
-
-
 }

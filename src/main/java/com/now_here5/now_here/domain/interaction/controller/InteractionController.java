@@ -62,21 +62,6 @@ public class InteractionController {
         }
     }
 
-    @Operation(summary = "탈퇴 사유 작성", description = "사용자가 탈퇴 사유를 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "W001 - 탈퇴 사유 작성에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "W001 - 탈퇴 사유 작성에 실패했습니다.")
-    })
-    @PostMapping("/withdrawalreason")
-    public ResponseEntity<ResponseForm> createWithdrawalReason(@RequestBody WithdrawalReasonRequest withdrawalReasonRequest) {
-        try {
-            interactionService.createWithdrawalReason(withdrawalReasonRequest);
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.WITHDRAWAL_REASON_CREATE_SUCCESS));
-        } catch (Exception e) {
-            log.error("탈퇴 사유 작성 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.WITHDRAWAL_REASON_CREATE_FAIL));
-        }
-    }
 //    // DTO 형태로 변경
 //    @Operation(summary = "사용자의 피드백 조회", description = "사용자가 작성한 피드백을 조회합니다.")
 //    @GetMapping("/feedback/{memberId}")
