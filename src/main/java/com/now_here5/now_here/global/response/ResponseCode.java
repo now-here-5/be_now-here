@@ -38,10 +38,22 @@ public enum ResponseCode {
     LOGIN_FAIL(200, "M001", "로그인에 실패했습니다."),
     LOGOUT_SUCCESS(200, "M002", "로그아웃에 성공했습니다."),
     LOGOUT_FAIL(200, "M002", "로그아웃에 실패했습니다."),
-    INACTIVATE_SUCCESS(200, "M003", "회원탈퇴에 성공했습니다."),
-    INACTIVATE_FAIL(400, "M003", "회원탈퇴에 실패했습니다."),
+    DEACTIVATE_SUCCESS(200, "M003", "회원탈퇴에 성공했습니다."),
+    DEACTIVATE_FAIL(400, "M003", "회원탈퇴에 실패했습니다."),
     MEMBER_RECOMMEND_SUCCESS(200, "M004", "회원 추천에 성공했습니다."),
     MEMBER_RECOMMEND_FAIL(400, "M004", "회원 추천에 실패했습니다."),
+    PROFILE_QUERY_SUCCESS(200, "M005", "프로필 조회에 성공했습니다."),
+    PROFILE_QUERY_FAIL(400, "M005", "프로필 조회에 실패했습니다."),
+    PERSONAL_INFO_QUERY_SUCCESS(200, "M006", "개인정보 조회에 성공했습니다."),
+    PERSONAL_INFO_QUERY_FAIL(400, "M006", "개인정보 조회에 실패했습니다."),
+    DESCRIPTION_UPDATE_SUCCESS(200, "M007", "자기소개 수정에 성공했습니다."),
+    DESCRIPTION_UPDATE_FAIL(400, "M007", "자기소개 수정에 실패했습니다."),
+    NICKNAME_UPDATE_SUCCESS(200, "M008", "닉네임 수정에 성공했습니다."),
+    NICKNAME_UPDATE_FAIL(400, "M008", "닉네임 수정에 실패했습니다."),
+    MBTI_UPDATE_SUCCESS(200, "M009", "MBTI 수정에 성공했습니다."),
+    MBTI_UPDATE_FAIL(400, "M009", "MBTI 수정에 실패했습니다."),
+    TOGGLE_NOTIFICATION_SUCCESS(200, "M010", "알림 설정 변경에 성공했습니다."),
+    TOGGLE_NOTIFICATION_FAIL(400, "M010", "알림 설정 변경에 실패했습니다."),
 
 
     // Sign-up
@@ -89,8 +101,7 @@ public enum ResponseCode {
     INQUIRY_QUERY_SUCCESS(200, "I005", "INQUIRY 조회에 성공했습니다."),
     INQUIRY_QUERY_FAIL(400, "I005", "INQUIRY 조회에 실패했습니다."),
     WITHDRAWAL_REASON_QUERY_SUCCESS(200, "I006", "WITHDRAWAL_REASON 조회에 성공했습니다."),
-    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다."),
-    ;
+    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다.");
 
     // field
     private final int status;

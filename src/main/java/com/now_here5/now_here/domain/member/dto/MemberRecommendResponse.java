@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @Getter
-@Builder
+
 @RequiredArgsConstructor
 public class MemberRecommendResponse {
     private final Long memberId;
