@@ -109,12 +109,25 @@ public class Member extends FullAudit  {
         setEvent(event);
     }
 
+    // 회원 수정 가능 필드용 업데이트 메서드
     public void updateToken(String newToken) {
         this.token = newToken;
     }
 
-    public void inactivate() {
-        this.active = false;
+    public void updateDescription(String newDescription) {
+        this.description = newDescription;
+    }
+
+    public void updateNotification(boolean newNotification) {
+        this.notification = newNotification;
+    }
+
+    public void updateMbti(MBTI mbti) {
+        this.mbti = mbti;
+    }
+
+    public void updateNickName(String newNickName) {
+        this.nickname = newNickName;
     }
 
     // 편의 메서드
