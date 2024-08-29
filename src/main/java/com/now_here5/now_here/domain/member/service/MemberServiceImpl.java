@@ -82,7 +82,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean deactivateMember() {
         try{
             AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
-            return memberRepository.inactiveMember(memberDto.getMemberId());
+            return memberRepository.deactivateMember(memberDto.getMemberId());
         }catch(Exception e){
             log.error("Failed to inactivate member: {}", e.getMessage());
             return false;
