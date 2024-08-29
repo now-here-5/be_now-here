@@ -6,6 +6,8 @@ import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
+import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.phone.service.PhoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,10 +35,11 @@ public class MemberAccountController {
     private final MemberService memberService;
     private final PhoneService phoneService;
     private final InteractionService interactionService;
+    private final CustomXOR customXOR;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
             @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     })
     @ApiResponses({
@@ -46,9 +49,10 @@ public class MemberAccountController {
     })
     @GetMapping("/verify/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
-            @PathVariable(name = "event_id") Long eventId,
+            @PathVariable(name = "event_id") String eventId,
             @RequestParam(name = "phone") String phone) {
-        boolean duplicated = memberService.checkPhoneDuplicated(eventId, phone);
+
+        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), phone);
 
         if (duplicated) {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
@@ -82,7 +86,7 @@ public class MemberAccountController {
 
     @Operation(summary = "닉네임 중복 확인", description = "이벤트 ID와 닉네임을 사용하여 닉네임 중복 여부를 확인합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
             @Parameter(name = "nickname", description = "닉네임", required = true, schema = @Schema(example = "john_doe"))
     })
     @ApiResponses({
@@ -91,11 +95,11 @@ public class MemberAccountController {
     })
     @GetMapping("/verify/nickname/{event_id}")
     public ResponseEntity<ResponseForm> checkIfNicknameIsDuplicated(
-            @PathVariable(name = "event_id", required = true) Long eventId,
+            @PathVariable(name = "event_id", required = true) String eventId,
             @RequestParam(name = "nickname", required = true) String nickname) {
 
 
-        boolean isDuplicated = memberService.checkNicknameDuplicated(eventId, nickname);
+        boolean isDuplicated = memberService.checkNicknameDuplicated(customXOR.decrypt(eventId), nickname);
 
         return isDuplicated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.NICKNAME_DUPLICATED)) :
@@ -125,7 +129,7 @@ public class MemberAccountController {
 
     @Operation(summary = "회원 등록", description = "이벤트 ID와 회원 등록 요청 정보를 사용하여 회원을 등록합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 등록 요청",
@@ -140,7 +144,7 @@ public class MemberAccountController {
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"password123\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )
@@ -152,10 +156,11 @@ public class MemberAccountController {
     @PostMapping("/register/{event_id}")
     public ResponseEntity<ResponseForm> registerMember(
 
-            @PathVariable(name = "event_id", required = true) Long eventId,
+            @PathVariable(name = "event_id", required = true) String eventId,
             @RequestBody RegisterMemberRequest registerMemberRequest) {
 
-        String token = memberService.registerMember(eventId, registerMemberRequest);
+
+        String token = memberService.registerMember(customXOR.decrypt(eventId), registerMemberRequest);
 
 
         return token != null?
@@ -184,6 +189,7 @@ public class MemberAccountController {
             @ApiResponse(responseCode = "200", description = "M003 - 회원탈퇴에 성공했습니다."),
             @ApiResponse(responseCode = "400", description = "M003 - 회원탈퇴에 실패했습니다.")
     })
+
     @DeleteMapping("/deactivate")
     public ResponseEntity<ResponseForm> deactivateMember(@RequestBody WithdrawalReasonRequest withdrawalReasonRequest) {
 

@@ -55,7 +55,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
-
+        log.warn("event id : {}", eventId);
         try{
             if(!phoneService.isVerifiedPhone(registerMemberRequest.getPhone())){
                 log.debug("Phone number {} is not verified", registerMemberRequest.getPhone());
@@ -82,7 +82,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean deactivateMember() {
         try{
             AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
-            return memberRepository.inactiveMember(memberDto.getMemberId());
+            return memberRepository.deactivateMember(memberDto.getMemberId());
         }catch(Exception e){
             log.error("Failed to inactivate member: {}", e.getMessage());
             return false;
@@ -118,7 +118,7 @@ public class MemberServiceImpl implements MemberService {
     public List<MemberRecommendResponse> recommendMembers() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Member member = memberRepository.findMemberById(authMember.getMemberId());
-        Long eventId = authMember.getEvent().getEventId();
+        Long eventId = authMember.getEventId();
         Gender gender = member.getGender();
 
         try {
@@ -200,7 +200,7 @@ public class MemberServiceImpl implements MemberService {
         try {
 
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
-            Long eventId = memberDto.getEvent().getEventId();
+            Long eventId = memberDto.getEventId();
 
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             member.updateNickName(nickName);

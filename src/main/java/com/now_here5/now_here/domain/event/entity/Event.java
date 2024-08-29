@@ -40,11 +40,20 @@ public class Event extends FullAudit {
     private List<Member> memberList;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id", nullable = false)
+    @JoinColumn(name = "location_id", nullable = false) // 장소가 없을 때는 placeless id를 가지도록 설정 (ex. -1)
     private Location location;
 
     @Builder
     public Event(LocalDateTime periodStart, LocalDateTime periodEnd, boolean status, String field, Location location) {
+        this.periodStart = periodStart;
+        this.periodEnd = periodEnd;
+        this.status = status;
+        this.field = field;
+        this.location = location;
+    }
+
+    // 통째로 바꾸기.
+    public void replaceWithNewEvent(LocalDateTime periodStart, LocalDateTime periodEnd, boolean status, String field, Location location) {
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;
         this.status = status;

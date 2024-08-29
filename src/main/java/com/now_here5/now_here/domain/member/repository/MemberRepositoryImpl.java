@@ -36,7 +36,7 @@ public class MemberRepositoryImpl implements MemberRepository {
 
 
     @Override
-    public boolean inactiveMember(Long memberId) {
+    public boolean deactivateMember(Long memberId) {
        try {
            em.createQuery("UPDATE Member m " +
                            "SET m.active = false, m.token = null " +
@@ -50,6 +50,20 @@ public class MemberRepositoryImpl implements MemberRepository {
            log.error("Failed to inactive member: {}", e.getMessage());
            return false;
        }
+    }
+
+    @Override
+    public void deactivateBulkMembersByEventId(Long eventId) {
+        try{
+            em.createQuery("update Member m " +
+                            "set m.active = false, m.token = null " +
+                            "where m.event.id = :eventId")
+                    .setParameter("eventId", eventId)
+                    .executeUpdate();
+        }catch (Exception e){
+            log.error("Failed to inactive members by event id: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
 
