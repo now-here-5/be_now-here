@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.admin.controller;
+package com.now_here5.now_here.admin.controller;
 
 import com.now_here5.now_here.domain.event.dto.LocationResponse;
 import com.now_here5.now_here.domain.event.dto.NewLocationRequest;
@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/admin/location")
-@Tag(name = "어드민 위치 관리", description = "어드민 위치 관리 API")
+@Tag(name = "Admin location management API", description = "관리자 위치 관리 API")
 public class LocationAdminController {
     private final EventService eventService;
 

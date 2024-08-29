@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.admin.controller;
+package com.now_here5.now_here.admin.controller;
 
 import com.now_here5.now_here.domain.event.dto.*;
 import com.now_here5.now_here.domain.event.service.EventSchedulerService;

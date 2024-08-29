@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.admin.controller;
+package com.now_here5.now_here.admin.controller;
 
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.dto.EventResponse;
@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/admin/event")
-@Tag(name = "어드민 이벤트 관리", description = "어드민 이벤트 관리 API")
+@Tag(name = "Admin Event management API", description = "관리자 이벤트 관리 API")
 public class EventAdminController {
     private final EventService eventService;
     private final EventSchedulerService eventSchedulerService;

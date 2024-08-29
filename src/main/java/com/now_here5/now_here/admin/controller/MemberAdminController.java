@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.admin.controller;
+package com.now_here5.now_here.admin.controller;
 
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Controller;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = "어드민 이벤트 관리", description = "어드민 이벤트 관리 API")
+@Tag(name = "Admin Member management API", description = "관리자 멤버 관리 API")
 public class MemberAdminController {
 }
