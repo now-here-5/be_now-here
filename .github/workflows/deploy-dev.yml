@@ -60,6 +60,8 @@ jobs:
                   value: ${{ secrets.CT_DB_USERNAME }}
                 - name: DB_PASSWORD
                   value: ${{ secrets.CT_DB_PASSWORD }}
+                - name: XOR_KEY
+                  value: ${{ secrets.XOR_KEY }}
               start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
               buildenv: []
             context:

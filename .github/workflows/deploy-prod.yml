@@ -81,6 +81,7 @@ jobs:
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
               -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
+              -e XOR_KEY=${{ secrets.XOR_KEY }} \
               ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
               echo "Failed to run Docker container"
               exit 1
