@@ -6,6 +6,7 @@ import com.now_here5.now_here.domain.member.service.MemberAuthService;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.global.util.CustomXOR;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -31,11 +32,11 @@ import org.springframework.web.bind.annotation.*;
 public class MemberAuthController {
 
     private final MemberAuthService memberAuthService;
-    private final AuthUtil authUtil;
+    private final CustomXOR customXOR;
 
     @Operation(summary = "로그인", description = "로그인을 시도하고, 반환값으로 토큰과 사용자가 참여중인 이벤트 목록을 반환합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "로그인 요청",
@@ -60,10 +61,10 @@ public class MemberAuthController {
     @PostMapping("/login/{event_id}")
     public ResponseEntity<ResponseForm> login(
             @RequestBody LoginRequest loginRequest,
-            @PathVariable(value = "event_id") Long eventId
+            @PathVariable(value = "event_id") String eventId
     ) {
 
-        LoginResponse loginResponse = memberAuthService.login(loginRequest, eventId);
+        LoginResponse loginResponse = memberAuthService.login(loginRequest, customXOR.decrypt(eventId));
         return loginResponse != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_SUCCESS, loginResponse)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_FAIL));

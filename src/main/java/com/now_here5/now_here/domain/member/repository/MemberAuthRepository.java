@@ -22,7 +22,8 @@ public class MemberAuthRepository {
                             "join fetch am.event " +
                             "left join fetch am.memberRoleList " +
                             "left join fetch am.event.location " +
-                            "where am.token = :token", Member.class)
+                            "where am.token = :token " +
+                            "and am.active = true", Member.class) // 혹시 토큰을 만들더라도, 사용자가 탈퇴한 경우에는 토큰을 사용할 수 없도록 방지.
                     .setParameter("token", token)
                     .getSingleResult();
         } catch (Exception e) {
@@ -52,8 +53,9 @@ public class MemberAuthRepository {
                             "left join fetch am.memberRoleList " +
                             "join fetch am.event e " +
                             "join fetch e.location " +
-                            "where am.phoneNumber = :phoneNumber and " +
-                            "am.event.id = :eventId ", Member.class)
+                            "where am.phoneNumber = :phoneNumber " +
+                            "and am.event.id = :eventId " +
+                            "and am.active = true", Member.class) // 사용자가 탈퇴한 경우에는 로그인을 할 수 없도록 방지.
                     .setParameter("phoneNumber", phoneNumber)
                     .setParameter("eventId", eventId)
                     .getSingleResult();

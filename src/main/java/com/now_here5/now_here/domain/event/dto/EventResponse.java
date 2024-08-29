@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 @Builder
 @RequiredArgsConstructor
 public class EventResponse {
-    private final Long eventId;
+    private final String eventId;
     private final String eventName;
     private final String location;
     private final LocalDateTime startsAt;
     private final LocalDateTime endsAt;
     private final boolean status;
+
 }

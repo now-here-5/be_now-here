@@ -85,16 +85,15 @@ public class MemberAuthService {
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
                     .nickname(member.getNickname())
-                    .event(   EventResponse.builder()
-                            .eventId(member.getEvent().getId())
-                            .endsAt(member.getEvent().getPeriodEnd())
-                            .startsAt(member.getEvent().getPeriodStart())
-                            .eventName(member.getEvent().getField())
-                            .location(member.getEvent().getLocation().getLocationName())
-                            .build())
+                    .eventId(member.getEvent().getId())
+                    .eventName(member.getEvent().getField())
+                    .location(member.getEvent().getLocation().getLocationName())
+                    .startsAt(member.getEvent().getPeriodStart())
+                    .endsAt(member.getEvent().getPeriodEnd())
+                    .status(member.getEvent().isStatus())
                     .roleNamesDto(listRolesToDto.converter(member.getMemberRoleList()))
                     .build();
-
+            
         }catch(Exception e) {
             log.error("get Member By Token Error ={}", e.getMessage());
             return null;
