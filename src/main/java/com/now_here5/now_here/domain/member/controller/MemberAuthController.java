@@ -36,7 +36,7 @@ public class MemberAuthController {
 
     @Operation(summary = "로그인", description = "로그인을 시도하고, 반환값으로 토큰과 사용자가 참여중인 이벤트 목록을 반환합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY")),
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "로그인 요청",

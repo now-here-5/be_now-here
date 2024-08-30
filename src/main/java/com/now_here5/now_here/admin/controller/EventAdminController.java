@@ -56,7 +56,7 @@ public class EventAdminController {
 
     @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 사용하여 이벤트의 세부 정보를 조회합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공", content = @Content(schema = @Schema(implementation = EventResponse.class))),
@@ -75,7 +75,7 @@ public class EventAdminController {
 
     @Operation(summary = "이벤트 삭제", description = "이벤트 ID를 사용하여 이벤트를 삭제합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E009 - 이벤트 삭제 성공"),

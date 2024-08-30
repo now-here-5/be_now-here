@@ -39,7 +39,7 @@ public class MemberAccountController {
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY")),
             @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     })
     @ApiResponses({
@@ -86,7 +86,7 @@ public class MemberAccountController {
 
     @Operation(summary = "닉네임 중복 확인", description = "이벤트 ID와 닉네임을 사용하여 닉네임 중복 여부를 확인합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY")),
             @Parameter(name = "nickname", description = "닉네임", required = true, schema = @Schema(example = "john_doe"))
     })
     @ApiResponses({
@@ -129,7 +129,7 @@ public class MemberAccountController {
 
     @Operation(summary = "회원 등록", description = "이벤트 ID와 회원 등록 요청 정보를 사용하여 회원을 등록합니다.")
     @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
+            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY")),
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 등록 요청",

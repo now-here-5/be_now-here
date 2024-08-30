@@ -24,21 +24,25 @@ public class SlackInquiryHandlerService {
         ResponseEntity<String> response = restTemplate.exchange(inquiryWebhookUrl, HttpMethod.POST, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("Message sent to Slack successfully.");
+            log.trace("Message sent to Slack successfully.");
+
         } else {
-            System.out.println("Failed to send message to Slack: " + response.getStatusCode());
+            log.error("Failed to send message to Slack. Status code: {}", response.getStatusCode());
+            throw new RuntimeException("Failed to send message to Slack.");
+
         }
     }
 
     private HttpEntity<String> getStringHttpEntity(Long inquiryId, String inquiryContent, String sourceInfo) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json, charset=UTF-8");
+        headers.add("Content-Type", "application/json; charset=utf-8");
 
-        String payload = String.format("{\"channel\": \"#운영-문의사항\", \"text\": \"[문의사항]\\n" +
-                        "*Inquiry ID:* %d\\n" +
-                        "*휴대폰:* %s\\n" +
-                        "*문의내용:* %s\"}",
-                inquiryId, inquiryContent, sourceInfo);
+        String payload = String.format("{\"channel\": \"#운영-문의사항\", " +
+                        "\"text\": \"*[문의사항]*\\n\\n" +
+                        "*문의 ID :*  %d\\n" +
+                        "*휴대폰  :*  %s\\n" +
+                        "*내용      :*  %s\"}",
+                inquiryId, sourceInfo, inquiryContent.replace("\n", "\\n").replace("\"", "\\\""));
 
 
         HttpEntity<String> entity = new HttpEntity<>(payload, headers);

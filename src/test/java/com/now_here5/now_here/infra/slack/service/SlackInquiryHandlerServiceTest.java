@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-        "slack.inquiry.webhook.url=https://hooks.slack.com/services/your-webhook-url"
+        "slack.inquiry.webhook.url=your-url"
 })
 class SlackInquiryHandlerServiceTest {
 
@@ -58,6 +58,14 @@ class SlackInquiryHandlerServiceTest {
         HttpEntity<String> entity = new HttpEntity<>(payload, headers);
 
         RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.exchange(inquiryWebhookUrl, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(inquiryWebhookUrl, HttpMethod.POST, entity, String.class);
+
+        // Handle redirection if necessary
+        if (response.getStatusCodeValue() == 302) {
+            String redirectUrl = response.getHeaders().getLocation().toString();
+            response = restTemplate.exchange(redirectUrl, HttpMethod.POST, entity, String.class);
+        }
+
+        return response;
     }
 }
