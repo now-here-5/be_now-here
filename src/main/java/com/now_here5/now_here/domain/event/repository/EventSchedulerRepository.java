@@ -20,7 +20,6 @@ public class EventSchedulerRepository {
             log.error("Failed to add event scheduler: {}", e.getMessage());
             throw new RuntimeException("Failed to add event scheduler");
         }
-
     }
 
     public  void removeEventScheduler(Long eventId) {
@@ -34,7 +33,6 @@ public class EventSchedulerRepository {
             log.error("Failed to remove event scheduler: {}", e.getMessage());
             throw new RuntimeException("Failed to remove event scheduler");
         }
-
     }
 
     public  ScheduledFuture<?> getEventScheduler(Long eventId) {
