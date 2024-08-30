@@ -30,14 +30,13 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // CORS 설정
-//                .cors(cors ->
-//                        cors.configurationSource(corsConfigurationSource())
-//                )
+                .cors(cors ->
+                        cors.configurationSource(corsConfigurationSource())
+                )
                 // CSRF 보호 비활성화 (주로 API를 사용하는 경우)
                 .csrf(AbstractHttpConfigurer::disable
                 )
@@ -50,6 +49,7 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers("/slack/**").permitAll()
+
                                 // 비유저 대상
                                 .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
@@ -89,14 +89,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin(clientOriginUrl); // 허용할 클라이언트 도메인 설정
-        configuration.addAllowedMethod("GET"); // 허용할 메서드 설정
-        configuration.addAllowedMethod("POST");
-        configuration.setAllowCredentials(true); // 자격 증명 허용 (예: 쿠키 등)
+        configuration.addAllowedOrigin("*"); // 모든 출처 허용 (로컬 테스트용)
+        configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
+        configuration.setAllowCredentials(true); // 자격 증명 허용
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }
 
