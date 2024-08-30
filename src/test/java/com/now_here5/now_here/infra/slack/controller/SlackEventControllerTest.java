@@ -33,7 +33,7 @@ class SlackEventControllerTest {
         when(slackEventService.processSlackEvent(payload)).thenReturn("OK");
 
         // When
-        String response = slackEventController.handleSlackEvent(payload);
+        String response = String.valueOf(slackEventController.handleSlackEvent(payload));
 
         // Then
         assertEquals("OK", response);
@@ -47,7 +47,7 @@ class SlackEventControllerTest {
         when(slackEventService.processSlackEvent(payload)).thenThrow(new RuntimeException("Unexpected Error"));
 
         // When
-        String response = slackEventController.handleSlackEvent(payload);
+        String response = String.valueOf(slackEventController.handleSlackEvent(payload));
 
         // Then
         assertEquals("Error: An unexpected error occurred.", response);

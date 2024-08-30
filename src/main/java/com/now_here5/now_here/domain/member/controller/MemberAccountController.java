@@ -6,9 +6,8 @@ import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
-import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
-import com.now_here5.now_here.infra.phone.service.PhoneService;
+import com.now_here5.now_here.infra.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -33,14 +32,14 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member Account API", description = "회원 계정 관련 API")
 public class MemberAccountController {
     private final MemberService memberService;
-    private final PhoneService phoneService;
+    private final NotificationService notificationService;
     private final InteractionService interactionService;
     private final CustomXOR customXOR;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
     @Parameters({
             @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
-            @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     })
     @ApiResponses({
             @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다."),
@@ -67,7 +66,7 @@ public class MemberAccountController {
 
     @Operation(summary = "인증 코드 조회", description = "개발용으로 휴대폰 번호를 사용하여 인증 코드를 조회합니다.")
     @Parameters({
-            @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "A001-D - 개발용 인증 코드를 조회했습니다."),
@@ -77,7 +76,7 @@ public class MemberAccountController {
     public ResponseEntity<ResponseForm> verifyPhone(
             @RequestParam(name = "phone") String phone) {
 
-        String savedCode = phoneService.getPhoneCode(phone);
+        String savedCode = notificationService.getPhoneCode(phone);
 
         return savedCode != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_GET_SUCCESS, savedCode)) :
@@ -108,7 +107,7 @@ public class MemberAccountController {
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
     @Parameters({
-            @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678")),
+            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678")),
             @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))
     })
     @ApiResponses({
@@ -138,13 +137,13 @@ public class MemberAccountController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = RegisterMemberRequest.class,
-                            requiredProperties = {"phone", "password", "nickname", "birth", "mbti", "gender", "description"}
+                            requiredProperties = {"notification", "password", "nickname", "birth", "mbti", "gender", "description"}
                     ),
                     examples = @ExampleObject(
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"notification\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )

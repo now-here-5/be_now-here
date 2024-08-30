@@ -10,13 +10,11 @@ import com.now_here5.now_here.domain.interaction.entity.WithdrawalReason;
 import com.now_here5.now_here.domain.interaction.repository.InteractionRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
-import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.phone.service.PhoneService;
+import com.now_here5.now_here.infra.notification.service.NotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +29,7 @@ public class InteractionServiceImpl implements InteractionService {
     private final MemberRepository memberRepository;
     private final AuthUtil authUtil;
     private final SlackInquiryHandlerService slackInquiryHandlerService;
-    private final PhoneService phoneService;
+    private final NotificationService notificationService;
 
     @Transactional
     @Override
@@ -83,7 +81,7 @@ public class InteractionServiceImpl implements InteractionService {
                     .build();
 
             // SMS 전송
-            phoneService.sendSms(foundInquiry.getPhoneNumber(), responseMessage);
+            notificationService.sendSms(foundInquiry.getPhoneNumber(), responseMessage);
         } else {
             System.out.println("Inquiry not found for ID: " + inquiryId);
         }

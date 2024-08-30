@@ -45,12 +45,12 @@ public class MemberAuthController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = LoginRequest.class,
-                            requiredProperties = {"phone", "password"}
+                            requiredProperties = {"notification", "password"}
                     ),
                     examples = @ExampleObject(
                             name = "LoginRequestExample",
                             summary = "Example of LoginRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\"}"
+                            value = "{\"notification\": \"01012345678\", \"password\": \"1234\"}"
                     )
             )
     )

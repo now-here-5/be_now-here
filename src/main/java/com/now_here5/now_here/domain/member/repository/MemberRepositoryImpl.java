@@ -27,7 +27,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                     .setParameter("phoneNumber", phoneNumber)
                     .getResultList();
         }catch (Exception e){
-            log.error("Failed to find active member by phone number: {}", phoneNumber);
+            log.error("Failed to find active member by notification number: {}", phoneNumber);
             throw new RuntimeException(e.getMessage());
         }
     }

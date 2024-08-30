@@ -14,13 +14,15 @@ public class MemberRecommendResponse {
     private final String nickname;
     private final String birthdate;
     private String gender;
+    private String description;
 
     @Builder
-    public MemberRecommendResponse(Long memberId, String mbti, String nickname, String birthdate, String gender) {
+    public MemberRecommendResponse(Long memberId, String mbti, String nickname, String birthdate, String gender, String description) {
         this.memberId = memberId;
         this.mbti = mbti;
         this.nickname = nickname;
         this.birthdate = birthdate;
         this.gender = gender;
+        this.description = description;
     }
 }

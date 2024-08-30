@@ -52,7 +52,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             if(member == null) {
                 log.warn("해당 전화번호로 가입된 유저가 없습니다.");
-                throw new UsernameNotFoundException("phone not found");
+                throw new UsernameNotFoundException("notification not found");
             }
 
             // UserDetails 객체로 변환하여 반환
