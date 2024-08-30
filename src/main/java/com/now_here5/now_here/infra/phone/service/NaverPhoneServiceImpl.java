@@ -1,6 +1,8 @@
 package com.now_here5.now_here.infra.phone.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.now_here5.now_here.global.util.RandomNumberUntil;
 import com.now_here5.now_here.infra.phone.repository.MemoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ public class NaverPhoneServiceImpl implements PhoneService {
 
     @Override
     public boolean sendVerificationCode(String phone) {
-
         try{
             String randomCode= RandomNumberUntil.generateRandomCode();
             log.info("Send verification code to phone number: {}, code : {}", phone, randomCode);
@@ -25,7 +26,6 @@ public class NaverPhoneServiceImpl implements PhoneService {
         }catch(Exception e){
             return false;
         }
-
     }
 
     @Override
@@ -65,4 +65,22 @@ public class NaverPhoneServiceImpl implements PhoneService {
         }
 
     }
+
+    @Override
+    public void sendSms(String phone, Object dto) {
+
+        try {
+            // dto를 JSON 문자열로 변환
+            String jsonMessage = new ObjectMapper().writeValueAsString(dto);
+            log.info("Send SMS to phone number: {}, message: {}", phone, jsonMessage);
+
+            // 예: naverSmsApi.send(phone, jsonMessage);
+
+        } catch (JsonProcessingException e) {
+            log.error("Failed to convert dto to JSON: {}", dto, e);
+        }
+        log.info("Send SMS to phone number: {}, message : {}", phone, dto);
+
+    }
+
 }

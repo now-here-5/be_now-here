@@ -9,4 +9,6 @@ public interface PhoneService {
     boolean isVerifiedPhone( String phone) ;
 
     String getPhoneCode(String phone);
+
+    void sendSms(String phone, Object message);
 }

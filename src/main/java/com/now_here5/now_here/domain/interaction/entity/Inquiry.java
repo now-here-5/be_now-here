@@ -21,4 +21,9 @@ public class Inquiry extends Interaction{
         super(content, member);
         this.answered = answered;
     }
+
+
+//    void updateAnswer(String answer) {
+//        this.content = answer;
+//    }
 }

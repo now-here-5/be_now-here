@@ -22,4 +22,7 @@ public interface InteractionService {
     List<Inquiry> getInquiriesByMemberId(Long memberId);
 
     List<WithdrawalReason> getWithdrawalReasonsByMemberId(Long memberId);
+
+    void processInquiryResponse(Long inquiryId, String answer);
+
 }
