@@ -33,14 +33,13 @@ public class MemberServiceImpl implements MemberService {
     private final RegisterDtoToMember registerDtoToMember;
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
-    private final MemberAuthRepository memberAuthRepository;
     private final EventListToDto eventListToDto;
 
 
     @Override
     public boolean sendCode(String phone) {
         try{
-            return  phoneService.sendVerificationCode(phone);
+            return phoneService.sendVerificationCode(phone);
         } catch (Exception e) {
             log.error("Failed to send verification code to phone number: {}", phone);
             return false;
