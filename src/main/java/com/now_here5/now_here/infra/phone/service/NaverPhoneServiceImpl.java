@@ -21,7 +21,7 @@ public class NaverPhoneServiceImpl implements PhoneService {
             String randomCode= RandomNumberUntil.generateRandomCode();
             log.info("Send verification code to phone number: {}, code : {}", phone, randomCode);
             memoryRepository.saveCheckCode(phone, randomCode); // 랜덤 번호, 이메일 저장.
-
+            // 실제로 sms 보내는 로직을 추가.
             return true;
         }catch(Exception e){
             return false;

@@ -50,6 +50,7 @@ public class InteractionServiceImpl implements InteractionService {
     @Override
     public void createInquiry(InquiryRequest inquiryRequest) {
         Long memberId = authUtil.getMemberByAuthentication().getMemberId();
+
         Inquiry.InquiryBuilder builder = Inquiry.builder();
         builder.content(inquiryRequest.getContent());
 
