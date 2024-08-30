@@ -11,19 +11,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "inquiry")
-public class Inquiry extends Interaction{
+public class Inquiry extends Interaction {
 
-    @Column(name = "answered", nullable = false)
-    private boolean answered;
+    @Column(name = "phone_number", nullable = true)
+    private String phoneNumber;
+
+    @Column(name = "answer", nullable = true)
+    private String answer;
 
     @Builder
-    public Inquiry(String content, Member member, boolean answered) {
+    public Inquiry(String content, Member member, String phoneNumber, String answer) {
         super(content, member);
-        this.answered = answered;
+        this.phoneNumber = phoneNumber;
+        this.answer = answer;
     }
 
-
-//    void updateAnswer(String answer) {
-//        this.content = answer;
-//    }
+    // 답변을 업데이트하는 메서드
+    public void updateAnswer(String answer) {
+        this.answer = answer;
+    }
 }

@@ -15,13 +15,16 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.infra.phone.service.PhoneService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InteractionServiceImpl implements InteractionService {
 
     private final InteractionRepository interactionRepository;
@@ -30,6 +33,7 @@ public class InteractionServiceImpl implements InteractionService {
     private final SlackInquiryHandlerService slackInquiryHandlerService;
     private final PhoneService phoneService;
 
+    @Transactional
     @Override
     public void createFeedback(FeedbackRequect feedbackRequect) {
         Long memberId = authUtil.getMemberByAuthentication().getMemberId();
@@ -42,27 +46,33 @@ public class InteractionServiceImpl implements InteractionService {
         interactionRepository.saveFeedback(feedback);
     }
 
+    @Transactional
     @Override
     public void createInquiry(InquiryRequest inquiryRequest) {
         Long memberId = authUtil.getMemberByAuthentication().getMemberId();
-        Member member = memberRepository.findActiveMemberById(memberId);
-        Inquiry inquiry = Inquiry.builder()
-                .content(inquiryRequest.getContent())
-                .member(member)
-                .answered(inquiryRequest.isAnswered())
-                .build();
+        Inquiry.InquiryBuilder builder = Inquiry.builder();
+        builder.content(inquiryRequest.getContent());
 
-        interactionRepository.saveInquiry(inquiry);
-        slackInquiryHandlerService.sendSlackNotification(inquiry.getId(), inquiry.getContent(), "01022223333");
+        builder.phoneNumber(inquiryRequest.getPhoneNumber());
+        if(memberId == null) {
+            log.warn("Member ID is null");
+        }else{
+            builder.member(memberRepository.findActiveMemberById(memberId));
+        }
+
+        Inquiry newInquiry = builder.build();
+        interactionRepository.saveInquiry(newInquiry);
+        slackInquiryHandlerService.sendSlackNotification(newInquiry.getId(), newInquiry.getContent(), newInquiry.getPhoneNumber());
     }
 
+    @Transactional
     @Override
     public void processInquiryResponse(Long inquiryId, String answer) {
         Inquiry foundInquiry = interactionRepository.findInquiryById(inquiryId);
 
         if (foundInquiry!=null) {
-           // foundInquiry.setAnswered(true); // 답변 완료 처리 필드 대신 답변 내용이 채워져 있는지로 구분 가능할듯.
-           //  foundInquiry.setAnswer(answer); 나중에는 이것만 사용.
+
+            foundInquiry.updateAnswer(answer);
 
             String responseMessage = String.format("[Now, Here] 질문에 대한 답변: %s", answer);
             InquiryResponse inquiryResponse = InquiryResponse.builder()
@@ -72,13 +82,13 @@ public class InteractionServiceImpl implements InteractionService {
                     .build();
 
             // SMS 전송
-//            phoneService.sendSms(foundInquiry.getPhoneNubmer(), responseMessage); 나중에 이거 이용.
-              phoneService.sendSms("01022223333", inquiryResponse);
+            phoneService.sendSms(foundInquiry.getPhoneNumber(), responseMessage);
         } else {
             System.out.println("Inquiry not found for ID: " + inquiryId);
         }
     }
 
+    @Transactional
     @Override
     public void createWithdrawalReason(WithdrawalReasonRequest withdrawalReasonRequest) {
         Long memberId = authUtil.getMemberByAuthentication().getMemberId();
