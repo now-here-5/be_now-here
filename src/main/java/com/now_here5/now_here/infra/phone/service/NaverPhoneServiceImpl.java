@@ -79,7 +79,6 @@ public class NaverPhoneServiceImpl implements PhoneService {
         } catch (JsonProcessingException e) {
             log.error("Failed to convert dto to JSON: {}", dto, e);
         }
-        log.info("Send SMS to phone number: {}, message : {}", phone, dto);
 
     }
 

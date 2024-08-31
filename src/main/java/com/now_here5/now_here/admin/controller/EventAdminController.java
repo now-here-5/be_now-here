@@ -40,7 +40,7 @@ public class EventAdminController {
             @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
     })
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공", content = @Content(schema = @Schema(implementation = EventListResponse.class))),
+            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공"),
             @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패")
     })
     @GetMapping("/list")
