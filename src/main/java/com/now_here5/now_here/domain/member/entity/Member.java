@@ -13,7 +13,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -65,11 +64,11 @@ public class Member extends FullAudit  {
     @Column(name = "popupStatus", nullable = false)
     private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
 
-    @Column(name = "checkNoti", nullable = false)
-    private LocalDateTime checkNotiTime;
+    @Column(name = "unreadNotiCount", nullable = true)
+    private Integer unreadNotiCount;// 읽지 않는 알림의 개수
 
     @Column(name = "noti_setting", nullable = false)
-    private boolean notiSetting;
+    private boolean notiSetting; // 알림 설정
 
     @Column(name = "active", nullable = false)
     private boolean active;
@@ -102,7 +101,7 @@ public class Member extends FullAudit  {
         this.notification = notification;
         this.active = active;
         this.event = event;
-        this.checkNotiTime = LocalDateTime.now();
+        this.unreadNotiCount = 0;
         this.notiSetting = true;
 
         // Add this member to the event's member list if it's not already present
@@ -138,6 +137,9 @@ public class Member extends FullAudit  {
         }
     }
 
+    public void updateUnreadNotiCount(int unreadNotiCount) {
+        this.unreadNotiCount = unreadNotiCount;
+    }
     // 상태 관리 메서드
     public void activate() {
         this.active = true;
@@ -145,16 +147,6 @@ public class Member extends FullAudit  {
 
     public void deactivate() {
         this.active = false;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.checkNotiTime = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.checkNotiTime = LocalDateTime.now();
     }
 }
 

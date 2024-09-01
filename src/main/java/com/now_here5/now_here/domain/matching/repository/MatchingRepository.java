@@ -1,5 +1,6 @@
 package com.now_here5.now_here.domain.matching.repository;
 
+import com.now_here5.now_here.domain.matching.dto.MatchingWithNicknameResponse;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.member.entity.Member;
@@ -23,6 +24,8 @@ public interface MatchingRepository {
     List<Matching> findByReceiverId(Long memberId);
 
     List<Matching> findBySenderId(Long memberId);
+
+    List<MatchingWithNicknameResponse> findMatchingWithNickname(Long memberId);
 
     List<Matching> findAcceptedMatchingsBySenderOrReceiver(Long memberId);
 }

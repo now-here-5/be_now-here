@@ -10,12 +10,10 @@ import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -37,15 +35,12 @@ public class MemberAccountController {
     private final CustomXOR customXOR;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
-            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다."),
-            @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다."),
-            @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
+    @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
+    @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
+
     @GetMapping("/verify/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") String eventId,
@@ -65,13 +60,10 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 조회", description = "개발용으로 휴대폰 번호를 사용하여 인증 코드를 조회합니다.")
-    @Parameters({
-            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "A001-D - 개발용 인증 코드를 조회했습니다."),
-            @ApiResponse(responseCode = "400", description = "A001-D - 개발용 인증 코드를 조회하지 못했습니다.")
-    })
+    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @ApiResponse(responseCode = "200", description = "A001-D - 개발용 인증 코드를 조회했습니다.")
+    @ApiResponse(responseCode = "400", description = "A001-D - 개발용 인증 코드를 조회하지 못했습니다.")
+
     @GetMapping("/verify/code")
     public ResponseEntity<ResponseForm> verifyPhone(
             @RequestParam(name = "phone") String phone) {
@@ -84,14 +76,11 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "닉네임 중복 확인", description = "이벤트 ID와 닉네임을 사용하여 닉네임 중복 여부를 확인합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
-            @Parameter(name = "nickname", description = "닉네임", required = true, schema = @Schema(example = "john_doe"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "A002 - 사용 가능한 닉네임입니다."),
-            @ApiResponse(responseCode = "400", description = "A002 - 중복된 닉네임입니다.")
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @Parameter(name = "nickname", description = "닉네임", required = true, schema = @Schema(example = "john_doe"))
+    @ApiResponse(responseCode = "200", description = "A002 - 사용 가능한 닉네임입니다.")
+    @ApiResponse(responseCode = "400", description = "A002 - 중복된 닉네임입니다.")
+
     @GetMapping("/verify/nickname/{event_id}")
     public ResponseEntity<ResponseForm> checkIfNicknameIsDuplicated(
             @PathVariable(name = "event_id", required = true) String eventId,
@@ -106,14 +95,11 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
-    @Parameters({
-            @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678")),
-            @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
-    })
+    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))
+    @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
+
     @PostMapping("/verify/code")
 
     public ResponseEntity<ResponseForm> verifyReceivedCode(
@@ -127,9 +113,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "회원 등록", description = "이벤트 ID와 회원 등록 요청 정보를 사용하여 회원을 등록합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5")),
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 등록 요청",
             required = true,
@@ -147,10 +131,8 @@ public class MemberAccountController {
                     )
             )
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "S001 - 회원가입에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "S001 - 회원가입에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "S001 - 회원가입에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "S001 - 회원가입에 실패했습니다.")
 
     @PostMapping("/register/{event_id}")
     public ResponseEntity<ResponseForm> registerMember(
@@ -162,10 +144,11 @@ public class MemberAccountController {
         String token = memberService.registerMember(customXOR.decrypt(eventId), registerMemberRequest);
 
 
-        return token != null?
+        return token != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_FAIL));
     }
+
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 시도합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 탈퇴 요청",
@@ -184,10 +167,8 @@ public class MemberAccountController {
                     )
             )
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M003 - 회원탈퇴에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M003 - 회원탈퇴에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M003 - 회원탈퇴에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M003 - 회원탈퇴에 실패했습니다.")
 
     @DeleteMapping("/deactivate")
     public ResponseEntity<ResponseForm> deactivateMember(@RequestBody WithdrawalReasonRequest withdrawalReasonRequest) {

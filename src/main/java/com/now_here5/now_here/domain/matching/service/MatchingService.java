@@ -16,4 +16,8 @@ public interface MatchingService {
     List<ReceiverResponse> getReceiverList();
 
     List<SummaryDetailResponse> getAcceptedMatchings();
+
+    List<NotificationResponse> getNotificationList();
+
+    Integer getNotificationCount();
 }

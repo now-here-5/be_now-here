@@ -36,13 +36,10 @@ public class EventAdminController {
     private final CustomXOR customXOR;
 
     @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
-    @Parameters({
-            @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공", content = @Content(schema = @Schema(implementation = EventListResponse.class))),
-            @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패")
-    })
+    @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
+    @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패")
+
     @GetMapping("/list")
     public ResponseEntity<ResponseForm> getEventList(
             @RequestParam(name = "status", required = true) boolean status) {
@@ -55,13 +52,10 @@ public class EventAdminController {
     }
 
     @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 사용하여 이벤트의 세부 정보를 조회합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공", content = @Content(schema = @Schema(implementation = EventResponse.class))),
-            @ApiResponse(responseCode = "400", description = "E006 - 이벤트 상세 조회 실패")
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공")
+    @ApiResponse(responseCode = "400", description = "E006 - 이벤트 상세 조회 실패")
+
     @GetMapping("/detail/{event_id}")
     public ResponseEntity<ResponseForm> getSingleEvent(
             @PathVariable(name = "event_id", required = true) String eventId) {
@@ -74,13 +68,9 @@ public class EventAdminController {
     }
 
     @Operation(summary = "이벤트 삭제", description = "이벤트 ID를 사용하여 이벤트를 삭제합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E009 - 이벤트 삭제 성공"),
-            @ApiResponse(responseCode = "400", description = "E010 - 이벤트 삭제 실패")
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @ApiResponse(responseCode = "200", description = "E009 - 이벤트 삭제 성공")
+    @ApiResponse(responseCode = "400", description = "E010 - 이벤트 삭제 실패")
 
     @PatchMapping("/update/{event_id}")
     public ResponseEntity<ResponseForm> deleteEvent(
@@ -94,21 +84,18 @@ public class EventAdminController {
     }
 
     @Operation(summary = "이벤트 종료", description = "이벤트 ID를 사용하여 이벤트를 종료합니다.")
-    @Parameters({
-            @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
-    })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E007 - 이벤트 종료 성공"),
-            @ApiResponse(responseCode = "400", description = "E008 - 이벤트 종료 실패")
-    })
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @ApiResponse(responseCode = "200", description = "E007 - 이벤트 종료 성공")
+    @ApiResponse(responseCode = "400", description = "E008 - 이벤트 종료 실패")
+
     @DeleteMapping("/close/{event_id}")
     public ResponseEntity<ResponseForm> closeEventWithMembers(
             @PathVariable(name = "event_id", required = true) String eventId) {
 
         try {
             eventSchedulerService.closeEventWithMembers(customXOR.decrypt(eventId));
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_CLOSE_SUCCESS)) ;
-        }catch (Exception e){
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_CLOSE_SUCCESS));
+        } catch (Exception e) {
             log.error("Failed to close event: {}", e.getMessage());
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_CLOSE_FAIL));
         }
@@ -126,10 +113,9 @@ public class EventAdminController {
                             value = "{ \"startsAt\": \"2024-09-01T10:00:00\", \"endsAt\": \"2024-09-01T18:00:00\", \"status\": true, \"field\": \"Field A\", \"locationId\": 1 }"
                     )
             ))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E009 - 이벤트 생성 성공"),
-            @ApiResponse(responseCode = "400", description = "E010 - 이벤트 생성 실패")
-    })
+    @ApiResponse(responseCode = "200", description = "E009 - 이벤트 생성 성공")
+    @ApiResponse(responseCode = "400", description = "E010 - 이벤트 생성 실패")
+
     @PostMapping("/open")
     public ResponseEntity<ResponseForm> openEvent(
             @RequestBody NewEventRequest request) {

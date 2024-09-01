@@ -115,11 +115,12 @@ public class MemberServiceImpl implements MemberService {
     public List<MemberRecommendResponse> recommendMembers() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Member member = memberRepository.findMemberById(authMember.getMemberId());
+        Long memberId = member.getId();
         Long eventId = authMember.getEventId();
         Gender gender = member.getGender();
 
         try {
-            List<Member> members = memberRepository.findMembersByEventIdAndGender(eventId, gender);
+            List<Member> members = memberRepository.findMembersByMemberIdAndEventIdAndGender(memberId, eventId, gender);
             return members.stream()
                     .map(m -> new MemberRecommendResponse(
                             m.getId(),
@@ -198,8 +199,6 @@ public class MemberServiceImpl implements MemberService {
         try {
 
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
-            Long eventId = memberDto.getEventId();
-
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             member.updateNickName(nickName);
 

@@ -82,5 +82,4 @@ public class NaverNotificationServiceImpl implements NotificationService {
         log.info("Send SMS to notification number: {}, message : {}", phone, dto);
 
     }
-
 }

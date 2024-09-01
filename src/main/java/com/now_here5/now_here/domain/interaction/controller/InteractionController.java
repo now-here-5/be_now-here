@@ -31,10 +31,9 @@ public class InteractionController {
     private final InteractionService interactionService;
 
     @Operation(summary = "피드백 작성", description = "사용자가 피드백을 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "F001 - 피드백 작성에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "F001 - 피드백 작성에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "F001 - 피드백 작성에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "F001 - 피드백 작성에 실패했습니다.")
+
     @PostMapping("/feedback")
     public ResponseEntity<ResponseForm> createFeedback(@RequestBody FeedbackRequect feedbackRequect) {
         try {
@@ -47,10 +46,9 @@ public class InteractionController {
     }
 
     @Operation(summary = "문의 작성", description = "사용자가 문의를 작성합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "I001 - 문의 작성에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "I001 - 문의 작성에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "I001 - 문의 작성에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "I001 - 문의 작성에 실패했습니다.")
+
     @PostMapping("/inquiry")
     public ResponseEntity<ResponseForm> createInquiry(@RequestBody InquiryRequest inquiryRequest) {
         try {

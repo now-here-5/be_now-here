@@ -12,11 +12,13 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,7 +42,6 @@ public class MatchingServiceImpl implements MatchingService {
         return matchingListToDto.convertToBannerListResponse(results);
     }
 
-
     @Override
     public void sendLove(Long receiverId) {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
@@ -53,6 +54,7 @@ public class MatchingServiceImpl implements MatchingService {
                     .receiver(receiver)
                     .status(Status.PENDING)
                     .build();
+            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
             matchingRepository.save(matching);
 
@@ -65,6 +67,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @CacheEvict(value = "bannerListCache", allEntries = true)// 캐시된 결과를 모두 삭제
     @Override
     public void receiveLove(Long senderId) {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
@@ -76,13 +79,15 @@ public class MatchingServiceImpl implements MatchingService {
             matching.setStatus(Status.ACCEPTED);
             matchingRepository.update(matching);
 
-            // receiver에게 매칭 알림 전송
+            // receiver / sender에게 매칭 알림 전송
             String rMessage = String.format("%s님과 매칭되었습니다.", sender.getNickname());
             slackNotificationService.sendNotification(rMessage);
-
-            // sender에게 매칭 알림 전송
             String sMessage = String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname());
             slackNotificationService.sendNotification(sMessage);
+
+            // noticount 업데이트
+            sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
         } catch (Exception e) {
             log.error("Failed to receive love from {} to {}: {}", senderId, receiverId, e.getMessage());
@@ -186,5 +191,70 @@ public class MatchingServiceImpl implements MatchingService {
             log.error("매칭 목록 조회 중 실패: memberId={}, error={}", memberId, e.getMessage());
             return List.of();
         }
+    }
+
+    @Override
+    public List<NotificationResponse> getNotificationList() {
+        AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
+        Long memberId = authMember.getMemberId();
+
+        try {
+            List<MatchingWithNicknameResponse> matchings = matchingRepository.findMatchingWithNickname(memberId);
+
+            return matchings.stream()
+                    .map(matching -> createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("알림 목록 조회 중 실패: memberId={}, error={}", memberId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    @Override
+    public Integer getNotificationCount() {
+        AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
+        Long memberId = authMember.getMemberId();
+        Member member = memberRepository.findActiveMemberById(memberId);
+        try {
+            Integer unreadNotiCount = member.getUnreadNotiCount();
+            member.updateUnreadNotiCount(0);
+            memberRepository.save(member);
+
+            return unreadNotiCount;
+        } catch (Exception e) {
+            log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
+            return 0;
+        }
+    }
+
+    private NotificationResponse createNotificationResponse(Matching matching, String counterpartNickname, Long memberId) {
+        String title = "";
+        String content = "";
+
+        if (matching.getSender().getId().equals(memberId)) {
+            // 내가 sender인 경우
+            if (matching.getStatus() == Status.ACCEPTED) {
+                title = "매칭 성공!";
+                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
+            } else if (matching.getStatus() == Status.REJECTED) {
+                title = "매칭 실패";
+                content = String.format("%s님과의 매칭에 실패했어요.", counterpartNickname);
+            }
+        } else if (matching.getReceiver().getId().equals(memberId)) {
+            // 내가 receiver인 경우
+            if (matching.getStatus() == Status.ACCEPTED) {
+                title = "매칭 성공!";
+                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
+            } else if (matching.getStatus() == Status.PENDING) {
+                title = "받은 하트";
+                content = String.format("%s님이 회원님에게 하트를 보냈어요.", counterpartNickname);
+            }
+        }
+        return NotificationResponse.builder()
+                .title(title)
+                .memberName(counterpartNickname)
+                .content(content)
+                .build();
     }
 }

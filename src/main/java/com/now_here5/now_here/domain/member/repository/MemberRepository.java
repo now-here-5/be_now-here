@@ -19,9 +19,7 @@ public interface MemberRepository {
   
     Member findMemberById(Long memberId);
 
-    List<Member> findMembersByEventIdAndGender(Long eventId, Gender gender);
-  
     void save(Member activeMember);
 
-
+    List<Member> findMembersByMemberIdAndEventIdAndGender(Long memberId, Long eventId, Gender gender);
 }

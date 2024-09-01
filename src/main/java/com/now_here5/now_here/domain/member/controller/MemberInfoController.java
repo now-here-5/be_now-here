@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +31,10 @@ public class MemberInfoController {
 
     private final MemberService memberService;
 
-
     @Operation(summary = "개인정보 조회", description = "회원의 개인정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M006 - 개인정보 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M006 - 개인정보 조회에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M006 - 개인정보 조회에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M006 - 개인정보 조회에 실패했습니다.")
+
     @GetMapping("/read/personal-info")
     public ResponseEntity<ResponseForm> getPersonalInfo() {
 
@@ -49,10 +46,9 @@ public class MemberInfoController {
     }
 
     @Operation(summary = "프로필 조회", description = "회원의 프로필을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M005 - 프로필 조회에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M005 - 프로필 조회에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M005 - 프로필 조회에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M005 - 프로필 조회에 실패했습니다.")
+
     @GetMapping("/read/profile")
     public ResponseEntity<ResponseForm> getProfile() {
 
@@ -64,10 +60,8 @@ public class MemberInfoController {
     }
 
     @Operation(summary = "회원 설명 업데이트", description = "회원의 설명을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M007 - 설명 업데이트에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M007 - 설명 업데이트에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M007 - 설명 업데이트에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M007 - 설명 업데이트에 실패했습니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 설명 업데이트 요청",
             required = true,
@@ -85,6 +79,7 @@ public class MemberInfoController {
                     )
             )
     )
+
     @PatchMapping("/update/description")
     public ResponseEntity<ResponseForm> updateDescription(
             @RequestBody UpdateDescriptionRequest updateDescriptionRequest) {
@@ -97,10 +92,8 @@ public class MemberInfoController {
     }
 
     @Operation(summary = "알림 설정 업데이트", description = "회원의 알림 설정을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M009 - 알림 설정 변경에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M009 - 알림 설정 변경에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M009 - 알림 설정 변경에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M009 - 알림 설정 변경에 실패했습니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "알림 설정 업데이트 요청",
             required = true,
@@ -118,6 +111,7 @@ public class MemberInfoController {
                     )
             )
     )
+
     @PatchMapping("/update/notification")
     public ResponseEntity<ResponseForm> updateNotification(
             @RequestBody UpdateNotificationRequest updateNotificationRequest) {
@@ -130,10 +124,8 @@ public class MemberInfoController {
     }
 
     @Operation(summary = "닉네임 업데이트", description = "회원의 닉네임을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M008 - 닉네임 업데이트에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M008 - 닉네임 업데이트에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M008 - 닉네임 업데이트에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M008 - 닉네임 업데이트에 실패했습니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "닉네임 업데이트 요청",
             required = true,
@@ -151,6 +143,7 @@ public class MemberInfoController {
                     )
             )
     )
+
     @PatchMapping("/update/nickname")
     public ResponseEntity<ResponseForm> updateNickName(
             @RequestBody UpdateNicknameRequest updateNicknameRequest) {
@@ -163,10 +156,9 @@ public class MemberInfoController {
     }
 
     @Operation(summary = "MBTI 업데이트", description = "회원의 MBTI를 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "M010 - MBTI 업데이트에 성공했습니다."),
-            @ApiResponse(responseCode = "400", description = "M010 - MBTI 업데이트에 실패했습니다.")
-    })
+    @ApiResponse(responseCode = "200", description = "M010 - MBTI 업데이트에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M010 - MBTI 업데이트에 실패했습니다.")
+
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "MBTI 업데이트 요청",
             required = true,
@@ -184,6 +176,7 @@ public class MemberInfoController {
                     )
             )
     )
+
     @PatchMapping("/update/mbti")
     public ResponseEntity<ResponseForm> updateMbti(
             @RequestBody UpdateMbtiRequest updateMbtiRequest) {

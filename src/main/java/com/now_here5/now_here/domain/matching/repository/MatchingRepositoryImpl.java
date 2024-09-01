@@ -1,5 +1,6 @@
 package com.now_here5.now_here.domain.matching.repository;
 
+import com.now_here5.now_here.domain.matching.dto.MatchingWithNicknameResponse;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.member.entity.Member;
@@ -141,6 +142,34 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+    @Override
+    public List<MatchingWithNicknameResponse> findMatchingWithNickname(Long memberId) {
+        try {
+            return em.createQuery("SELECT new com.now_here5.now_here.domain.matching.dto.MatchingWithNicknameResponse(" +
+                            "m, " +
+                            "CASE " +
+                            "WHEN m.sender.id = :memberId THEN r.nickname " +
+                            "WHEN m.receiver.id = :memberId THEN s.nickname " +
+                            "END" +
+                            ") " +
+                            "FROM Matching m " +
+                            "JOIN FETCH m.sender s " +
+                            "JOIN FETCH m.receiver r " +
+                            "WHERE (m.sender.id = :memberId AND m.status <> :pendingStatus) " +
+                            "   OR (m.receiver.id = :memberId AND m.status <> :rejectedStatus) " +
+                            "ORDER BY m.createdAt DESC", MatchingWithNicknameResponse.class)
+                    .setParameter("memberId", memberId)
+                    .setParameter("pendingStatus", Status.PENDING)
+                    .setParameter("rejectedStatus", Status.REJECTED)
+                    .getResultList();
+        } catch (Exception e) {
+            log.error("Failed to find matchings with counterpart nickname: memberId={}, error={}", memberId, e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
 
     @Override
     public List<Matching> findAcceptedMatchingsBySenderOrReceiver(Long memberId) {
