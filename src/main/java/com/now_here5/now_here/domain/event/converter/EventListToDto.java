@@ -4,7 +4,6 @@ import com.now_here5.now_here.domain.event.dto.EventResponse;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.global.util.CustomXOR;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

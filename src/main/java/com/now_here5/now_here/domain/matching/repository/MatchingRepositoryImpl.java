@@ -72,7 +72,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             if (matching != null) {
                 em.remove(matching);
             } else {
-                log.warn("ID로 매칭 못 찾음", matchingId);
+                log.warn("ID로 매칭 못 찾음: {}", matchingId);
             }
         } catch (Exception e) {
             log.error("ID로 매칭 삭제 중 실패: {}", matchingId, e);

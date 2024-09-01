@@ -40,12 +40,11 @@ public class SlackInquiryHandlerService {
         String payload = String.format("{\"channel\": \"#운영-문의사항\", " +
                         "\"text\": \"*[문의사항]*\\n\\n" +
                         "*문의 ID :*  %d\\n" +
-                        "*휴대폰  :*  %s\\n" +
-                        "*내용      :*  %s\"}",
+                        "*휴대폰 :*  %s\\n" +
+                        "*내용 :*  %s\"}",
                 inquiryId, sourceInfo, inquiryContent.replace("\n", "\\n").replace("\"", "\\\""));
 
 
-        HttpEntity<String> entity = new HttpEntity<>(payload, headers);
-        return entity;
+        return new HttpEntity<>(payload, headers);
     }
 }

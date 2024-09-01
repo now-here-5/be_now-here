@@ -32,15 +32,15 @@ public class LocationAdminController {
 
     @Operation(summary = "위치 추가", description = "새로운 위치를 추가합니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        description = "새로운 위치 요청",
-        required = true,
-        content = @Content(
-                schema = @Schema(implementation = NewLocationRequest.class),
-                examples = @ExampleObject(
-                        name = "NewLocationRequest",
-                        value = "{ \"locationName\": \"Location A\" }"
-                )
-    ))
+            description = "새로운 위치 요청",
+            required = true,
+            content = @Content(
+                    schema = @Schema(implementation = NewLocationRequest.class),
+                    examples = @ExampleObject(
+                            name = "NewLocationRequest",
+                            value = "{ \"locationName\": \"Location A\" }"
+                    )
+            ))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E011 - 위치 추가 성공"),
             @ApiResponse(responseCode = "400", description = "E012 - 위치 추가 실패")
@@ -53,6 +53,7 @@ public class LocationAdminController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_ADD_LOCATION_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_ADD_LOCATION_FAIL));
     }
+
     @Operation(summary = "위치 조회", description = "위치 ID를 사용하여 위치의 세부 정보를 조회합니다.")
     @Parameters({
             @Parameter(name = "location_id", description = "위치 ID", required = true, schema = @Schema(example = "1"))
@@ -63,7 +64,7 @@ public class LocationAdminController {
     })
     @GetMapping("/detail/{location_id}")
     public ResponseEntity<ResponseForm> getLocation(
-            @PathVariable(name = "location_id", required = true) Long locationId) {
+            @PathVariable(name = "location_id") Long locationId) {
         String location = eventService.getLocation(locationId);
         return location != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOCATION_QUERY_SUCCESS, location)) :
@@ -94,7 +95,7 @@ public class LocationAdminController {
     })
     @DeleteMapping("/delete/{location_id}")
     public ResponseEntity<ResponseForm> deleteLocation(
-            @PathVariable(name = "location_id", required = true) Long locationId) {
+            @PathVariable(name = "location_id") Long locationId) {
         boolean result = eventService.deleteLocation(locationId);
 
         return result ?

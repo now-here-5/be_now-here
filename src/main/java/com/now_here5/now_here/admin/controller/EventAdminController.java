@@ -10,12 +10,10 @@ import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.util.CustomXOR;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +43,7 @@ public class EventAdminController {
     })
     @GetMapping("/list")
     public ResponseEntity<ResponseForm> getEventList(
-            @RequestParam(name = "status", required = true) boolean status) {
+            @RequestParam(name = "status") boolean status) {
 
         EventListResponse eventList = eventService.getEventList(status);
 
@@ -64,7 +62,7 @@ public class EventAdminController {
     })
     @GetMapping("/detail/{event_id}")
     public ResponseEntity<ResponseForm> getSingleEvent(
-            @PathVariable(name = "event_id", required = true) String eventId) {
+            @PathVariable(name = "event_id") String eventId) {
 
         EventResponse eventDetail = eventService.getEventDetail(customXOR.decrypt(eventId));
 
@@ -84,7 +82,7 @@ public class EventAdminController {
 
     @PatchMapping("/update/{event_id}")
     public ResponseEntity<ResponseForm> deleteEvent(
-            @PathVariable(name = "event_id", required = true) String eventId,
+            @PathVariable(name = "event_id") String eventId,
             @RequestBody NewEventRequest request) {
         boolean result = eventSchedulerService.updateEvent(request, customXOR.decrypt(eventId));
 
@@ -103,7 +101,7 @@ public class EventAdminController {
     })
     @DeleteMapping("/close/{event_id}")
     public ResponseEntity<ResponseForm> closeEventWithMembers(
-            @PathVariable(name = "event_id", required = true) String eventId) {
+            @PathVariable(name = "event_id") String eventId) {
 
         try {
             eventSchedulerService.closeEventWithMembers(customXOR.decrypt(eventId));

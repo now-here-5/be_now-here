@@ -95,8 +95,8 @@ public class MemberAccountController {
     })
     @GetMapping("/verify/nickname/{event_id}")
     public ResponseEntity<ResponseForm> checkIfNicknameIsDuplicated(
-            @PathVariable(name = "event_id", required = true) String eventId,
-            @RequestParam(name = "nickname", required = true) String nickname) {
+            @PathVariable(name = "event_id") String eventId,
+            @RequestParam(name = "nickname") String nickname) {
 
 
         boolean isDuplicated = memberService.checkNicknameDuplicated(customXOR.decrypt(eventId), nickname);
@@ -156,7 +156,7 @@ public class MemberAccountController {
     @PostMapping("/register/{event_id}")
     public ResponseEntity<ResponseForm> registerMember(
 
-            @PathVariable(name = "event_id", required = true) String eventId,
+            @PathVariable(name = "event_id") String eventId,
             @RequestBody RegisterMemberRequest registerMemberRequest) {
 
 
