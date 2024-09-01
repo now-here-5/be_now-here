@@ -17,8 +17,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "matching", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"sender_member_id", "sender_active", "receiver_member_id", "receiver_active"})
 })
-
-// 자주 사용되는 데이터 2차 캐시
 @Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Matching extends CreatedDateAudit {
@@ -31,6 +29,18 @@ public class Matching extends CreatedDateAudit {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
+    @Column(name = "sender_member_id", nullable = false)
+    private Long senderMemberId;
+
+    @Column(name = "sender_active", nullable = false)
+    private Boolean senderActive;
+
+    @Column(name = "receiver_member_id", nullable = false)
+    private Long receiverMemberId;
+
+    @Column(name = "receiver_active", nullable = false)
+    private Boolean receiverActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
@@ -47,21 +57,38 @@ public class Matching extends CreatedDateAudit {
     private Member receiver;
 
     @Builder
-    public Matching(Status status) {
+    public Matching(Member sender, Member receiver, Status status) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.status = status;
+        this.senderMemberId = sender.getId();
+        this.senderActive = true;
+        this.receiverMemberId = receiver.getId();
+        this.receiverActive = true;
     }
 
     public void setSender(Member sender) {
         this.sender = sender;
-        if (sender != null && !sender.getSentMatchings().contains(this)) {
-            sender.getSentMatchings().add(this);
+        if (sender != null) {
+            this.senderMemberId = sender.getId();
+            this.senderActive = true;
+            if (!sender.getSentMatchings().contains(this)) {
+                sender.getSentMatchings().add(this);
+            }
         }
     }
 
     public void setReceiver(Member receiver) {
         this.receiver = receiver;
-        if (receiver != null && !receiver.getReceivedMatchings().contains(this)) {
-            receiver.getReceivedMatchings().add(this);
+        if (receiver != null) {
+            this.receiverMemberId = receiver.getId();
+            this.receiverActive = true;
+            if (!receiver.getReceivedMatchings().contains(this)) {
+                receiver.getReceivedMatchings().add(this);
+            }
         }
+    }
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

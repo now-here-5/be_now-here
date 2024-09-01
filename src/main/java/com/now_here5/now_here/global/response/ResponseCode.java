@@ -109,6 +109,18 @@ public enum ResponseCode {
     // Matching
     BannerList_QUERY_SUCCESS(200, "M001", "배너 목록 조회에 성공했습니다."),
     BannerList_QUERY_FAIL(400, "M001", "배너 목록 조회에 실패했습니다."),
+    LOVE_SEND_SUCCESS(200, "M002", "하트 전송에 성공했습니다."),
+    LOVE_SEND_FAIL(400, "M002", "하트 전송에 실패했습니다."),
+    LOVE_RECEIVE_SUCCESS(200, "M003", "하트 수신에 성공했습니다."),
+    LOVE_RECEIVE_FAIL(400, "M003", "하트 수신에 실패했습니다."),
+    SUMMARY_GET_SUCCESS(200, "M004", "매칭 현황 조회에 성공했습니다."),
+    SUMMARY_GET_FAIL(400, "M004", "매칭 현황 조회에 실패했습니다."),
+    SENDERLIST_QUERY_SUCCESS(200, "M005", "받은 하트 페이지 조회에 성공했습니다."),
+    SENDERLIST_QUERY_FAIL(400, "M005", "받은 하트 페이지 조회에 실패했습니다."),
+    RECEIVERLIST_QUERY_SUCCESS(200, "M006", "보낸 하트 페이지 조회에 성공했습니다."),
+    RECEIVERLIST_QUERY_FAIL(400, "M006", "보낸 하트 페이지 조회에 실패했습니다."),
+    SUMMARYDETAIL_GET_SUCCESS(200, "M007", "매칭 현황 페이지 조회에 성공했습니다."),
+    SUMMARYDETAIL_GET_FAIL(400, "M007", "매칭 현황 페이지 조회에 실패했습니다."),
 
     // Interaction
     FEEDBACK_CREATE_SUCCESS(200, "I001", "FEEDBACK 생성에 성공했습니다."),
