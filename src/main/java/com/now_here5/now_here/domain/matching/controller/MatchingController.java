@@ -41,7 +41,7 @@ public class MatchingController {
             bannerList = List.of();
         }
 
-        return ResponseEntity.ok(ResponseForm.of(ResponseCode.Banner_LIST_QUERY_SUCCESS, bannerList));
+        return ResponseEntity.ok(ResponseForm.of(ResponseCode.BANNER_LIST_QUERY_SUCCESS, bannerList));
     }
 
     @Operation(summary = "하트 보내기", description = "특정 사용자에게 하트를 보냅니다.", security = @SecurityRequirement(name = "bearerAuth"))

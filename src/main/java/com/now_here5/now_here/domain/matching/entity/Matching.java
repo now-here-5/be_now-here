@@ -43,17 +43,15 @@ public class Matching extends CreatedDateAudit {
     private Boolean receiverActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "sender_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
-            @JoinColumn(name = "sender_active", referencedColumnName = "active", insertable = false, updatable = false)
-    })
+    @JoinColumn(name = "sender_member_id", referencedColumnName = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "sender_active", referencedColumnName = "active", insertable = false, updatable = false)
+
     private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id", insertable = false, updatable = false),
-            @JoinColumn(name = "receiver_active", referencedColumnName = "active", insertable = false, updatable = false)
-    })
+    @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id", insertable = false, updatable = false)
+    @JoinColumn(name = "receiver_active", referencedColumnName = "active", insertable = false, updatable = false)
+
     private Member receiver;
 
     @Builder
@@ -88,6 +86,7 @@ public class Matching extends CreatedDateAudit {
             }
         }
     }
+
     public void setStatus(Status status) {
         this.status = status;
     }

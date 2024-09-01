@@ -5,7 +5,6 @@ import com.now_here5.now_here.domain.event.dto.*;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.entity.Location;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
-import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
@@ -13,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -131,7 +128,6 @@ public class EventServiceImpl implements EventService {
 //            return List.of();
             return null;
         }
-
     }
 
     @Override

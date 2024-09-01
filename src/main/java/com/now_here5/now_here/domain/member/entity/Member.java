@@ -13,6 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -78,13 +79,13 @@ public class Member extends FullAudit  {
     private Event event;
 
     @OneToMany(mappedBy = "sender")
-    private List<Matching> sentMatchings;
+    private List<Matching> sentMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "receiver")
-    private List<Matching> receivedMatchings;
+    private List<Matching> receivedMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberRole> memberRoleList;
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,

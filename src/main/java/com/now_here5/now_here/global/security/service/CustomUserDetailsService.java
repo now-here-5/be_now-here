@@ -38,9 +38,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 이벤트 ID가 필요하다면, 커스텀 토큰에서 꺼내 사용
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication instanceof CustomAuthenticationToken) {
-
-            CustomAuthenticationToken customToken = (CustomAuthenticationToken) authentication;
+        if (authentication instanceof CustomAuthenticationToken customToken) {
 
             Long eventId = customToken.getEventId();
 

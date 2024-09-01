@@ -83,7 +83,7 @@ public class InteractionServiceImpl implements InteractionService {
             // SMS 전송
             notificationService.sendSms(foundInquiry.getPhoneNumber(), responseMessage);
         } else {
-            System.out.println("Inquiry not found for ID: " + inquiryId);
+            log.info("Inquiry not found for ID: {}", inquiryId);
         }
     }
 

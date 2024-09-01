@@ -107,8 +107,8 @@ public enum ResponseCode {
     EVENTSCHEDULER_QUERY_SUCCESS(200, "E014", "이벤트 스케줄러 조회에 성공했습니다."),
     EVENTSCHEDULER_QUERY_FAIL(400, "E014", "이벤트 스케줄러 조회에 실패했습니다."),
     // Matching
-    Banner_LIST_QUERY_SUCCESS(200, "M001", "배너 목록 조회에 성공했습니다."),
-    Banner_LIST_QUERY_FAIL(400, "M001", "배너 목록 조회에 실패했습니다."),
+    BANNER_LIST_QUERY_SUCCESS(200, "M001", "배너 목록 조회에 성공했습니다."),
+    BANNER_LIST_QUERY_FAIL(400, "M001", "배너 목록 조회에 실패했습니다."),
     LOVE_SEND_SUCCESS(200, "M002", "하트 전송에 성공했습니다."),
     LOVE_SEND_FAIL(400, "M002", "하트 전송에 실패했습니다."),
     LOVE_RECEIVE_SUCCESS(200, "M003", "하트 수신에 성공했습니다."),

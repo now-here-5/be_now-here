@@ -1,4 +1,4 @@
-//package com.now_here5.now_here.infra.notification.controller;
+package com.now_here5.now_here.infra.notification.controller;
 //
 //import com.now_here5.now_here.infra.notification.dto.NotificationResponse;
 //import com.now_here5.now_here.global.response.ResponseCode;
