@@ -19,7 +19,8 @@ public class EventListToDto {
                 .eventList(
                         eventList.stream()
                                 .map(event -> EventResponse.builder()
-                                        .eventId(customXOR.encrypt(event.getId()))
+                                        .eventId(event.getId())
+                                        .encodedId(customXOR.encrypt(event.getId()))
                                         .eventName(event.getField())
                                         .location(event.getLocation().getLocationName())
                                         .status(event.isStatus())

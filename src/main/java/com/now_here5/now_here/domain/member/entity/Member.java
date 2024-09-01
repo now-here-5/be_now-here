@@ -33,7 +33,7 @@ public class Member extends FullAudit  {
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "token", unique = true)
+    @Column(name = "token", nullable = true, unique = true)
     private String token;
 
     @Column(name = "birthday", nullable = false)
@@ -65,7 +65,7 @@ public class Member extends FullAudit  {
     @Column(name = "popupStatus", nullable = false)
     private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
 
-    @Column(name = "unreadNotiCount")
+    @Column(name = "unreadNotiCount", nullable = true)
     private Integer unreadNotiCount;// 읽지 않는 알림의 개수
 
     @Column(name = "noti_setting", nullable = false)
@@ -102,7 +102,6 @@ public class Member extends FullAudit  {
         this.notification = notification;
         this.active = active;
         this.event = event;
-        this.popupStatus = 0;
         this.unreadNotiCount = 0;
         this.notiSetting = true;
 

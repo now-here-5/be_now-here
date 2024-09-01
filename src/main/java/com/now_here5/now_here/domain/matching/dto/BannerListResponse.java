@@ -9,6 +9,8 @@ import lombok.Getter;
 public class BannerListResponse {
     private final String senderNickname;
     private final String senderMbti;
+    private final String senderGender;
     private final String receiverNickname;
     private final String receiverMbti;
+    private final String receiverGender;
 }

@@ -1,9 +1,9 @@
-//package com.now_here5.now_here.infra.email.service;
+package com.now_here5.now_here.infra.email.service;
 //
 //
 //import com.now_here5.now_here.global.util.RandomNumberUntil;
 //import com.now_here5.now_here.infra.email.dto.EmailRequestDto;
-//import com.now_here5.now_here.infra.phone.repository.MemoryRepository;
+//import com.now_here5.now_here.infra.notification.repository.MemoryRepository;
 //import jakarta.annotation.PostConstruct;
 //import lombok.RequiredArgsConstructor;
 //import lombok.extern.slf4j.Slf4j;

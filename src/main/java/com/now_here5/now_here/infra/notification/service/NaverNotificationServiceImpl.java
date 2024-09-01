@@ -1,10 +1,10 @@
-package com.now_here5.now_here.infra.phone.service;
+package com.now_here5.now_here.infra.notification.service;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.now_here5.now_here.global.util.RandomNumberUntil;
-import com.now_here5.now_here.infra.phone.repository.MemoryRepository;
+import com.now_here5.now_here.infra.notification.repository.MemoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class NaverPhoneServiceImpl implements PhoneService {
+public class NaverNotificationServiceImpl implements NotificationService {
     private final MemoryRepository memoryRepository;
 
     @Override
     public boolean sendVerificationCode(String phone) {
         try{
             String randomCode= RandomNumberUntil.generateRandomCode();
-            log.info("Send verification code to phone number: {}, code : {}", phone, randomCode);
+            log.info("Send verification code to notification number: {}, code : {}", phone, randomCode);
             memoryRepository.saveCheckCode(phone, randomCode); // 랜덤 번호, 이메일 저장.
             // 실제로 sms 보내는 로직을 추가.
             return true;
@@ -72,15 +72,14 @@ public class NaverPhoneServiceImpl implements PhoneService {
         try {
             // dto를 JSON 문자열로 변환
             String jsonMessage = new ObjectMapper().writeValueAsString(dto);
-            log.info("Send SMS to phone number: {}, message: {}", phone, jsonMessage);
+            log.info("Send SMS to notification number: {}, message: {}", phone, jsonMessage);
 
-            // 예: naverSmsApi.send(phone, jsonMessage);
+            // 예: naverSmsApi.send(notification, jsonMessage);
 
         } catch (JsonProcessingException e) {
             log.error("Failed to convert dto to JSON: {}", dto, e);
         }
-        log.info("Send SMS to phone number: {}, message : {}", phone, dto);
+        log.info("Send SMS to notification number: {}, message : {}", phone, dto);
 
     }
-
 }

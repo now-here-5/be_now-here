@@ -1,9 +1,8 @@
-package com.now_here5.now_here.infra.phone.repository;
+package com.now_here5.now_here.infra.notification.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -50,6 +49,4 @@ public class MemoryRepository {
             
         }
     }
-
-
 }

@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "feedback")
 public class Feedback extends Interaction{
 
-    @Column(name = "field")
+    @Column(name = "field", nullable = true)
+//    @Min(1)  // 최소값 1
     @Max(5)  // 최대값 5
     private int field;  // 별점
 

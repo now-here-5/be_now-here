@@ -2,6 +2,7 @@ package com.now_here5.now_here.infra.slack.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,7 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SlackNotificationServiceTest {
-    private static final String WEBHOOK_URL = "your-webhook-url";
+    @Value("${slack.inquiry.webhook.url}")
+    private static String WEBHOOK_URL;
     private RestTemplate restTemplate;
     private SlackNotificationService slackNotificationService;
 

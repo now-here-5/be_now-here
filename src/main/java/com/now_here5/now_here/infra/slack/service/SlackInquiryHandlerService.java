@@ -43,8 +43,6 @@ public class SlackInquiryHandlerService {
                         "*휴대폰 :*  %s\\n" +
                         "*내용 :*  %s\"}",
                 inquiryId, sourceInfo, inquiryContent.replace("\n", "\\n").replace("\"", "\\\""));
-
-
         return new HttpEntity<>(payload, headers);
     }
 }

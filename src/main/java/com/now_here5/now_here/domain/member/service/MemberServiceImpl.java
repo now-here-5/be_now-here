@@ -11,25 +11,23 @@ import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
 import com.now_here5.now_here.domain.member.dto.ProfileResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.*;
-import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.phone.service.PhoneService;
+import com.now_here5.now_here.infra.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
-    private final PhoneService phoneService;
+    private final NotificationService notificationService;
     private final RegisterDtoToMember registerDtoToMember;
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
@@ -39,16 +37,16 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean sendCode(String phone) {
         try{
-            return phoneService.sendVerificationCode(phone);
+            return notificationService.sendVerificationCode(phone);
         } catch (Exception e) {
-            log.error("Failed to send verification code to phone number: {}", phone);
+            log.error("Failed to send verification code to notification number: {}", phone);
             return false;
         }
     }
 
     @Override
     public boolean verifyCode(String phone, String code) {
-        return phoneService.verifyCode(phone, code);
+        return notificationService.verifyCode(phone, code);
     }
 
     @Transactional
@@ -56,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
         log.warn("event id : {}", eventId);
         try{
-            if(!phoneService.isVerifiedPhone(registerMemberRequest.getPhone())){
+            if(!notificationService.isVerifiedPhone(registerMemberRequest.getPhone())){
                 log.debug("Phone number {} is not verified", registerMemberRequest.getPhone());
                 throw new Exception("Phone number is not verified");
             }
@@ -92,7 +90,7 @@ public class MemberServiceImpl implements MemberService {
     public boolean checkPhoneDuplicated(Long eventId, String phone) {
         try{
             List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
-            log.trace("phone number {} : ",members);
+            log.trace("notification number {} : ",members);
             for(Member member : members){
                 if(member.getEvent().getId().equals(eventId)){
 
@@ -101,7 +99,7 @@ public class MemberServiceImpl implements MemberService {
                     return true;
                 }
             }
-            log.trace("phone number {} : ",members);
+            log.trace("notification number {} : ",members);
                 return false;
         } catch (Exception e) {
             return true;
@@ -117,19 +115,21 @@ public class MemberServiceImpl implements MemberService {
     public List<MemberRecommendResponse> recommendMembers() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Member member = memberRepository.findMemberById(authMember.getMemberId());
+        Long memberId = member.getId();
         Long eventId = authMember.getEventId();
         Gender gender = member.getGender();
 
         try {
-            List<Member> members = memberRepository.findMembersByEventIdAndGender(eventId, gender);
+            List<Member> members = memberRepository.findMembersByMemberIdAndEventIdAndGender(memberId, eventId, gender);
             return members.stream()
                     .map(m -> new MemberRecommendResponse(
                             m.getId(),
                             m.getMbti().toString(),
                             m.getNickname(),
                             m.getBirthday().toString(),
-                            m.getGender().toString()))
-                    .collect(Collectors.toUnmodifiableList());
+                            m.getGender().toString(),
+                            m.getDescription()))
+                    .toList();
         } catch (Exception e) {
             log.error("멤버 추천 실패: {}", e.getMessage());
             return List.of();
@@ -199,8 +199,6 @@ public class MemberServiceImpl implements MemberService {
         try {
 
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
-            Long eventId = memberDto.getEventId();
-
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             member.updateNickName(nickName);
 
@@ -222,7 +220,8 @@ public class MemberServiceImpl implements MemberService {
                     member.getMbti().toString(),
                     member.getNickname(),
                     member.getBirthday().toString(),
-                    member.getGender().toString());
+                    member.getGender().toString(),
+                    member.getDescription());
 
         } catch (Exception e) {
             log.error("Failed to get profile: {}", e.getMessage());

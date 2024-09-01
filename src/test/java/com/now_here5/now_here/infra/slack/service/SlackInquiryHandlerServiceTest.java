@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -22,12 +24,10 @@ class SlackInquiryHandlerServiceTest {
     @Value("${slack.inquiry.webhook.url}")
     private String inquiryWebhookUrl;
 
-    private SlackInquiryHandlerService slackInquiryHandlerService;
-
     @BeforeEach
     void setUp() {
         RestTemplate restTemplate = new RestTemplate();
-        slackInquiryHandlerService = new SlackInquiryHandlerService(restTemplate);
+        new SlackInquiryHandlerService(restTemplate);
     }
 
     @Test
@@ -62,7 +62,7 @@ class SlackInquiryHandlerServiceTest {
 
         // Handle redirection if necessary
         if (response.getStatusCodeValue() == 302) {
-            String redirectUrl = response.getHeaders().getLocation().toString();
+            String redirectUrl = Objects.requireNonNull(response.getHeaders().getLocation()).toString();
             response = restTemplate.exchange(redirectUrl, HttpMethod.POST, entity, String.class);
         }
 
