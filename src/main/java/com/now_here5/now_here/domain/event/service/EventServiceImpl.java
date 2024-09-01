@@ -32,7 +32,8 @@ public class EventServiceImpl implements EventService {
         try{
             Event event =  eventRepository.getEventDetail(eventId);
             return EventResponse.builder()
-                    .eventId(customXOR.encrypt(event.getId()))
+                    .eventId(event.getId())
+                    .encodedId(customXOR.encrypt(event.getId()))
                     .eventName(event.getField())
                     .location(event.getLocation().getLocationName())
                     .status(event.isStatus())
@@ -127,6 +128,7 @@ public class EventServiceImpl implements EventService {
 
         }catch(Exception e){
             log.error("getLocationList error = {} ", e.getMessage());
+//            return List.of();
             return null;
         }
 
