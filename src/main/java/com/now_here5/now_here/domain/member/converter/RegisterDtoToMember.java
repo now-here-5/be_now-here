@@ -3,7 +3,7 @@ package com.now_here5.now_here.domain.member.converter;
 
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.Gender;
-import com.now_here5.now_here.domain.member.entity.Mbti;
+import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import lombok.Builder;
@@ -29,7 +29,7 @@ public class RegisterDtoToMember {
                 .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))
                 .notification(true)
                 .active(true)
-                .mbti(Mbti.valueOf(registerRequest.getMbti().toUpperCase()))
+                .mbti(MBTI.valueOf(registerRequest.getMbti().toUpperCase()))
                 .token(tokenGenerator.generateUniqueToken())
                 .description(registerRequest.getDescription())
                 .birthday(registerRequest.getBirth())

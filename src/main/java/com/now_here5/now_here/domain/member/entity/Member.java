@@ -9,14 +9,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cacheable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member", uniqueConstraints = {
@@ -51,7 +54,7 @@ public class Member extends FullAudit  {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "mbti", nullable = false)
-    private Mbti mbti;
+    private MBTI mbti;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -62,11 +65,11 @@ public class Member extends FullAudit  {
     @Column(name = "popupStatus", nullable = false)
     private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
 
-    @Column(name = "checkNoti", nullable = false)
-    private LocalDateTime checkNotiTime;
+    @Column(name = "unreadNotiCount", nullable = true)
+    private Integer unreadNotiCount;// 읽지 않는 알림의 개수
 
     @Column(name = "noti_setting", nullable = false)
-    private boolean notiSetting;
+    private boolean notiSetting; // 알림 설정
 
     @Column(name = "active", nullable = false)
     private boolean active;
@@ -76,17 +79,17 @@ public class Member extends FullAudit  {
     private Event event;
 
     @OneToMany(mappedBy = "sender")
-    private List<Matching> sentMatchings;
+    private List<Matching> sentMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "receiver")
-    private List<Matching> receivedMatchings;
+    private List<Matching> receivedMatchings = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberRole> memberRoleList;
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                  Gender gender, Mbti mbti, String description, boolean notification, boolean active,
+                  Gender gender, MBTI mbti, String description, boolean notification, boolean active,
                   Event event) {
         this.token = token;
         this.birthday = birthday;
@@ -99,19 +102,32 @@ public class Member extends FullAudit  {
         this.notification = notification;
         this.active = active;
         this.event = event;
-        this.checkNotiTime = LocalDateTime.now();
+        this.unreadNotiCount = 0;
         this.notiSetting = true;
 
         // Add this member to the event's member list if it's not already present
         setEvent(event);
     }
 
+    // 회원 수정 가능 필드용 업데이트 메서드
     public void updateToken(String newToken) {
         this.token = newToken;
     }
 
-    public void inactivate() {
-        this.active = false;
+    public void updateDescription(String newDescription) {
+        this.description = newDescription;
+    }
+
+    public void updateNotification(boolean newNotification) {
+        this.notification = newNotification;
+    }
+
+    public void updateMbti(MBTI mbti) {
+        this.mbti = mbti;
+    }
+
+    public void updateNickName(String newNickName) {
+        this.nickname = newNickName;
     }
 
     // 편의 메서드
@@ -122,6 +138,9 @@ public class Member extends FullAudit  {
         }
     }
 
+    public void updateUnreadNotiCount(int unreadNotiCount) {
+        this.unreadNotiCount = unreadNotiCount;
+    }
     // 상태 관리 메서드
     public void activate() {
         this.active = true;
@@ -129,16 +148,6 @@ public class Member extends FullAudit  {
 
     public void deactivate() {
         this.active = false;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.checkNotiTime = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.checkNotiTime = LocalDateTime.now();
     }
 }
 

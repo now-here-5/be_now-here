@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Connect deploy key
         uses: cloudtype-github-actions/connect@v1
         with:
@@ -60,6 +60,12 @@ jobs:
                   value: ${{ secrets.CT_DB_USERNAME }}
                 - name: DB_PASSWORD
                   value: ${{ secrets.CT_DB_PASSWORD }}
+                - name: XOR_KEY
+                  value: ${{ secrets.XOR_KEY }}
+                - name: SLACK_WEBHOOK_URL
+                  value: ${{ secrets.SLACK_WEBHOOK_URL }}
+                - name: SLACK_INQUIRY_WEBHOOK_URL
+                  value: ${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }}
               start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
               buildenv: []
             context:

@@ -4,6 +4,7 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +17,9 @@ import lombok.NoArgsConstructor;
 public class Feedback extends Interaction{
 
     @Column(name = "field", nullable = true)
-    private int field;
+//    @Min(1)  // 최소값 1
+    @Max(5)  // 최대값 5
+    private int field;  // 별점
 
     @Builder
     public Feedback(String content, Member member, int field) {

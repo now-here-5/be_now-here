@@ -1,5 +1,4 @@
 package com.now_here5.now_here.global.config;
-import com.now_here5.now_here.domain.member.entity.role.RoleName;
 import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandler;
 import com.now_here5.now_here.global.security.exception.CustomAuthenticationEntryPoint;
 import com.now_here5.now_here.global.security.filter.CustomAuthFilter;
@@ -30,7 +29,6 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -49,13 +47,17 @@ public class SecurityConfig {
                                 // 매니저 대상
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
-                                
+                                .requestMatchers("/slack/**").permitAll()
+
                                 // 비유저 대상
-                                .requestMatchers(HttpMethod.GET, "/event/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/register/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/login/**").permitAll()
+
+                                // 어드민 대상
+                                .requestMatchers("/admin/**").permitAll()
+
 
 
                                 // 나머지는 인증 필요.
@@ -86,13 +88,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin(clientOriginUrl); // 허용할 클라이언트 도메인 설정
-        configuration.addAllowedMethod("GET"); // 허용할 메서드 설정
-        configuration.addAllowedMethod("POST");
-        configuration.setAllowCredentials(true); // 자격 증명 허용 (예: 쿠키 등)
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
+        configuration.setAllowCredentials(false); // 자격 증명 허용
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }
+
