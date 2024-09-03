@@ -52,12 +52,8 @@ public class MemberAuthService {
 
             return LoginResponse.builder()
                     .token(new TokenDto(newToken))
-                    .eventListResponse(
-                            eventListToDto.converter(
-                                    eventRepository.getSignedEventsByMember(true,tempMember.getId())
-                            )
-                    )
                     .build();
+
         } catch (Exception e) {
             log.error("login Error ={}", e.getMessage());
             return null;
