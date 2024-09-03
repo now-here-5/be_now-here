@@ -101,13 +101,14 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+
     @Override
     public void initializePopupValue() {
         try {
-            em.createNativeQuery("UPDATE Member SET popupCount = " +
+            em.createQuery("UPDATE Member SET popupCount = " +
                             "CASE " +
-                            "WHEN popupCount < 0 " +
-                            "THEN -1 ELSE 1 " +
+                            "WHEN popupCount <= 0 " +
+                            "THEN 0 ELSE 1 " +
                             "END")
             .executeUpdate();
         } catch (Exception e) {

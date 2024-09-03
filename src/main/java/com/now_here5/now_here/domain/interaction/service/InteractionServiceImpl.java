@@ -127,7 +127,7 @@ public class InteractionServiceImpl implements InteractionService {
 */
 
 
-
+    @Transactional
     @Override
     public boolean getFeedbackStatus() {
 
@@ -142,7 +142,7 @@ public class InteractionServiceImpl implements InteractionService {
             Member member = memberRepository.findMemberById(memberId);
             if (member == null) {
                 log.warn("Member not found for ID: {}", memberId);
-                return false;
+                throw new RuntimeException("Member not found for ID: " + memberId);
             }
 
             int currentCount = member.getPopupCount();
