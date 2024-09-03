@@ -2,6 +2,8 @@
 package com.now_here5.now_here.domain.interaction.entity;
 
 import com.now_here5.now_here.domain.member.entity.Member;
+import com.now_here5.now_here.global.entity.CreatedDateAudit;
+import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @MappedSuperclass
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Interaction {
+public abstract class Interaction extends CreatedDateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

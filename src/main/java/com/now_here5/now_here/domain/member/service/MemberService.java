@@ -26,9 +26,11 @@ public interface MemberService {
 
     EventListResponse getAssignedEventsByMember();
 
+    boolean getNotificationSetting();
+
     boolean updateDescription(String description);
 
-    boolean updateNotification(boolean notification);
+    boolean updateNotificationSetting(boolean notification);
 
     boolean updateNickName(String nickName);
 

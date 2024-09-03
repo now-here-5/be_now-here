@@ -21,6 +21,7 @@ public class Feedback extends Interaction{
     @Max(5)  // 최대값 5
     private int field;  // 별점
 
+
     @Builder
     public Feedback(String content, Member member, int field) {
         super(content, member);

@@ -21,5 +21,7 @@ public interface MemberRepository {
 
     void save(Member activeMember);
 
+    void initializePopupValue();
+
     List<Member> findMembersByMemberIdAndEventIdAndGender(Long memberId, Long eventId, Gender gender);
 }
