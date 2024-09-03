@@ -147,6 +147,18 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
+    public boolean getNotificationSetting() {
+        try{
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            return member.isNotiSetting();
+        }catch (Exception e){
+            log.error("Failed to get notification setting: {}", e.getMessage());
+            throw  new RuntimeException("Failed to get notification setting");
+        }
+    }
+
     @Transactional
     @Override
     public boolean updateDescription(String description) {
@@ -165,11 +177,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public boolean updateNotification(boolean notification) {
+    public boolean updateNotificationSetting(boolean notiSetting) {
         try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
-            member.updateNotification(notification);
+            member.updateNotiSetting(notiSetting);
 
             return true;
         } catch (Exception e) {
