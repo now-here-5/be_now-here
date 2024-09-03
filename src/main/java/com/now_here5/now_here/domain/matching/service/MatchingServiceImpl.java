@@ -197,10 +197,10 @@ public class MatchingServiceImpl implements MatchingService {
     public List<NotificationResponse> getNotificationList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Long memberId = authMember.getMemberId();
-
+        Member member = memberRepository.findActiveMemberById(memberId);
         try {
             List<MatchingWithNicknameResponse> matchings = matchingRepository.findMatchingWithNickname(memberId);
-
+            member.updateUnreadNotiCount(0);
             return matchings.stream()
                     .map(matching -> createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
                     .collect(Collectors.toList());
@@ -218,9 +218,6 @@ public class MatchingServiceImpl implements MatchingService {
         Member member = memberRepository.findActiveMemberById(memberId);
         try {
             Integer unreadNotiCount = member.getUnreadNotiCount();
-            member.updateUnreadNotiCount(0);
-            memberRepository.save(member);
-
             return unreadNotiCount;
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
