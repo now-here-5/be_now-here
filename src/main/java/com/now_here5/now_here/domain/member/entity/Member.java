@@ -3,7 +3,6 @@ package com.now_here5.now_here.domain.member.entity;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
-import com.now_here5.now_here.global.entity.CreatedDateAudit;
 import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -34,7 +33,7 @@ public class Member extends FullAudit {
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "token", nullable = true, unique = true)
+    @Column(name = "token", unique = true)
     private String token;
 
     @Column(name = "birthday", nullable = false)

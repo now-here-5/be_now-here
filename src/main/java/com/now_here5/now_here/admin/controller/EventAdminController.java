@@ -31,7 +31,6 @@ import java.util.List;
 public class EventAdminController {
     private final EventService eventService;
     private final EventSchedulerService eventSchedulerService;
-    private final CustomXOR customXOR;
 
     @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
     @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))

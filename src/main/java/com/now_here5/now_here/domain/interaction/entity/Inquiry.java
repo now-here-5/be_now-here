@@ -1,14 +1,11 @@
 package com.now_here5.now_here.domain.interaction.entity;
 
 import com.now_here5.now_here.domain.member.entity.Member;
-import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,10 +14,10 @@ import java.time.LocalDateTime;
 @Table(name = "inquiry")
 public class Inquiry extends Interaction {
 
-    @Column(name = "phone_number", nullable = true)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "answer", nullable = true)
+    @Column(name = "answer")
     private String answer;
 
     @Column(name = "answered_at")
