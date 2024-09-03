@@ -109,7 +109,8 @@ public enum ResponseCode {
     EVENTSCHEDULER_QUERY_FAIL(400, "E14", "이벤트 스케줄러 조회에 실패했습니다."),
     EVENT_UPDATE_SUCCESS(200, "E15", "이벤트 업데이트에 성공했습니다."),
     EVENT_UPDATE_FAIL(400, "E15", "이벤트 업데이트에 실패했습니다."),
-    
+    EVENT_QUERY_BY_TOKEN_SUCCESS(200, "E16", "이벤트 토큰으로 조회에 성공했습니다."),
+    EVENT_QUERY_BY_TOKEN_FAIL(400, "E16", "이벤트 토큰으로 조회에 실패했습니다."),
 
     // Matching
     BANNER_LIST_QUERY_SUCCESS(200, "M001", "배너 목록 조회에 성공했습니다."),
