@@ -84,8 +84,6 @@ public class MatchingController {
         }
     }
 
-
-
     @Operation(summary = "매칭 요약 조회", description = "매칭 요약 정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "S001 - 요약 정보 조회 성공")
     @ApiResponse(responseCode = "400", description = "S001 - 요약 정보 조회 실패")
