@@ -7,7 +7,6 @@ import com.now_here5.now_here.domain.event.service.EventSchedulerService;
 import com.now_here5.now_here.domain.event.service.EventService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
-import com.now_here5.now_here.global.util.CustomXOR;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

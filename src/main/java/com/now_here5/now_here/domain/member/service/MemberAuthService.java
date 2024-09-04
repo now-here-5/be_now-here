@@ -2,11 +2,9 @@ package com.now_here5.now_here.domain.member.service;
 
 
 import com.now_here5.now_here.domain.event.converter.EventListToDto;
-import com.now_here5.now_here.domain.event.dto.EventResponse;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
 import com.now_here5.now_here.domain.member.dto.LoginResponse;
 import com.now_here5.now_here.domain.member.entity.Member;
-import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.domain.member.dto.LoginRequest;
