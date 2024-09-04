@@ -1,10 +1,17 @@
 package com.now_here5.now_here.domain.matching.service;
+
+import com.now_here5.now_here.domain.matching.entity.MatchingStatistics;
+import com.now_here5.now_here.domain.matching.repository.MatchingStatisticsRepository;
 import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.Member;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
+
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,45 +19,55 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor  // 생성자 주입을 위한 Lombok 애노테이션
 public class PreferenceBasedMBTIMatching {
+
+    private final MatchingStatisticsRepository matchingStatisticsRepository;
+
     // 남성과 여성 각각의 MBTI 선호도를 저장하는 ConcurrentHashMap
-    private final Map<MBTI, Map<MBTI, Double>> malePreferences;
-    private final Map<MBTI, Map<MBTI, Double>> femalePreferences;
+    private final Map<MBTI, Map<MBTI, Double>> malePreferences = new ConcurrentHashMap<>();
+    private final Map<MBTI, Map<MBTI, Double>> femalePreferences = new ConcurrentHashMap<>();
 
-    // 생성자에서 ConcurrentHashMap으로 초기화
-    public PreferenceBasedMBTIMatching() {
-        malePreferences = new ConcurrentHashMap<>();
-        femalePreferences = new ConcurrentHashMap<>();
-        initializeWeights();  // 초기 가중치 설정 메서드 호출
-    }
-
-    // 가중치 초기화를 ConcurrentHashMap으로 진행
-    private void initializeWeights() {
+    @PostConstruct
+    public void initializeWeights() {
         MBTI[] mbtiTypes = MBTI.values();
+
+        // DB에서 기존 저장된 가중치 불러오기
         for (MBTI mbti : mbtiTypes) {
             malePreferences.putIfAbsent(mbti, new ConcurrentHashMap<>());
             femalePreferences.putIfAbsent(mbti, new ConcurrentHashMap<>());
+
+            // 남성에 대한 가중치 불러오기
+            List<MatchingStatistics> maleStatistics = matchingStatisticsRepository.findByUserGenderAndUserMbti(Gender.MALE, mbti);
+            for (MatchingStatistics stat : maleStatistics) {
+                malePreferences.get(mbti).put(stat.getMatchedMbti(), stat.getWeight());
+            }
+
+            // 여성에 대한 가중치 불러오기
+            List<MatchingStatistics> femaleStatistics = matchingStatisticsRepository.findByUserGenderAndUserMbti(Gender.FEMALE, mbti);
+            for (MatchingStatistics stat : femaleStatistics) {
+                femalePreferences.get(mbti).put(stat.getMatchedMbti(), stat.getWeight());
+            }
+
+            // 없는 경우 기본값으로 0.5를 설정
             for (MBTI otherMbti : mbtiTypes) {
-                malePreferences.get(mbti).put(otherMbti, 0.5);
-                femalePreferences.get(mbti).put(otherMbti, 0.5);
+                malePreferences.get(mbti).putIfAbsent(otherMbti, 0.5);
+                femalePreferences.get(mbti).putIfAbsent(otherMbti, 0.5);
             }
         }
     }
 
     // 특정 MBTI와 성별에 대한 선호도 점수를 반환하는 메서드
     public double getPreferenceScore(MBTI userMbti, MBTI potentialMatchMbti, Gender gender) {
-        // 성별에 따라 남성 또는 여성의 선호도 맵에서 값을 가져옴
-        Map<MBTI, Map<MBTI, Double>> preferences = gender == Gender.MALE ? malePreferences : femalePreferences;
-
-        preferences.putIfAbsent(userMbti, new HashMap<>());  // 성별에 맞는 사용자 MBTI가 없을 경우 새로 추가
+        Map<MBTI, Map<MBTI, Double>> preferences = (gender == Gender.MALE) ? malePreferences : femalePreferences;
+        preferences.putIfAbsent(userMbti, new HashMap<>());
         return preferences.get(userMbti).getOrDefault(potentialMatchMbti, 0.5);
     }
 
     // 매칭 성공 여부에 따라 선호도 가중치를 업데이트하는 메서드
     public void updatePreferences(MBTI userMbti, MBTI matchedMbti, Gender gender, boolean success) {
-        // 성별에 따라 남성 또는 여성의 선호도 맵에서 값을 가져옴
-        Map<MBTI, Map<MBTI, Double>> preferences = gender == Gender.MALE ? malePreferences : femalePreferences;
-        preferences.putIfAbsent(userMbti, new HashMap<>());  // NullPointerException 방지
+        Map<MBTI, Map<MBTI, Double>> preferences = (gender == Gender.MALE) ? malePreferences : femalePreferences;
+        preferences.putIfAbsent(userMbti, new HashMap<>());
 
         // 동적 조정법 : 가중치가 극단에 갈수록 안정성을 높임
         double baseAdjustment = 0.1;
@@ -72,34 +89,24 @@ public class PreferenceBasedMBTIMatching {
 
         for (PotentialMatch match : potentialMatches) {
             if (match.getMbti() == null || match.getGender() == null) {
-                continue;  // 매칭 상대의 MBTI나 성별이 null일 경우 해당 매칭을 건너뜀
+                continue;
             }
 
-            // 사용자와 잠재적 매칭 상대의 선호도 점수를 계산
             double userPref = getPreferenceScore(userMbti, match.getMbti(), userGender);
             double matchPref = getPreferenceScore(match.getMbti(), userMbti, match.getGender());
-
-            // 매칭 점수를 두 선호도의 평균 대신 최소값으로 사용
-            double score = Math.min(userPref, matchPref);  // 선호도가 낮은 쪽을 기준으로 매칭 점수를 계산
+            double score = Math.min(userPref, matchPref);
             log.info("Matched score: {}", score);
-
             results.add(new MatchResult(match, score));
         }
 
-        // 점수를 기준으로 내림차순 정렬
         results.sort((a, b) -> Double.compare(b.score, a.score));
 
-        // 상위 두 개만 반환
-        return results.stream()
-                .limit(2)  // 상위 2개의 결과만 반환
-                .collect(Collectors.toList());
+        return results.stream().limit(2).collect(Collectors.toList());
     }
 
-
-
-    // 잠재적인 매칭 상대를 표현하는 내부 클래스
+    // 잠재적인 매칭 상대방을 표현하는 내부 클래스
     public static class PotentialMatch {
-        Member member;  // Member 객체를 필드로 추가
+        Member member;
 
         public PotentialMatch(Member member) {
             this.member = member;
@@ -130,8 +137,6 @@ public class PreferenceBasedMBTIMatching {
         }
     }
 
-
-
     // 매칭 결과를 표현하는 내부 클래스
     public static class MatchResult {
         @Getter
@@ -145,13 +150,7 @@ public class PreferenceBasedMBTIMatching {
 
         @Override
         public String toString() {
-            return String.format(
-                    "(MBTI: %s, Gender: %s, Score: %.2f)",
-                    match.getMbti(),  // Member 객체의 MBTI를 가져옴
-                    match.getGender(),  // Member 객체의 성별을 가져옴
-                    score
-            );
+            return String.format("(MBTI: %s, Gender: %s, Score: %.2f)", match.getMbti(), match.getGender(), score);
         }
     }
-
 }
