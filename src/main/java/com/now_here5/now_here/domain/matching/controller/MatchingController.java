@@ -73,6 +73,19 @@ public class MatchingController {
         }
     }
 
+    @PatchMapping("/reject/{senderId}")
+    public ResponseEntity<ResponseForm> rejecteLove(@PathVariable(name = "senderId") Long senderId) {
+        try {
+            matchingService.rejectLove(senderId);
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_REJECT_SUCCESS));
+        } catch (Exception e) {
+            log.error("하트 거절 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_REJECT_FAIL));
+        }
+    }
+
+
+
     @Operation(summary = "매칭 요약 조회", description = "매칭 요약 정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "S001 - 요약 정보 조회 성공")
     @ApiResponse(responseCode = "400", description = "S001 - 요약 정보 조회 실패")
