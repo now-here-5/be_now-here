@@ -53,6 +53,22 @@ public class InteractionController {
         }
     }
 
+    @Operation(summary = "팝업 상태 조회", description = "사용자에게 팝업을 뜨워야할지 판단합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "I001 - 문의 작성에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "I001 - 문의 작성에 실패했습니다.")
+    @GetMapping("/feedback/status")
+    public ResponseEntity<ResponseForm> getFeedbackStatus() {
+
+        try{
+            boolean status = interactionService.getFeedbackStatus();
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.FEEDBACK_STATUS_SUCCESS, status));
+        }catch(Exception e){
+            log.error("피드백 팝업 상태 조회 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.FEEDBACK_STATUS_FAIL));
+
+        }
+    }
+
 //    // DTO 형태로 변경
 //    @Operation(summary = "사용자의 피드백 조회", description = "사용자가 작성한 피드백을 조회합니다.")
 //    @GetMapping("/feedback/{memberId}")

@@ -14,6 +14,8 @@ public interface InteractionRepository {
 
     void saveWithdrawalReason(WithdrawalReason withdrawalReason);
 
+    boolean isFeedbackFullyWrittenToday(Long memberId);
+
     Feedback findFeedbackById(Long id);
 
     Inquiry findInquiryById(Long id);

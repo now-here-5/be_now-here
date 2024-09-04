@@ -3,7 +3,7 @@ package com.now_here5.now_here.domain.member.entity;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
-import com.now_here5.now_here.global.entity.CreatedDateAudit;
+import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,14 +26,14 @@ import java.util.List;
         @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
 })
-public class Member extends CreatedDateAudit {
+public class Member extends FullAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "token", nullable = true, unique = true)
+    @Column(name = "token", unique = true)
     private String token;
 
     @Column(name = "birthday", nullable = false)
@@ -42,7 +42,7 @@ public class Member extends CreatedDateAudit {
     @Column(name = "phone_num", nullable = false, length = 11)
     private String phoneNumber;
 
-    @Column(name = "nick_name", nullable = false, length = 8)
+    @Column(name = "nick_name", nullable = false, length = 8, unique = true)
     private String nickname;
 
     @Column(name = "password", nullable = false)
@@ -59,10 +59,10 @@ public class Member extends CreatedDateAudit {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "popupStatus", nullable = false)
-    private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
+    @Column(name = "popupCount", nullable = false)
+    private int popupCount; // 하루에 몇번이나 매칭 페이지를 조회했는지. (4번 : 팝업, null : 첫 매칭 이전, 0 : 첫 매칭 이후  )
 
-    @Column(name = "unreadNotiCount", nullable = true)
+    @Column(name = "unreadNotiCount")
     private Integer unreadNotiCount;// 읽지 않는 알림의 개수
 
     @Column(name = "noti_setting", nullable = false)
@@ -100,6 +100,7 @@ public class Member extends CreatedDateAudit {
         this.event = event;
         this.unreadNotiCount = 0;
         this.notiSetting = true;
+        this.popupCount = 0;
 
         // Add this member to the event's member list if it's not already present
         setEvent(event);
@@ -112,6 +113,14 @@ public class Member extends CreatedDateAudit {
 
     public void updateDescription(String newDescription) {
         this.description = newDescription;
+    }
+
+    public void updateNotiSetting(boolean notiSetting) {
+        this.notiSetting = notiSetting;
+    }
+
+    public int updatePopupCount(int num) {
+        return this.popupCount = num;
     }
 
     public void updateMbti(MBTI mbti) {

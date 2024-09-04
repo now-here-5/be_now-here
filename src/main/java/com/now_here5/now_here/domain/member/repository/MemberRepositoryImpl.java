@@ -101,6 +101,23 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+
+    @Override
+    public void initializePopupValue() {
+        try {
+            em.createQuery("UPDATE Member SET popupCount = " +
+                            "CASE " +
+                            "WHEN popupCount <= 0 " +
+                            "THEN 0 ELSE 1 " +
+                            "END")
+            .executeUpdate();
+        } catch (Exception e) {
+            log.error("Failed to initialize popup value: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     @Override
     public Member findMemberById(Long memberId) {
         try{

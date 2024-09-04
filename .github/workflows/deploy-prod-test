@@ -1,0 +1,95 @@
+name: Build and Deploy Spring Boot to OCI using Docker
+
+on:
+  push:
+    branches:
+      - prod-test
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2  
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+            
+      - name: Log in to OCI Registry
+        run: |
+          echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
+                              --cache-to type=local,dest=/tmp/.buildx-cache \
+                              -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest \
+                              --push .
+
+
+
+      # PostgreSQL VM 접속 및 상태 확인 단계
+      - name: Check and Start PostgreSQL on Separate VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PS_VM_IP }}
+          username: ${{ secrets.PS_VM_USERNAME }}
+          key: ${{ secrets.PS_VM_PRIVATE_KEY }}
+          script: |
+            if systemctl is-active --quiet postgresql@14-main; then
+              echo "PostgreSQL is already running."
+            else
+              echo "PostgreSQL is not running. Starting PostgreSQL..."
+              sudo systemctl start postgresql
+            fi
+
+      # 애플리케이션 VM 배포 단계
+      - name: Deploy Spring Boot on OCI VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          script: |
+            DEPLOYMENT_DIR="/home/username/app"
+            if [ ! -d "$DEPLOYMENT_DIR" ]; then
+              echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
+              mkdir -p "$DEPLOYMENT_DIR"
+            fi
+            
+            cd "$DEPLOYMENT_DIR"
+            echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+            if ! sudo docker pull ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+              echo "Failed to pull Docker image"
+              exit 1
+            fi
+            
+            sudo docker stop now-here-server || true
+            sudo docker rm now-here-server || true
+            if ! sudo docker run -d --name now-here-server -p 8080:8080 \
+            
+              -e DB_HOST=${{ secrets.OC_CT_DB_HOST }} \
+              -e DB_PORT=${{ secrets.OC_CT_DB_PORT }} \
+              -e DB_NAME=${{ secrets.OC_DB_NAME }} \
+              -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
+              -e XOR_KEY=${{ secrets.XOR_KEY }} \
+              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
+              -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
+    
+              ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+              echo "Failed to run Docker container"
+              exit 1
+            fi
+
+            # Show container logs for debugging
+            sudo docker logs now-here-server

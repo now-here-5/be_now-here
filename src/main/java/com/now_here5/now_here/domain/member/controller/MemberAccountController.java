@@ -35,8 +35,8 @@ public class MemberAccountController {
     private final CustomXOR customXOR;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
-    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -60,7 +60,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 조회", description = "개발용으로 휴대폰 번호를 사용하여 인증 코드를 조회합니다.")
-    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "200", description = "A001-D - 개발용 인증 코드를 조회했습니다.")
     @ApiResponse(responseCode = "400", description = "A001-D - 개발용 인증 코드를 조회하지 못했습니다.")
 
@@ -76,7 +76,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "닉네임 중복 확인", description = "이벤트 ID와 닉네임을 사용하여 닉네임 중복 여부를 확인합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
     @Parameter(name = "nickname", description = "닉네임", required = true, schema = @Schema(example = "john_doe"))
     @ApiResponse(responseCode = "200", description = "A002 - 사용 가능한 닉네임입니다.")
     @ApiResponse(responseCode = "400", description = "A002 - 중복된 닉네임입니다.")
@@ -95,7 +95,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
-    @Parameter(name = "notification", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증에 성공했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -113,7 +113,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "회원 등록", description = "이벤트 ID와 회원 등록 요청 정보를 사용하여 회원을 등록합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM5"))
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "회원 등록 요청",
             required = true,
@@ -121,13 +121,13 @@ public class MemberAccountController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = RegisterMemberRequest.class,
-                            requiredProperties = {"notification", "password", "nickname", "birth", "mbti", "gender", "description"}
+                            requiredProperties = {"phone", "password", "nickname", "birth", "mbti", "gender", "description"}
                     ),
                     examples = @ExampleObject(
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"notification\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )

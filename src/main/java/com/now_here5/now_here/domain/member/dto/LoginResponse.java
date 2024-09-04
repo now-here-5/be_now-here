@@ -13,5 +13,5 @@ import java.util.List;
 @Builder
 public class LoginResponse {
     private final TokenDto token;
-    private final EventListResponse eventListResponse;
+//    private final EventListResponse eventListResponse;
 }

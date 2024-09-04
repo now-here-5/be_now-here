@@ -96,16 +96,22 @@ public enum ResponseCode {
     EVENT_DELETE_LOCATION_FAIL(400, "E008", "이벤트 장소 삭제에 실패했습니다."),
     EVENT_DELETE_SUCCESS(200, "E009", "이벤트 삭제에 성공했습니다."),
     EVENT_DELETE_FAIL(400, "E009", "이벤트 삭제에 실패했습니다."),
-    LOCATION_CREATE_SUCCESS(200, "E010", "장소 생성에 성공했습니다."),
-    LOCATION_CREATE_FAIL(400, "E010", "장소 생성에 실패했습니다."),
-    LOCATION_DELETE_SUCCESS(200, "E011", "장소 삭제에 성공했습니다."),
-    LOCATION_DELETE_FAIL(400, "E011", "장소 삭제에 실패했습니다."),
-    LOCATION_QUERY_SUCCESS(200, "E012", "장소 조회에 성공했습니다."),
-    LOCATION_QUERY_FAIL(400, "E012", "장소 조회에 실패했습니다."),
-    LOCATION_LIST_QUERY_SUCCESS(200, "E013", "장소 목록 조회에 성공했습니다."),
-    LOCATION_LIST_QUERY_FAIL(400, "E013", "장소 목록 조회에 실패했습니다."),
-    EVENTSCHEDULER_QUERY_SUCCESS(200, "E014", "이벤트 스케줄러 조회에 성공했습니다."),
-    EVENTSCHEDULER_QUERY_FAIL(400, "E014", "이벤트 스케줄러 조회에 실패했습니다."),
+
+    LOCATION_CREATE_SUCCESS(200, "E10", "장소 생성에 성공했습니다."),
+    LOCATION_CREATE_FAIL(400, "E10", "장소 생성에 실패했습니다."),
+    LOCATION_DELETE_SUCCESS(200, "E11", "장소 삭제에 성공했습니다."),
+    LOCATION_DELETE_FAIL(400, "E11", "장소 삭제에 실패했습니다."),
+    LOCATION_QUERY_SUCCESS(200, "E12", "장소 조회에 성공했습니다."),
+    LOCATION_QUERY_FAIL(400, "E12", "장소 조회에 실패했습니다."),
+    LOCATION_LIST_QUERY_SUCCESS(200, "E13", "장소 목록 조회에 성공했습니다."),
+    LOCATION_LIST_QUERY_FAIL(400, "E13", "장소 목록 조회에 실패했습니다."),
+    EVENTSCHEDULER_QUERY_SUCCESS(200, "E14", "이벤트 스케줄러 조회에 성공했습니다."),
+    EVENTSCHEDULER_QUERY_FAIL(400, "E14", "이벤트 스케줄러 조회에 실패했습니다."),
+    EVENT_UPDATE_SUCCESS(200, "E15", "이벤트 업데이트에 성공했습니다."),
+    EVENT_UPDATE_FAIL(400, "E15", "이벤트 업데이트에 실패했습니다."),
+    EVENT_QUERY_BY_TOKEN_SUCCESS(200, "E16", "이벤트 토큰으로 조회에 성공했습니다."),
+    EVENT_QUERY_BY_TOKEN_FAIL(400, "E16", "이벤트 토큰으로 조회에 실패했습니다."),
+
     // Matching
     BANNER_LIST_QUERY_SUCCESS(200, "M001", "배너 목록 조회에 성공했습니다."),
     BANNER_LIST_QUERY_FAIL(400, "M001", "배너 목록 조회에 실패했습니다."),
@@ -138,8 +144,9 @@ public enum ResponseCode {
     INQUIRY_QUERY_SUCCESS(200, "I005", "INQUIRY 조회에 성공했습니다."),
     INQUIRY_QUERY_FAIL(400, "I005", "INQUIRY 조회에 실패했습니다."),
     WITHDRAWAL_REASON_QUERY_SUCCESS(200, "I006", "WITHDRAWAL_REASON 조회에 성공했습니다."),
-    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다.");
-
+    WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다."),
+    FEEDBACK_STATUS_FAIL(400, "I007", "피드백 상태 조회에 실패했습니다."),
+    FEEDBACK_STATUS_SUCCESS(200, "I007", "피드백 상태 조회에 성공했습니다.");
     // field
     private final int status;
     private final String code;
