@@ -10,7 +10,9 @@ public interface MatchingService {
     void sendLove(Long receiverId);
     void receiveLove(Long senderId);
 
+    void rejectLove(Long senderId);
     List<SummaryResponse> getSummary();
+
     List<SenderResponse> getSenderList();
 
     List<ReceiverResponse> getReceiverList();
