@@ -5,7 +5,7 @@ import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
-import com.now_here5.now_here.domain.matching.entity.PreferenceBasedMBTIMatching;
+import com.now_here5.now_here.domain.matching.service.PreferenceBasedMBTIMatching;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
 import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
@@ -33,7 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
     private final EventListToDto eventListToDto;
-
+    private final PreferenceBasedMBTIMatching matcher;
 
     @Override
     public boolean sendCode(String phone) {

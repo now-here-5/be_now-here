@@ -1,4 +1,4 @@
-package com.now_here5.now_here.domain.matching.entity;
+package com.now_here5.now_here.domain.matching.service;
 import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.Member;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -88,7 +89,10 @@ public class PreferenceBasedMBTIMatching {
         // 점수를 기준으로 내림차순 정렬
         results.sort((a, b) -> Double.compare(b.score, a.score));
 
-        return results;
+        // 상위 두 개만 반환
+        return results.stream()
+                .limit(2)  // 상위 2개의 결과만 반환
+                .collect(Collectors.toList());
     }
 
 

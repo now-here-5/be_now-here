@@ -3,7 +3,6 @@ package com.now_here5.now_here.domain.matching.service;
 import com.now_here5.now_here.domain.matching.converter.MatchingListToDto;
 import com.now_here5.now_here.domain.matching.dto.*;
 import com.now_here5.now_here.domain.matching.entity.Matching;
-import com.now_here5.now_here.domain.matching.entity.PreferenceBasedMBTIMatching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
