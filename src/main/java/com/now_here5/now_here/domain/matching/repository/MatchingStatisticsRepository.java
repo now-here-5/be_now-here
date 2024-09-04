@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface MatchingStatisticsRepository extends JpaRepository<MatchingStatistics, Long> {
@@ -17,7 +16,7 @@ public interface MatchingStatisticsRepository extends JpaRepository<MatchingStat
     boolean existsByDate(LocalDate date);
 
     // 특정 날짜의 매칭 통계를 찾는 메서드
-    Optional<MatchingStatistics> findByDate(LocalDate date);
+    List<MatchingStatistics> findByDate(LocalDate date);
 
     // 모든 매칭 통계를 날짜별로 정렬해서 가져오는 메서드 (선택 사항)
     // 기본적으로 JpaRepository가 제공하는 findAll() 메서드를 날짜별로 정렬해 사용할 수 있음

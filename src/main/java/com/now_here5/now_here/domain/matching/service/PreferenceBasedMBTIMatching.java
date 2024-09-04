@@ -32,30 +32,40 @@ public class PreferenceBasedMBTIMatching {
     public void initializeWeights() {
         MBTI[] mbtiTypes = MBTI.values();
 
-        // DB에서 기존 저장된 가중치 불러오기
+        // 어제의 날짜를 구함
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+
+        // DB에서 어제 날짜의 가중치만 불러오기
+        List<MatchingStatistics> yesterdayStatistics = matchingStatisticsRepository.findByDate(yesterday);
+
+        // 남성과 여성의 가중치 맵 초기화
         for (MBTI mbti : mbtiTypes) {
             malePreferences.putIfAbsent(mbti, new ConcurrentHashMap<>());
             femalePreferences.putIfAbsent(mbti, new ConcurrentHashMap<>());
+        }
 
-            // 남성에 대한 가중치 불러오기
-            List<MatchingStatistics> maleStatistics = matchingStatisticsRepository.findByUserGenderAndUserMbti(Gender.MALE, mbti);
-            for (MatchingStatistics stat : maleStatistics) {
-                malePreferences.get(mbti).put(stat.getMatchedMbti(), stat.getWeight());
+        // 어제 데이터를 메모리에서 처리하여 남성 및 여성에 대한 가중치 설정
+        for (MatchingStatistics stat : yesterdayStatistics) {
+            MBTI userMbti = stat.getUserMbti();
+            MBTI matchedMbti = stat.getMatchedMbti();
+            double weight = stat.getWeight();
+
+            if (stat.getUserGender() == Gender.MALE) {
+                malePreferences.get(userMbti).put(matchedMbti, weight);
+            } else if (stat.getUserGender() == Gender.FEMALE) {
+                femalePreferences.get(userMbti).put(matchedMbti, weight);
             }
+        }
 
-            // 여성에 대한 가중치 불러오기
-            List<MatchingStatistics> femaleStatistics = matchingStatisticsRepository.findByUserGenderAndUserMbti(Gender.FEMALE, mbti);
-            for (MatchingStatistics stat : femaleStatistics) {
-                femalePreferences.get(mbti).put(stat.getMatchedMbti(), stat.getWeight());
-            }
-
-            // 없는 경우 기본값으로 0.5를 설정
+        // 없는 경우 기본값으로 0.5를 설정
+        for (MBTI mbti : mbtiTypes) {
             for (MBTI otherMbti : mbtiTypes) {
                 malePreferences.get(mbti).putIfAbsent(otherMbti, 0.5);
                 femalePreferences.get(mbti).putIfAbsent(otherMbti, 0.5);
             }
         }
     }
+
 
     // 특정 MBTI와 성별에 대한 선호도 점수를 반환하는 메서드
     public double getPreferenceScore(MBTI userMbti, MBTI potentialMatchMbti, Gender gender) {
