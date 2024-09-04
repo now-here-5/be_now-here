@@ -91,38 +91,6 @@ public class MemberInfoController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.DESCRIPTION_UPDATE_FAIL));
     }
 
-    @Operation(summary = "알림 설정 업데이트", description = "회원의 알림 설정을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "M009 - 알림 설정 변경에 성공했습니다.")
-    @ApiResponse(responseCode = "400", description = "M009 - 알림 설정 변경에 실패했습니다.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "알림 설정 업데이트 요청",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(
-                            implementation = UpdateNotificationRequest.class,
-                            requiredProperties = {"notification"}
-                    ),
-                    examples = @ExampleObject(
-                            description = "UpdateNotificationRequestExample",
-                            name = "UpdateNotificationRequestExample",
-                            summary = "Example of UpdateNotificationRequest",
-                            value = "{\"notification\": true}"
-                    )
-            )
-    )
-
-    @PatchMapping("/update/notification")
-    public ResponseEntity<ResponseForm> updateNotification(
-            @RequestBody UpdateNotificationRequest updateNotificationRequest) {
-
-        boolean updated = memberService.updateNotification(updateNotificationRequest.isNotification());
-
-        return updated ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_SUCCESS)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_FAIL));
-    }
-
     @Operation(summary = "닉네임 업데이트", description = "회원의 닉네임을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "M008 - 닉네임 업데이트에 성공했습니다.")
     @ApiResponse(responseCode = "400", description = "M008 - 닉네임 업데이트에 실패했습니다.")

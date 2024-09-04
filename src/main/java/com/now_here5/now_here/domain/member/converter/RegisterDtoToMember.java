@@ -27,7 +27,6 @@ public class RegisterDtoToMember {
                 .password(encryptedPassword)
                 .nickname(registerRequest.getNickname())
                 .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))
-                .notification(true)
                 .active(true)
                 .mbti(MBTI.valueOf(registerRequest.getMbti().toUpperCase()))
                 .token(tokenGenerator.generateUniqueToken())

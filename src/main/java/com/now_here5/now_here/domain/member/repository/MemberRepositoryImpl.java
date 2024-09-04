@@ -128,7 +128,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                     .setParameter("memberId", memberId)
                     .setParameter("eventId", eventId)
                     .setParameter("gender", gender)
-                    .setMaxResults(2)  // 최대 2명 선택
+                    .setMaxResults(10)  // 최대 2명 선택
                     .getResultList();
         } catch (Exception e) {
             log.error("Failed to find members by memberId, eventId and gender: {}", e.getMessage());

@@ -28,8 +28,6 @@ public interface MemberService {
 
     boolean updateDescription(String description);
 
-    boolean updateNotification(boolean notification);
-
     boolean updateNickName(String nickName);
 
     boolean updateMbti(String mbti);

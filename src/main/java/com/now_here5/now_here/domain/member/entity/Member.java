@@ -3,7 +3,7 @@ package com.now_here5.now_here.domain.member.entity;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
-import com.now_here5.now_here.global.entity.FullAudit;
+import com.now_here5.now_here.global.entity.CreatedDateAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,7 +26,7 @@ import java.util.List;
         @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
 })
-public class Member extends FullAudit  {
+public class Member extends CreatedDateAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class Member extends FullAudit  {
     @Column(name = "phone_num", nullable = false, length = 11)
     private String phoneNumber;
 
-    @Column(name = "nick_name", nullable = false, length = 8, unique = true)
+    @Column(name = "nick_name", nullable = false, length = 8)
     private String nickname;
 
     @Column(name = "password", nullable = false)
@@ -58,9 +58,6 @@ public class Member extends FullAudit  {
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "notification", nullable = false)
-    private boolean notification;
 
     @Column(name = "popupStatus", nullable = false)
     private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
@@ -89,7 +86,7 @@ public class Member extends FullAudit  {
 
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                  Gender gender, MBTI mbti, String description, boolean notification, boolean active,
+                  Gender gender, MBTI mbti, String description, boolean active,
                   Event event) {
         this.token = token;
         this.birthday = birthday;
@@ -99,7 +96,6 @@ public class Member extends FullAudit  {
         this.gender = gender;
         this.mbti = mbti;
         this.description = description;
-        this.notification = notification;
         this.active = active;
         this.event = event;
         this.unreadNotiCount = 0;
@@ -116,10 +112,6 @@ public class Member extends FullAudit  {
 
     public void updateDescription(String newDescription) {
         this.description = newDescription;
-    }
-
-    public void updateNotification(boolean newNotification) {
-        this.notification = newNotification;
     }
 
     public void updateMbti(MBTI mbti) {

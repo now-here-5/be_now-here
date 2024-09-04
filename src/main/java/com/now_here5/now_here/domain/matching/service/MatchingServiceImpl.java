@@ -3,6 +3,7 @@ package com.now_here5.now_here.domain.matching.service;
 import com.now_here5.now_here.domain.matching.converter.MatchingListToDto;
 import com.now_here5.now_here.domain.matching.dto.*;
 import com.now_here5.now_here.domain.matching.entity.Matching;
+import com.now_here5.now_here.domain.matching.entity.PreferenceBasedMBTIMatching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
@@ -31,6 +32,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
     private final SlackNotificationService slackNotificationService;
+    private final PreferenceBasedMBTIMatching matcher = new PreferenceBasedMBTIMatching();
 
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
@@ -79,6 +81,10 @@ public class MatchingServiceImpl implements MatchingService {
             matching.setStatus(Status.ACCEPTED);
             matchingRepository.update(matching);
 
+            // 선호도 업데이트
+            matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
+            matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
+
             // receiver / sender에게 매칭 알림 전송
             String rMessage = String.format("%s님과 매칭되었습니다.", sender.getNickname());
             slackNotificationService.sendNotification(rMessage);
@@ -94,6 +100,7 @@ public class MatchingServiceImpl implements MatchingService {
             throw new RuntimeException("Failed to receive love", e);
         }
     }
+
 
     @Override
     public List<SummaryResponse> getSummary() {
@@ -197,10 +204,10 @@ public class MatchingServiceImpl implements MatchingService {
     public List<NotificationResponse> getNotificationList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Long memberId = authMember.getMemberId();
-
+        Member member = memberRepository.findActiveMemberById(memberId);
         try {
             List<MatchingWithNicknameResponse> matchings = matchingRepository.findMatchingWithNickname(memberId);
-
+            member.updateUnreadNotiCount(0);
             return matchings.stream()
                     .map(matching -> createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
                     .collect(Collectors.toList());
@@ -217,11 +224,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long memberId = authMember.getMemberId();
         Member member = memberRepository.findActiveMemberById(memberId);
         try {
-            Integer unreadNotiCount = member.getUnreadNotiCount();
-            member.updateUnreadNotiCount(0);
-            memberRepository.save(member);
-
-            return unreadNotiCount;
+            return member.getUnreadNotiCount();
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
             return 0;
