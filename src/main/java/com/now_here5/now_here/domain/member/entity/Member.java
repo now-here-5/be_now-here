@@ -42,7 +42,7 @@ public class Member extends FullAudit {
     @Column(name = "phone_num", nullable = false, length = 11)
     private String phoneNumber;
 
-    @Column(name = "nick_name", nullable = false, length = 8, unique = true)
+    @Column(name = "nick_name", nullable = false, length = 8)
     private String nickname;
 
     @Column(name = "password", nullable = false)
