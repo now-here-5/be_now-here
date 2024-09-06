@@ -20,8 +20,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         try{
             return em.createQuery("select m from Member m " +
                             "join fetch m.event " +
-                            "where m.phoneNumber = :phoneNumber " +
-                            "and m.active = true", Member.class)
+                            "where m.phoneNumber = :phoneNumber " , Member.class)
                     .setParameter("phoneNumber", phoneNumber)
                     .getResultList();
         }catch (Exception e){
