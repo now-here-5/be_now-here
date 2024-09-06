@@ -32,6 +32,7 @@ jobs:
           echo "::set-output name=image-sha::${{ github.sha }}"
 
       - name: Upload Docker Image Artifact
+        id: upload-artifact
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
@@ -92,27 +93,31 @@ jobs:
           key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
           script: |
             DEPLOYMENT_DIR="/home/username/app"
+
+            # Check if the deployment directory exists; create it if it does not
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
               mkdir -p "$DEPLOYMENT_DIR"
             fi
-            
-            cd $DEPLOYMENT_DIR
-            
-            # Docker 이미지 로드
-            if ! sudo docker load -i server-image.tar; then
-              echo "Failed to load Docker image"
-              exit 1
-            fi
-            
+
+            # Move Docker image to the deployment directory
+            mv server-image.tar "$DEPLOYMENT_DIR"
+
+            # Move to the deployment directory
             cd "$DEPLOYMENT_DIR"
+
             # Verify if the Docker image file exists
             if [ ! -f "server-image.tar" ]; then
               echo "Docker image file server-image.tar not found in $DEPLOYMENT_DIR"
               exit 1
             fi
-            
-            
+
+            # Docker 이미지 로드
+            if ! sudo docker load -i server-image.tar; then
+              echo "Failed to load Docker image"
+              exit 1
+            fi
+
             # 컨테이너 실행
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
@@ -129,5 +134,6 @@ jobs:
               echo "Failed to run Docker container"
               exit 1
             fi
+
             # Show container logs for debugging
             sudo docker logs now-here-server
