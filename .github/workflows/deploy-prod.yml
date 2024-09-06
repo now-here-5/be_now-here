@@ -99,8 +99,14 @@ jobs:
 
             cd "$DEPLOYMENT_DIR"
 
+            # Verify if the Docker image file exists
+            if [ ! -f "server-image.tar" ]; then
+              echo "Docker image file server-image.tar not found in $DEPLOYMENT_DIR"
+              exit 1
+            fi
+
             # Docker 이미지 로드
-            if ! sudo docker load -i /home/username/server-image.tar; then
+            if ! sudo docker load -i server-image.tar; then
               echo "Failed to load Docker image"
               exit 1
             fi
