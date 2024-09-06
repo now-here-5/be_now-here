@@ -3,7 +3,7 @@ name: Build and Deploy Spring Boot to OCI using Docker
 on:
   push:
     branches:
-      - infra/24-unauthorized
+      - prod
 
 jobs:
   build-and-deploy:
