@@ -1,5 +1,5 @@
 # 1. JDK 17 베이스 이미지 사용
-FROM eclipse-temurin:17-jdk-alpine as build
+FROM eclipse-temurin:17-jdk-alpine AS build
 
 # 2. 작업 디렉토리 설정
 WORKDIR /app
