@@ -69,12 +69,13 @@ jobs:
             fi
             
             cd "$DEPLOYMENT_DIR"
+  
             
             # GitHub Container Registry 로그인
             echo ${{ secrets.GHP_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
             # Docker 이미지 Pull
-            if ! sudo docker pull ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}; then
+            if ! sudo docker pull --no-cache ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}; then
               echo "Failed to pull Docker image"
               exit 1
             fi
