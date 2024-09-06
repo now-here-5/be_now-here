@@ -3,7 +3,7 @@ name: Build and Deploy Spring Boot to OCI using Docker
 on:
   push:
     branches:
-      - prod
+      - infra/24-unauthorized
 
 jobs:
   build-and-deploy:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -23,19 +23,17 @@ jobs:
           key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
-            
-      - name: Log in to OCI Registry
+
+      - name: Log in to GitHub Container Registry
         run: |
-          echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+          echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build and Push Docker Image
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
                               --cache-to type=local,dest=/tmp/.buildx-cache \
-                              -t ${{ secrets.OCIR_REPOSITORY_URL }}:latest \
+                              -t ghcr.io/${{ github.repository }}:latest \
                               --push .
-
-
 
       # PostgreSQL VM 접속 및 상태 확인 단계
       - name: Check and Start PostgreSQL on Separate VM
@@ -67,8 +65,9 @@ jobs:
             fi
             
             cd "$DEPLOYMENT_DIR"
-            echo "${{ secrets.OCIR_AUTH_TOKEN }}" | docker login ap-chuncheon-1.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
-            if ! sudo docker pull ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+            
+            echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            if ! docker pull ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to pull Docker image"
               exit 1
             fi
@@ -76,7 +75,6 @@ jobs:
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server -p 8080:8080 \
-            
               -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
@@ -85,8 +83,7 @@ jobs:
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-    
-              ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
+              ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1
             fi
