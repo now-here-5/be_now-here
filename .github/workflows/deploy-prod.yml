@@ -35,7 +35,7 @@ jobs:
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
                               --cache-to type=local,dest=/tmp/.buildx-cache \
-                              -t ghcr.io/${{ github.repository }}/server-image:${{ github.sha }} \
+                              -t ghcr.io/${{ github.repository }}/server-image:lastest \
                               --push .
 
 
@@ -70,14 +70,11 @@ jobs:
             
             cd "$DEPLOYMENT_DIR"
 
-            sudo docker logout ghcr.io
-            sudo rm ~/.docker/config.json
-            
             # GitHub Container Registry 로그인
             echo ${{ secrets.GHP_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
             # Docker 이미지 Pull
-            if ! sudo docker pull ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}; then
+            if ! sudo docker pull ghcr.io/${{ github.repository }}/server-image:lastest; then
               echo "Failed to pull Docker image"
               exit 1
             fi
@@ -93,7 +90,7 @@ jobs:
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-              ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}; then
+              ghcr.io/${{ github.repository }}/server-image:lastest; then
               echo "Failed to run Docker container"
               exit 1
             fi
