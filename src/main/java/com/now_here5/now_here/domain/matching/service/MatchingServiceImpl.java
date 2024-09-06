@@ -254,7 +254,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long memberId = authMember.getMemberId();
         Member member = memberRepository.findActiveMemberById(memberId);
         try {
-            return member.getUnreadNotiCount();
+              return member.getUnreadNotiCount();
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
             return 0;
