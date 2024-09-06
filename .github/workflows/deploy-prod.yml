@@ -24,18 +24,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      - name: Log in to Github Container Registry
-        uses : docker/login-action@v2
-        with :
-          registry : ghcr.io
-          username : ${{ github.actor}}
-          password : ${{sercrets.GHP_TOKEN }}
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
 
       - name: Build and Push Docker Image
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
                               --cache-to type=local,dest=/tmp/.buildx-cache \
-                              -t ${{ github.repository }}/server-image:latest \
+                              -t ghcr.io/${{ github.repository }}:latest \
                               --push .
 
 
@@ -70,11 +69,9 @@ jobs:
             
             cd "$DEPLOYMENT_DIR"
             
-            # GitHub Container Registry 로그인
-            echo ${{ secrets.GHP_TOKEN  }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            # Docker 이미지 Pull
-            if ! sudo docker pull ghcr.io/${{github.repository}}/server-image:latest; then
+
+            echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            if ! docker pull ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to pull Docker image"
               exit 1
             fi
@@ -90,7 +87,7 @@ jobs:
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-              ${{github.repository}}/server-image:latest; then
+              ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1
             fi
