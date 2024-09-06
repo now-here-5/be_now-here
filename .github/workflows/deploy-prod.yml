@@ -6,8 +6,9 @@ on:
       - infra/24-unauthorized
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,54 +24,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      - name: Build Docker Image
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and Push Docker Image
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
                               --cache-to type=local,dest=/tmp/.buildx-cache \
-                              -t server-image:${{ github.sha }} \
-                              --output type=docker,dest=server-image.tar .
-          echo "::set-output name=image-sha::${{ github.sha }}"
+                              -t ghcr.io/${{ github.repository }}:latest \
+                              --push .
 
-      - name: Upload Docker Image Artifact
-        id: upload-artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-image
-          path: server-image.tar
-
-  push-to-registry:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Download Docker Image Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHP_TOKEN }}
-
-      - name: Load and Push Docker Image to GitHub Container Registry
-        run: |
-          # Load the image from the artifact
-          docker load -i server-image.tar
-          # Tag and push the image
-          docker tag server-image:${{ github.sha }} ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository }}/server-image:${{ github.sha }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Download Docker Image Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
-
+      # PostgreSQL VM 접속 및 상태 확인 단계
       - name: Check and Start PostgreSQL on Separate VM
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -78,14 +43,15 @@ jobs:
           username: ${{ secrets.PS_VM_USERNAME }}
           key: ${{ secrets.PS_VM_PRIVATE_KEY }}
           script: |
-            if systemctl is-active --quiet postgresql; then
+            if systemctl is-active --quiet postgresql@14-main; then
               echo "PostgreSQL is already running."
             else
               echo "PostgreSQL is not running. Starting PostgreSQL..."
               sudo systemctl start postgresql
             fi
 
-      - name: Deploy Spring Boot Application on OCI VM
+      # 애플리케이션 VM 배포 단계
+      - name: Deploy Spring Boot on OCI VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.OCI_VM_IP }}
@@ -93,32 +59,19 @@ jobs:
           key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
           script: |
             DEPLOYMENT_DIR="/home/username/app"
-
-            # Check if the deployment directory exists; create it if it does not
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
               mkdir -p "$DEPLOYMENT_DIR"
             fi
-
-            # Move Docker image to the deployment directory
-            mv server-image.tar "$DEPLOYMENT_DIR"
-
-            # Move to the deployment directory
+            
             cd "$DEPLOYMENT_DIR"
-
-            # Verify if the Docker image file exists
-            if [ ! -f "server-image.tar" ]; then
-              echo "Docker image file server-image.tar not found in $DEPLOYMENT_DIR"
+            
+            echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            if ! docker pull ghcr.io/${{ github.repository }}:latest; then
+              echo "Failed to pull Docker image"
               exit 1
             fi
-
-            # Docker 이미지 로드
-            if ! sudo docker load -i server-image.tar; then
-              echo "Failed to load Docker image"
-              exit 1
-            fi
-
-            # 컨테이너 실행
+            
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server -p 8080:8080 \
@@ -130,7 +83,7 @@ jobs:
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-              server-image:${{ github.sha }}; then
+              ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1
             fi
