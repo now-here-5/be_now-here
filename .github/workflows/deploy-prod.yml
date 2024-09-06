@@ -76,7 +76,6 @@ jobs:
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server -p 8080:8080 \
-            
               -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
@@ -85,7 +84,6 @@ jobs:
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-    
               ${{ secrets.OCIR_REPOSITORY_URL }}:latest; then
               echo "Failed to run Docker container"
               exit 1
