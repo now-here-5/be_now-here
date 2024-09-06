@@ -26,14 +26,14 @@ import java.util.List;
         @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
 })
-public class Member extends FullAudit  {
+public class Member extends FullAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "token", nullable = true, unique = true)
+    @Column(name = "token", unique = true)
     private String token;
 
     @Column(name = "birthday", nullable = false)
@@ -42,7 +42,7 @@ public class Member extends FullAudit  {
     @Column(name = "phone_num", nullable = false, length = 11)
     private String phoneNumber;
 
-    @Column(name = "nick_name", nullable = false, length = 8, unique = true)
+    @Column(name = "nick_name", nullable = false, length = 8)
     private String nickname;
 
     @Column(name = "password", nullable = false)
@@ -59,13 +59,10 @@ public class Member extends FullAudit  {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "notification", nullable = false)
-    private boolean notification;
+    @Column(name = "popupCount", nullable = false)
+    private int popupCount; // 하루에 몇번이나 매칭 페이지를 조회했는지. (4번 : 팝업, null : 첫 매칭 이전, 0 : 첫 매칭 이후  )
 
-    @Column(name = "popupStatus", nullable = false)
-    private int popupStatus; // 하루에 몇 번 팝업이 나왔는지
-
-    @Column(name = "unreadNotiCount", nullable = true)
+    @Column(name = "unreadNotiCount")
     private Integer unreadNotiCount;// 읽지 않는 알림의 개수
 
     @Column(name = "noti_setting", nullable = false)
@@ -89,7 +86,7 @@ public class Member extends FullAudit  {
 
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                  Gender gender, MBTI mbti, String description, boolean notification, boolean active,
+                  Gender gender, MBTI mbti, String description, boolean active,
                   Event event) {
         this.token = token;
         this.birthday = birthday;
@@ -99,11 +96,11 @@ public class Member extends FullAudit  {
         this.gender = gender;
         this.mbti = mbti;
         this.description = description;
-        this.notification = notification;
         this.active = active;
         this.event = event;
         this.unreadNotiCount = 0;
         this.notiSetting = true;
+        this.popupCount = 0;
 
         // Add this member to the event's member list if it's not already present
         setEvent(event);
@@ -118,8 +115,12 @@ public class Member extends FullAudit  {
         this.description = newDescription;
     }
 
-    public void updateNotification(boolean newNotification) {
-        this.notification = newNotification;
+    public void updateNotiSetting(boolean notiSetting) {
+        this.notiSetting = notiSetting;
+    }
+
+    public int updatePopupCount(int num) {
+        return this.popupCount = num;
     }
 
     public void updateMbti(MBTI mbti) {

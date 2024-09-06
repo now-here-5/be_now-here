@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -182,6 +184,21 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("매칭 조회 중 실패: memberId={}, status=ACCEPTED, error={}", memberId, e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Matching> findMatchingsFromYesterday() {
+        try {
+            LocalDateTime endOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+            LocalDateTime startOfDay = endOfDay.minusDays(1);
+            return em.createQuery("SELECT m FROM Matching m WHERE m.createdAt >= :startOfDay AND m.createdAt < :endOfDay", Matching.class)
+                    .setParameter("startOfDay", startOfDay)
+                    .setParameter("endOfDay", endOfDay)
+                    .getResultList();
+        } catch (Exception e) {
+            log.error("어제의 매칭 조회중 실패: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }

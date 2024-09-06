@@ -7,7 +7,6 @@ import com.now_here5.now_here.domain.event.service.EventSchedulerService;
 import com.now_here5.now_here.domain.event.service.EventService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
-import com.now_here5.now_here.global.util.CustomXOR;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +30,6 @@ import java.util.List;
 public class EventAdminController {
     private final EventService eventService;
     private final EventSchedulerService eventSchedulerService;
-    private final CustomXOR customXOR;
 
     @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
     @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
@@ -50,48 +48,49 @@ public class EventAdminController {
     }
 
     @Operation(summary = "이벤트 상세 조회", description = "이벤트 ID를 사용하여 이벤트의 세부 정보를 조회합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1"))
     @ApiResponse(responseCode = "200", description = "E005 - 이벤트 상세 조회 성공")
     @ApiResponse(responseCode = "400", description = "E006 - 이벤트 상세 조회 실패")
 
     @GetMapping("/detail/{event_id}")
     public ResponseEntity<ResponseForm> getSingleEvent(
-            @PathVariable(name = "event_id") String eventId) {
+            @PathVariable(name = "event_id") Long eventId) {
 
-        EventResponse eventDetail = eventService.getEventDetail(customXOR.decrypt(eventId));
+        EventResponse eventDetail = eventService.getEventDetail(eventId);
 
         return eventDetail != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_SUCCESS, eventDetail)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_FAIL));
     }
 
-    @Operation(summary = "이벤트 삭제", description = "이벤트 ID를 사용하여 이벤트를 삭제합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Operation(summary = "이벤트 업데이트", description = "이벤트 ID를 사용하여 이벤트를 업데이트합니다.")
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1"))
     @ApiResponse(responseCode = "200", description = "E009 - 이벤트 삭제 성공")
     @ApiResponse(responseCode = "400", description = "E010 - 이벤트 삭제 실패")
 
     @PatchMapping("/update/{event_id}")
-    public ResponseEntity<ResponseForm> deleteEvent(
-            @PathVariable(name = "event_id") String eventId,
+    public ResponseEntity<ResponseForm> updateEvent(
+            @PathVariable(name = "event_id") Long eventId,
             @RequestBody NewEventRequest request) {
-        boolean result = eventSchedulerService.updateEvent(request, customXOR.decrypt(eventId));
+
+        boolean result = eventSchedulerService.updateEvent(request, eventId);
 
         return result ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_DELETE_SUCCESS)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_DELETE_FAIL));
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_UPDATE_SUCCESS)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_UPDATE_FAIL));
     }
 
     @Operation(summary = "이벤트 종료", description = "이벤트 ID를 사용하여 이벤트를 종료합니다.")
-    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "1"))
     @ApiResponse(responseCode = "200", description = "E007 - 이벤트 종료 성공")
     @ApiResponse(responseCode = "400", description = "E008 - 이벤트 종료 실패")
 
     @DeleteMapping("/close/{event_id}")
     public ResponseEntity<ResponseForm> closeEventWithMembers(
-            @PathVariable(name = "event_id") String eventId) {
+            @PathVariable(name = "event_id") Long eventId) {
 
         try {
-            eventSchedulerService.closeEventWithMembers(customXOR.decrypt(eventId));
+            eventSchedulerService.closeEventWithMembers(eventId);
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_CLOSE_SUCCESS));
         } catch (Exception e) {
             log.error("Failed to close event: {}", e.getMessage());
@@ -100,6 +99,7 @@ public class EventAdminController {
 
     }
 
+    
     @Operation(summary = "이벤트 생성", description = "새로운 이벤트를 생성합니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "새로운 이벤트 요청",

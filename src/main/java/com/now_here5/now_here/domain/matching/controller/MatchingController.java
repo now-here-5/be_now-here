@@ -6,12 +6,9 @@ import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.response.ResponseCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +70,17 @@ public class MatchingController {
         } catch (Exception e) {
             log.error("하트 받기 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_RECEIVE_FAIL));
+        }
+    }
+
+    @PatchMapping("/reject/{senderId}")
+    public ResponseEntity<ResponseForm> rejecteLove(@PathVariable(name = "senderId") Long senderId) {
+        try {
+            matchingService.rejectLove(senderId);
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_REJECT_SUCCESS));
+        } catch (Exception e) {
+            log.error("하트 거절 중 오류 발생: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_REJECT_FAIL));
         }
     }
 

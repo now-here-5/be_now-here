@@ -20,8 +20,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         try{
             return em.createQuery("select m from Member m " +
                             "join fetch m.event " +
-                            "where m.phoneNumber = :phoneNumber " +
-                            "and m.active = true", Member.class)
+                            "where m.phoneNumber = :phoneNumber " , Member.class)
                     .setParameter("phoneNumber", phoneNumber)
                     .getResultList();
         }catch (Exception e){
@@ -101,6 +100,23 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+
+    @Override
+    public void initializePopupValue() {
+        try {
+            em.createQuery("UPDATE Member SET popupCount = " +
+                            "CASE " +
+                            "WHEN popupCount <= 0 " +
+                            "THEN 0 ELSE 1 " +
+                            "END")
+            .executeUpdate();
+        } catch (Exception e) {
+            log.error("Failed to initialize popup value: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     @Override
     public Member findMemberById(Long memberId) {
         try{
@@ -128,7 +144,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                     .setParameter("memberId", memberId)
                     .setParameter("eventId", eventId)
                     .setParameter("gender", gender)
-                    .setMaxResults(2)  // 최대 2명 선택
+                    .setMaxResults(10)  // 최대 10명 선택
                     .getResultList();
         } catch (Exception e) {
             log.error("Failed to find members by memberId, eventId and gender: {}", e.getMessage());

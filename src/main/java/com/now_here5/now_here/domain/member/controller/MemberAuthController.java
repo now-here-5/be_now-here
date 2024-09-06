@@ -1,5 +1,4 @@
 package com.now_here5.now_here.domain.member.controller;
-
 import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.domain.member.dto.LoginResponse;
 import com.now_here5.now_here.domain.member.service.MemberAuthService;

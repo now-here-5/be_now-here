@@ -5,6 +5,7 @@ import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
+import com.now_here5.now_here.domain.matching.service.PreferenceBasedMBTIMatching;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
 import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
 import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
@@ -32,7 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
     private final EventListToDto eventListToDto;
-
+    private final PreferenceBasedMBTIMatching matcher;
 
     @Override
     public boolean sendCode(String phone) {
@@ -118,24 +119,40 @@ public class MemberServiceImpl implements MemberService {
         Long memberId = member.getId();
         Long eventId = authMember.getEventId();
         Gender gender = member.getGender();
+        MBTI memberMbti = member.getMbti();
 
         try {
-            List<Member> members = memberRepository.findMembersByMemberIdAndEventIdAndGender(memberId, eventId, gender);
-            return members.stream()
-                    .map(m -> new MemberRecommendResponse(
-                            m.getId(),
-                            m.getMbti().toString(),
-                            m.getNickname(),
-                            m.getBirthday().toString(),
-                            m.getGender().toString(),
-                            m.getDescription()))
+            // 잠재적인 매칭 후보자들을 JPQL로 가져오기
+            List<Member> potentialMatches = memberRepository.findMembersByMemberIdAndEventIdAndGender(memberId, eventId, gender);
+
+            // 가중치를 반영한 매칭 결과 계산
+            List<PreferenceBasedMBTIMatching.MatchResult> matchResults = matcher.findMatches(
+                    memberMbti,
+                    member.getGender(),
+                    potentialMatches.stream()
+                            .map(PreferenceBasedMBTIMatching.PotentialMatch::new)  // Member 객체를 직접 PotentialMatch로 변환
+                            .toList()
+            );
+
+            // 매칭 점수가 높은 순으로 결과 반환
+            return matchResults.stream()
+                    .map(result -> new MemberRecommendResponse(
+                            result.getMatch().getId(),  // 추천된 멤버의 ID
+                            result.getMatch().getMbti().toString(),  // MBTI
+                            result.getMatch().getNickname(),  // 닉네임
+                            result.getMatch().getBirthday().toString(),  // 생일
+                            result.getMatch().getGender().toString(),  // 성별
+                            result.getMatch().getDescription()  // 설명
+                    ))
                     .toList();
+
         } catch (Exception e) {
             log.error("멤버 추천 실패: {}", e.getMessage());
             return List.of();
         }
     }
-          
+
+
     public EventListResponse getAssignedEventsByMember() {
         try{
             List<Event> events =  eventRepository.getSignedEventsByMember(true,
@@ -144,6 +161,18 @@ public class MemberServiceImpl implements MemberService {
         }catch (Exception e){
             log.error("Failed to get assigned events by member: {}", e.getMessage());
             return null;
+        }
+    }
+
+    @Override
+    public boolean getNotificationSetting() {
+        try{
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            return member.isNotiSetting();
+        }catch (Exception e){
+            log.error("Failed to get notification setting: {}", e.getMessage());
+            throw  new RuntimeException("Failed to get notification setting");
         }
     }
 
@@ -165,11 +194,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public boolean updateNotification(boolean notification) {
+    public boolean updateNotificationSetting(boolean notiSetting) {
         try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
-            member.updateNotification(notification);
+            member.updateNotiSetting(notiSetting);
 
             return true;
         } catch (Exception e) {

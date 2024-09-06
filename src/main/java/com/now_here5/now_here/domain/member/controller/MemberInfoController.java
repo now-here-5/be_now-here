@@ -112,15 +112,30 @@ public class MemberInfoController {
             )
     )
 
-    @PatchMapping("/update/notification")
+    @PatchMapping("/update/notification-setting")
     public ResponseEntity<ResponseForm> updateNotification(
             @RequestBody UpdateNotificationRequest updateNotificationRequest) {
 
-        boolean updated = memberService.updateNotification(updateNotificationRequest.isNotification());
+        boolean updated = memberService.updateNotificationSetting(updateNotificationRequest.isNotification());
 
         return updated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_FAIL));
+    }
+
+
+    @Operation(summary = "알림 설정 조회", description = "회원의 알림 설정을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "M009 - 알림 설정 조회에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M009 - 알림 설정 조회에 실패했습니다.")
+    @GetMapping("/notification-setting")
+    public ResponseEntity<ResponseForm> getNotificationSetting() {
+        try {
+            boolean notificationSetting = memberService.getNotificationSetting();
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_SUCCESS, notificationSetting));
+        } catch (Exception e) {
+            log.error("알림 설정 조회에 실패했습니다: {}", e.getMessage());
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_FAIL));
+        }
     }
 
     @Operation(summary = "닉네임 업데이트", description = "회원의 닉네임을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))

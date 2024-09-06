@@ -52,6 +52,21 @@ public class InteractionRepositoryImpl implements InteractionRepository {
     }
 
     @Override
+    public boolean isFeedbackFullyWrittenToday(Long memberId) {
+        try{
+            return em.createQuery("select count(f) from Feedback f " +
+                            "where f.member.id = :memberId " +
+                            "and f.field is not null " +
+                            "and f.createdAt >= current_date", Long.class)
+                    .setParameter("memberId", memberId)
+                    .getSingleResult() >= 1;
+        } catch (Exception e) {
+            log.error("오늘 FULL 피드백 작성 여부 조회에 실패했습니다: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public Feedback findFeedbackById(Long id) {
         try {
             return em.find(Feedback.class, id);

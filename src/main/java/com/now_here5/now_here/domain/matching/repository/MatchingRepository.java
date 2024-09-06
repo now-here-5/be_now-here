@@ -28,4 +28,6 @@ public interface MatchingRepository {
     List<MatchingWithNicknameResponse> findMatchingWithNickname(Long memberId);
 
     List<Matching> findAcceptedMatchingsBySenderOrReceiver(Long memberId);
+
+    List<Matching> findMatchingsFromYesterday();
 }

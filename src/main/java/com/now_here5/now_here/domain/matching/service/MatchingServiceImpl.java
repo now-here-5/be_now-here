@@ -31,6 +31,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
     private final SlackNotificationService slackNotificationService;
+    private final PreferenceBasedMBTIMatching matcher;
 
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
@@ -79,6 +80,10 @@ public class MatchingServiceImpl implements MatchingService {
             matching.setStatus(Status.ACCEPTED);
             matchingRepository.update(matching);
 
+            // 선호도 업데이트
+            matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
+            matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
+
             // receiver / sender에게 매칭 알림 전송
             String rMessage = String.format("%s님과 매칭되었습니다.", sender.getNickname());
             slackNotificationService.sendNotification(rMessage);
@@ -94,6 +99,38 @@ public class MatchingServiceImpl implements MatchingService {
             throw new RuntimeException("Failed to receive love", e);
         }
     }
+
+    @Override
+    public void rejectLove(Long senderId) {
+        Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
+        Member sender = memberRepository.findActiveMemberById(senderId);
+        Member receiver = memberRepository.findActiveMemberById(receiverId);
+
+        try {
+            Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
+            matching.setStatus(Status.REJECTED);
+            matchingRepository.update(matching);
+
+            // 선호도 업데이트
+            matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
+            matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
+
+            // receiver / sender에게 매칭 알림 전송
+            String rMessage = String.format("%s님을 거절하셨습니다.", sender.getNickname());
+            slackNotificationService.sendNotification(rMessage);
+            String sMessage = String.format("%s님과 매칭에 실패했어요...", receiver.getNickname());
+            slackNotificationService.sendNotification(sMessage);
+
+            // noticount 업데이트
+            sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+
+        } catch (Exception e) {
+            log.error("Failed to receive love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw new RuntimeException("Failed to receive love", e);
+        }
+    }
+
 
     @Override
     public List<SummaryResponse> getSummary() {
@@ -217,8 +254,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long memberId = authMember.getMemberId();
         Member member = memberRepository.findActiveMemberById(memberId);
         try {
-            Integer unreadNotiCount = member.getUnreadNotiCount();
-            return unreadNotiCount;
+              return member.getUnreadNotiCount();
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
             return 0;
