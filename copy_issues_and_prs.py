@@ -2,9 +2,9 @@ import requests
 import os
 
 # GitHub 토큰과 레포지토리 정보
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # GitHub Actions에서는 secrets.GITHUB_TOKEN 설정 필요
-PRIVATE_REPO = os.getenv('PRIVATE_REPO')  # 원본 레포지토리
-PUBLIC_REPO = os.getenv('PUBLIC_REPO')    # 목적지 레포지토리
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+PRIVATE_REPO = os.getenv('PRIVATE_REPO')
+PUBLIC_REPO = os.getenv('PUBLIC_REPO')
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
@@ -15,12 +15,23 @@ headers = {
 def get_all_issues_and_prs(repo):
     url = f'https://api.github.com/repos/{repo}/issues?state=all'
     response = requests.get(url, headers=headers)
-    
     try:
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
         print(f"HTTP error occurred when fetching issues/PRs: {e}")
+    return None
+
+# 특정 PR의 세부 정보를 가져옴
+def get_pull_request_details(repo, pull_number):
+    """원본 레포지토리에서 PR의 상세 정보를 가져옴"""
+    url = f'https://api.github.com/repos/{repo}/pulls/{pull_number}'
+    response = requests.get(url, headers=headers)
+    try:
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error occurred when getting PR details: {e}")
     return None
 
 # 목적지 레포지토리의 기존 이슈 및 PR 목록을 가져옴
@@ -41,7 +52,7 @@ def create_issue(repo, issue):
         'title': issue.get('title', 'No title'),
         'body': issue.get('body', ''),
         'labels': [label['name'] for label in issue.get('labels', [])],
-        'state': issue.get('state', 'open')  # 기본값 'open'으로 설정, 필요시 수정
+        'state': issue.get('state', 'open')  # 기본값 'open'으로 설정
     }
     response = requests.post(url, json=data, headers=headers)
     if response.status_code == 201:
@@ -65,7 +76,6 @@ def create_pull_request(repo, issue):
             data = {
                 'title': issue.get('title', 'No title'),
                 'body': issue.get('body', ''),
-                # head와 base 브랜치가 있는 경우에만 포함
                 'head': head_branch if head_branch else 'default-head-branch',  # 기본 head 브랜치
                 'base': base_branch if base_branch else 'main'  # 기본 base 브랜치 (필요시 변경 가능)
             }
