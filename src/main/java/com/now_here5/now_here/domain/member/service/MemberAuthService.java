@@ -3,7 +3,6 @@ package com.now_here5.now_here.domain.member.service;
 
 import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
-import com.now_here5.now_here.domain.member.dto.LoginResponse;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
@@ -33,11 +32,9 @@ public class MemberAuthService {
     private final TokenGenerator tokenGenerator;
     private final AuthUtil authUtil;
     private final ListRolesToDto listRolesToDto;
-    private final EventRepository eventRepository;
-    private final EventListToDto eventListToDto;
 
 
-    public LoginResponse login(LoginRequest loginRequest, Long eventId) {
+    public TokenDto login(LoginRequest loginRequest, Long eventId) {
 
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
@@ -48,9 +45,7 @@ public class MemberAuthService {
 
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
 
-            return LoginResponse.builder()
-                    .token(new TokenDto(newToken))
-                    .build();
+            return new TokenDto(newToken);
 
         } catch (Exception e) {
             log.error("login Error ={}", e.getMessage());
