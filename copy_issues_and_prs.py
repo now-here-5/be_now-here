@@ -17,7 +17,9 @@ def get_all_issues_and_prs(repo):
     response = requests.get(url, headers=headers)
     try:
         response.raise_for_status()
-        return response.json()
+        issues_and_prs = response.json()
+        # 이슈와 PR을 created_at 시간에 따라 정렬 (오름차순)
+        return sorted(issues_and_prs, key=lambda x: x['created_at'])
     except requests.exceptions.HTTPError as e:
         print(f"HTTP error occurred when fetching issues/PRs: {e}")
     return None
@@ -53,7 +55,7 @@ def create_issue(repo, issue, is_pr=False):
         print(f"Failed to create issue: {response.status_code}, {response.text}")
     return None
 
-# 모든 새로운 이슈 및 PR을 이슈로 복사
+# 모든 새로운 이슈 및 PR을 이슈로 복사 (생성 시간 순으로)
 def copy_new_issues_and_prs():
     existing_items = get_existing_issues_and_prs(PUBLIC_REPO)  # 목적지 레포지토리의 기존 이슈 및 PR
     
