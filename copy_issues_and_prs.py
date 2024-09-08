@@ -72,12 +72,16 @@ def create_pull_request(repo, issue):
             head_branch = pr_details.get('head', {}).get('ref', None)  # head 브랜치가 없을 경우 None
             base_branch = pr_details.get('base', {}).get('ref', None)  # base 브랜치가 없을 경우 None
             
-            # 브랜치 정보가 없는 경우에도 복사 가능하도록 처리
+            # head 또는 base 브랜치 정보가 없는 경우 기본 브랜치로 설정
+            if not head_branch or not base_branch:
+                print(f"Warning: PR #{pr_number} has invalid head or base branch.")
+                print(f"Using default branches: head='default-head-branch', base='main'")
+
             data = {
                 'title': issue.get('title', 'No title'),
                 'body': issue.get('body', ''),
                 'head': head_branch if head_branch else 'default-head-branch',  # 기본 head 브랜치
-                'base': base_branch if base_branch else 'main'  # 기본 base 브랜치 (필요시 변경 가능)
+                'base': base_branch if base_branch else 'main'  # 기본 base 브랜치
             }
             url = f'https://api.github.com/repos/{repo}/pulls'
             response = requests.post(url, json=data, headers=headers)
