@@ -1,131 +1,110 @@
-import os
 import requests
-import time
+import os
 
-# GitHub 토큰을 환경 변수에서 가져오기 (보안 향상)
+# GitHub 토큰과 레포지토리 정보
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # GitHub Actions에서는 secrets.GITHUB_TOKEN 설정 필요
-PRIVATE_REPO = 'now-here-5/be_now-here'
-PUBLIC_REPO = 'now-here-5/Now-Here'
+PRIVATE_REPO = os.getenv('PRIVATE_REPO')  # 원본 레포지토리
+PUBLIC_REPO = os.getenv('PUBLIC_REPO')    # 목적지 레포지토리
 
 headers = {
     'Authorization': f'token {GITHUB_TOKEN}',
     'Accept': 'application/vnd.github.v3+json'
 }
 
-# Rate Limit 확인 함수
-def check_rate_limit():
-    rate_limit_url = 'https://api.github.com/rate_limit'
-    response = requests.get(rate_limit_url, headers=headers)
-    
-    if response.status_code == 200:
-        rate_limit_info = response.json()
-        remaining = rate_limit_info['resources']['core']['remaining']
-        reset_time = rate_limit_info['resources']['core']['reset']
-        print(f"Remaining requests: {remaining}, Reset time (epoch): {reset_time}")
-        
-        if remaining == 0:
-            wait_time = max(reset_time - int(time.time()), 0)
-            print(f"Rate limit reached. Sleeping for {wait_time} seconds.")
-            time.sleep(wait_time)
-
-# 이슈 및 PR 가져오기
-def get_issues_and_prs(repo):
+# 레포지토리의 모든 이슈 및 PR을 가져옴 (open/closed/merged 상태 모두 포함)
+def get_all_issues_and_prs(repo):
     url = f'https://api.github.com/repos/{repo}/issues?state=all'
-    check_rate_limit()  # Rate limit 체크
-    response = requests.get(url, headers=headers)
-    
-    try:
-        response.raise_for_status()  # 응답 상태 코드 확인 (200 OK 여부)
-        return response.json()  # 성공 시 JSON 반환
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP error occurred: {e}")
-    except ValueError:
-        print("Error: Received non-JSON response")
-    return None
-
-# 특정 PR의 상세 정보를 가져오기
-def get_pull_request_details(repo, pull_number):
-    """PR 번호를 통해 PR의 head와 base 브랜치 정보를 가져옵니다."""
-    url = f'https://api.github.com/repos/{repo}/pulls/{pull_number}'
     response = requests.get(url, headers=headers)
     
     try:
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as e:
-        print(f"HTTP error occurred when getting PR details: {e}")
+        print(f"HTTP error occurred when fetching issues/PRs: {e}")
     return None
 
-# 이슈 생성
+# 목적지 레포지토리의 기존 이슈 및 PR 목록을 가져옴
+def get_existing_issues_and_prs(repo):
+    return get_all_issues_and_prs(repo)
+
+# 이슈 또는 PR이 이미 존재하는지 확인 (제목 기준 비교)
+def item_exists_in_repo(item, existing_items):
+    for existing_item in existing_items:
+        if item['title'] == existing_item.get('title'):
+            return True
+    return False
+
+# 새로운 이슈 복사
 def create_issue(repo, issue):
-    check_rate_limit()  # Rate limit 체크
-    if isinstance(issue, dict):
-        url = f'https://api.github.com/repos/{repo}/issues'
-        data = {
-            'title': issue.get('title', 'No title'),
-            'body': issue.get('body', ''),
-            'labels': [label['name'] for label in issue.get('labels', [])],
-            'state': issue.get('state', 'open')  # 기본값 'open'으로 설정
-        }
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 201:
-            return response.json()
-        else:
-            print(f"Failed to create issue: {response.status_code}, {response.text}")
+    url = f'https://api.github.com/repos/{repo}/issues'
+    data = {
+        'title': issue.get('title', 'No title'),
+        'body': issue.get('body', ''),
+        'labels': [label['name'] for label in issue.get('labels', [])],
+        'state': issue.get('state', 'open')  # 기본값 'open'으로 설정, 필요시 수정
+    }
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 201:
+        return response.json()
     else:
-        print("Error: issue is not a dictionary")
+        print(f"Failed to create issue: {response.status_code}, {response.text}")
     return None
 
-# Pull Request 생성
+# PR 복사 (브랜치 정보가 없을 경우에도 복사 가능하도록 수정)
 def create_pull_request(repo, issue):
-    """PR의 head와 base 브랜치를 가져와서 PR을 복사합니다."""
-    check_rate_limit()  # Rate limit 체크
-    if isinstance(issue, dict) and 'pull_request' in issue:
-        # 이슈에서 PR 번호를 가져옴
-        pr_url = issue.get('pull_request', {}).get('url')
-        if pr_url:
-            pr_number = pr_url.split('/')[-1]  # URL에서 pull_number 추출
-            pr_details = get_pull_request_details(repo, pr_number)
+    if 'pull_request' in issue:
+        pr_url = issue['pull_request']['url']
+        pr_number = pr_url.split('/')[-1]  # PR 번호 추출
+        pr_details = get_pull_request_details(PRIVATE_REPO, pr_number)  # 원본 레포지토리에서 PR 가져오기
+        
+        if pr_details:
+            head_branch = pr_details.get('head', {}).get('ref', None)  # head 브랜치가 없을 경우 None
+            base_branch = pr_details.get('base', {}).get('ref', None)  # base 브랜치가 없을 경우 None
             
-            if pr_details:
-                head_branch = pr_details.get('head', {}).get('ref')
-                base_branch = pr_details.get('base', {}).get('ref')
-
-                # head 또는 base 브랜치 정보가 없을 경우 오류 출력
-                if not head_branch or not base_branch:
-                    print(f"Error: head or base branch is invalid. Head: {head_branch}, Base: {base_branch}")
-                    return None
-
-                # PR 생성 요청
-                url = f'https://api.github.com/repos/{repo}/pulls'
-                data = {
-                    'title': issue.get('title', 'No title'),
-                    'body': issue.get('body', ''),
-                    'head': head_branch,
-                    'base': base_branch
-                }
-                response = requests.post(url, json=data, headers=headers)
-                if response.status_code == 201:
-                    return response.json()
-                else:
-                    print(f"Failed to create pull request: {response.status_code}, {response.text}")
+            # 브랜치 정보가 없는 경우에도 복사 가능하도록 처리
+            data = {
+                'title': issue.get('title', 'No title'),
+                'body': issue.get('body', ''),
+                # head와 base 브랜치가 있는 경우에만 포함
+                'head': head_branch if head_branch else 'default-head-branch',  # 기본 head 브랜치
+                'base': base_branch if base_branch else 'main'  # 기본 base 브랜치 (필요시 변경 가능)
+            }
+            url = f'https://api.github.com/repos/{repo}/pulls'
+            response = requests.post(url, json=data, headers=headers)
+            if response.status_code == 201:
+                return response.json()
             else:
-                print("Failed to fetch pull request details.")
+                print(f"Failed to create pull request: {response.status_code}, {response.text}")
         else:
-            print("No valid pull_request URL found in the issue.")
-    else:
-        print("Error: issue is not a dictionary or does not contain a pull_request field.")
+            print(f"Failed to fetch pull request details for PR #{pr_number}.")
     return None
 
-# 이슈 및 PR 복사 실행
-issues = get_issues_and_prs(PRIVATE_REPO)
-if issues:
-    for issue in issues:
-        if 'pull_request' not in issue:  # 일반 이슈인 경우
-            new_issue = create_issue(PUBLIC_REPO, issue)
-            if new_issue:
-                print(f"Issue {issue.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_issue.get('number')}")
-        else:  # Pull Request인 경우
-            new_pr = create_pull_request(PUBLIC_REPO, issue)
-            if new_pr:
-                print(f"Pull Request {issue.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_pr.get('number')}")
+# 모든 새로운 이슈 및 PR 복사
+def copy_new_issues_and_prs():
+    existing_items = get_existing_issues_and_prs(PUBLIC_REPO)  # 목적지 레포지토리의 기존 이슈 및 PR
+    
+    if not existing_items:
+        print("Failed to fetch existing issues/PRs from the target repository.")
+        return
+
+    issues_and_prs = get_all_issues_and_prs(PRIVATE_REPO)  # 원본 레포지토리의 이슈 및 PR
+    
+    if issues_and_prs:
+        for item in issues_and_prs:
+            if 'pull_request' not in item:  # 일반 이슈인 경우
+                if not item_exists_in_repo(item, existing_items):
+                    new_issue = create_issue(PUBLIC_REPO, item)
+                    if new_issue:
+                        print(f"Issue {item.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_issue.get('number')}")
+                else:
+                    print(f"Issue {item.get('title', 'No title')} already exists in {PUBLIC_REPO}. Skipping.")
+            else:  # PR인 경우
+                if not item_exists_in_repo(item, existing_items):
+                    new_pr = create_pull_request(PUBLIC_REPO, item)
+                    if new_pr:
+                        print(f"Pull Request {item.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_pr.get('number')}")
+                else:
+                    print(f"Pull Request {item.get('title', 'No title')} already exists in {PUBLIC_REPO}. Skipping.")
+
+# 함수 실행
+copy_new_issues_and_prs()
