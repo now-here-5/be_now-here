@@ -1,7 +1,6 @@
 package com.now_here5.now_here.global.response;
 
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,11 +13,11 @@ import lombok.Getter;
  */
 
 /*
-    * Business Response Code
-    * A  : Authentication or Authorization
-    * M  : Member
-    * S  : Sign-up
-    * E  : Event
+ * Business Response Code
+ * A  : Authentication or Authorization
+ * M  : Member
+ * S  : Sign-up
+ * E  : Event
  */
 
 
@@ -70,11 +69,11 @@ public enum ResponseCode {
     PHONE_VERIFY_REQUEST(200, "A003", "휴대폰 인증을 요청했습니다."),
     PHONE_VERIFY_SUCCESS(200, "A003", "휴대폰 인증에 성공했습니다."),
     PHONE_VERIFY_FAIL(400, "A003", "휴대폰 인증에 실패했습니다."),
-    
+
     // development - only
     PHONE_GET_SUCCESS(200, "A001-D", "개발용 인증 번호 조회에 성공했습니다."),
     PHONE_GET_FAIL(400, "A001-D", "개발용 인증 번호 조회에 실패했습니다."),
-  
+
     // Event
     EVENTLIST_QUERY_SUCCESS(200, "E001", "이벤트 목록 조회에 성공했습니다."),
     EVENTLIST_QUERY_FAIL(400, "E001", "이벤트 목록 조회에 실패했습니다."),
@@ -84,7 +83,8 @@ public enum ResponseCode {
     EVENT_TIME_FAIL(400, "E003", "이벤트 시간 조회에 실패했습니다."),
     MY_EVENTS_QUERY_SUCCESS(200, "E004", "내 이벤트 목록 조회에 성공했습니다."),
     MY_EVENTS_QUERY_FAIL(400, "E004", "내 이벤트 목록 조회에 실패했습니다."),
-
+    MEMBER_REACTIVATE_SUCCESS(200, "E005", "회원 재활성화에 성공했습니다."),
+    MEMBER_REACTIVATE_FAIL(400, "E005", "회원 재활성화에 실패했습니다."),
     //admin
     EVENT_CLOSE_SUCCESS(200, "E005", "이벤트 종료에 성공했습니다."),
     EVENT_CLOSE_FAIL(400, "E005", "이벤트 종료에 실패했습니다."),

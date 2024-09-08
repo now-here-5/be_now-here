@@ -64,4 +64,5 @@ public class MemberAuthRepository {
             return null;
         }
     }
+
 }

@@ -1,9 +1,9 @@
 package com.now_here5.now_here.domain.member.controller;
 import com.now_here5.now_here.domain.member.dto.LoginRequest;
-import com.now_here5.now_here.domain.member.dto.LoginResponse;
 import com.now_here5.now_here.domain.member.service.MemberAuthService;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.response.ResponseCode;
+import com.now_here5.now_here.global.security.dto.TokenDto;
 import com.now_here5.now_here.global.util.CustomXOR;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,9 +56,9 @@ public class MemberAuthController {
             @PathVariable(value = "event_id") String eventId
     ) {
 
-        LoginResponse loginResponse = memberAuthService.login(loginRequest, customXOR.decrypt(eventId));
-        return loginResponse != null ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_SUCCESS, loginResponse)) :
+        TokenDto token = memberAuthService.login(loginRequest, customXOR.decrypt(eventId));
+        return token != null ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_FAIL));
     }
 

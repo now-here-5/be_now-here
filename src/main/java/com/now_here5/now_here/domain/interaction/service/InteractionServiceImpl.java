@@ -49,16 +49,15 @@ public class InteractionServiceImpl implements InteractionService {
     @Transactional
     @Override
     public void createInquiry(InquiryRequest inquiryRequest) {
-        Long memberId = authUtil.getMemberByAuthentication().getMemberId();
-
         Inquiry.InquiryBuilder builder = Inquiry.builder();
-        builder.content(inquiryRequest.getContent());
-
-        builder.phoneNumber(inquiryRequest.getPhoneNumber());
-        if(memberId == null) {
-            log.warn("Member ID is null");
-        }else{
+        try {
+            Long memberId = authUtil.getMemberByAuthentication().getMemberId();
             builder.member(memberRepository.findActiveMemberById(memberId));
+        }catch(Exception e){
+            log.error("토큰이 없는 문의사항 작성: {}", e.getMessage());
+        }finally {
+            builder.content(inquiryRequest.getContent())
+                    .phoneNumber(inquiryRequest.getPhoneNumber());
         }
 
         Inquiry newInquiry = builder.build();
