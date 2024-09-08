@@ -22,6 +22,19 @@ def get_all_issues_and_prs(repo):
         print(f"HTTP error occurred when fetching issues/PRs: {e}")
     return None
 
+# 레포지토리에서 유효한 브랜치 목록을 가져옴
+def get_branches(repo):
+    """레포지토리의 모든 브랜치를 가져옵니다"""
+    url = f'https://api.github.com/repos/{repo}/branches'
+    response = requests.get(url, headers=headers)
+    try:
+        response.raise_for_status()
+        branches = response.json()
+        return [branch['name'] for branch in branches]  # 모든 브랜치 이름 리스트 반환
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error occurred when fetching branches: {e}")
+    return []
+
 # 특정 PR의 세부 정보를 가져옴
 def get_pull_request_details(repo, pull_number):
     """원본 레포지토리에서 PR의 상세 정보를 가져옴"""
@@ -72,16 +85,20 @@ def create_pull_request(repo, issue):
             head_branch = pr_details.get('head', {}).get('ref', None)  # head 브랜치가 없을 경우 None
             base_branch = pr_details.get('base', {}).get('ref', None)  # base 브랜치가 없을 경우 None
             
-            # head 또는 base 브랜치 정보가 없는 경우 기본 브랜치로 설정
-            if not head_branch or not base_branch:
-                print(f"Warning: PR #{pr_number} has invalid head or base branch.")
-                print(f"Using default branches: head='default-head-branch', base='main'")
+            # 유효한 브랜치인지 확인
+            valid_branches = get_branches(PUBLIC_REPO)  # 목적지 레포지토리의 유효한 브랜치 목록 가져오기
+            if head_branch not in valid_branches:
+                print(f"Warning: head branch '{head_branch}' is invalid in {PUBLIC_REPO}. Using default 'default-head-branch'.")
+                head_branch = 'default-head-branch'
+            if base_branch not in valid_branches:
+                print(f"Warning: base branch '{base_branch}' is invalid in {PUBLIC_REPO}. Using default 'main'.")
+                base_branch = 'main'
 
             data = {
                 'title': issue.get('title', 'No title'),
                 'body': issue.get('body', ''),
-                'head': head_branch if head_branch else 'default-head-branch',  # 기본 head 브랜치
-                'base': base_branch if base_branch else 'main'  # 기본 base 브랜치
+                'head': head_branch,  # 유효한 head 브랜치
+                'base': base_branch   # 유효한 base 브랜치
             }
             url = f'https://api.github.com/repos/{repo}/pulls'
             response = requests.post(url, json=data, headers=headers)
