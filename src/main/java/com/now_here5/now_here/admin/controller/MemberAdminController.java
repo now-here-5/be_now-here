@@ -1,9 +1,9 @@
 package com.now_here5.now_here.admin.controller;
 
 
-import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.service.MemberAuthService;
 import com.now_here5.now_here.global.response.ResponseCode;
+import com.now_here5.now_here.global.response.ResponseForm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,12 +30,12 @@ public class MemberAdminController {
     @ApiResponse(responseCode = "400", description = "E005 - 회원 재활성화에 실패했습니다.")
     
     @PatchMapping("/reactivate/{member_id}")
-    ResponseEntity<ResponseCode> reactivateMember(@PathVariable(name = "member_id") Long memberId) {
+    ResponseEntity<ResponseForm> reactivateMember(@PathVariable(name = "member_id") Long memberId) {
         boolean activated = memberAuthService.reactivateMember(memberId);
 
         return activated ?
-                ResponseEntity.ok(ResponseCode.MEMBER_REACTIVATE_SUCCESS) :
-                ResponseEntity.ok(ResponseCode.MEMBER_REACTIVATE_FAIL);
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_REACTIVATE_SUCCESS)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.MEMBER_REACTIVATE_FAIL)  );
     }
 
 }
