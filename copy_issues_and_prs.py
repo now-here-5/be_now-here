@@ -35,6 +35,30 @@ def get_branches(repo):
         print(f"HTTP error occurred when fetching branches: {e}")
     return []
 
+# 브랜치 생성 함수
+def create_branch(repo, branch_name, source_branch='main'):
+    """새로운 브랜치를 만듭니다"""
+    # source_branch의 sha를 가져옴
+    url = f'https://api.github.com/repos/{repo}/git/refs/heads/{source_branch}'
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        sha = response.json()['object']['sha']
+        # 새 브랜치 생성
+        create_url = f'https://api.github.com/repos/{repo}/git/refs'
+        data = {
+            'ref': f'refs/heads/{branch_name}',
+            'sha': sha
+        }
+        create_response = requests.post(create_url, json=data, headers=headers)
+        if create_response.status_code == 201:
+            print(f"Branch '{branch_name}' created successfully in {repo}.")
+            return True
+        else:
+            print(f"Failed to create branch '{branch_name}' in {repo}: {create_response.text}")
+    else:
+        print(f"Failed to fetch source branch '{source_branch}' in {repo}.")
+    return False
+
 # 특정 PR의 세부 정보를 가져옴
 def get_pull_request_details(repo, pull_number):
     """원본 레포지토리에서 PR의 상세 정보를 가져옴"""
@@ -88,17 +112,17 @@ def create_pull_request(repo, issue):
             # 유효한 브랜치인지 확인
             valid_branches = get_branches(PUBLIC_REPO)  # 목적지 레포지토리의 유효한 브랜치 목록 가져오기
             if head_branch not in valid_branches:
-                print(f"Warning: head branch '{head_branch}' is invalid in {PUBLIC_REPO}. Using default 'default-head-branch'.")
-                head_branch = 'default-head-branch'
+                print(f"Branch '{head_branch}' does not exist. Creating it.")
+                create_branch(PUBLIC_REPO, head_branch)  # 브랜치가 없으면 새로 생성
             if base_branch not in valid_branches:
-                print(f"Warning: base branch '{base_branch}' is invalid in {PUBLIC_REPO}. Using default 'main'.")
-                base_branch = 'main'
+                print(f"Branch '{base_branch}' does not exist. Creating it.")
+                create_branch(PUBLIC_REPO, base_branch)  # base 브랜치도 없으면 생성
 
             data = {
                 'title': issue.get('title', 'No title'),
                 'body': issue.get('body', ''),
-                'head': head_branch,  # 유효한 head 브랜치
-                'base': base_branch   # 유효한 base 브랜치
+                'head': head_branch if head_branch else 'default-head-branch',  # 기본 head 브랜치
+                'base': base_branch if base_branch else 'main'  # 기본 base 브랜치
             }
             url = f'https://api.github.com/repos/{repo}/pulls'
             response = requests.post(url, json=data, headers=headers)
