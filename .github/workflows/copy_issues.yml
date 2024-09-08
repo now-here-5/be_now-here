@@ -4,7 +4,9 @@ on:
   workflow_dispatch:  # 수동으로 실행 가능
   schedule:
     - cron: '0 * * * *'  # 매시간 실행
-
+  push:
+    branches: 
+      - issue_mover  
 jobs:
   copy-issues-and-prs:
     runs-on: ubuntu-latest
