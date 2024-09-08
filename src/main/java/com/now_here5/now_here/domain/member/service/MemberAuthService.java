@@ -4,6 +4,7 @@ package com.now_here5.now_here.domain.member.service;
 import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
+import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.domain.member.dto.LoginRequest;
@@ -29,24 +30,30 @@ public class MemberAuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final MemberAuthRepository memberAuthRepository;
+    private final MemberRepository memberRepository;
     private final TokenGenerator tokenGenerator;
     private final AuthUtil authUtil;
     private final ListRolesToDto listRolesToDto;
 
+    @Transactional
+    public boolean reactivateMember(Long memberId) {
+        try {
+            memberRepository.findMemberById(memberId).activate();
+            return true;
+        } catch (Exception e) {
+            log.error("reactivate Member Error ={}", e.getMessage());
+            return false;
+        }
+    }
 
     public TokenDto login(LoginRequest loginRequest, Long eventId) {
-
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
-
             String newToken = tokenGenerator.generateUniqueToken();
             Authentication authentication = authUtil.getAuthentication();
             Member tempMember = (Member) authentication.getPrincipal();
-
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
-
             return new TokenDto(newToken);
-
         } catch (Exception e) {
             log.error("login Error ={}", e.getMessage());
             return null;
@@ -54,7 +61,7 @@ public class MemberAuthService {
     }
 
     @Transactional
-    public boolean logout(){
+    public boolean logout() {
 
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
 
@@ -69,7 +76,7 @@ public class MemberAuthService {
 
 
     public AuthenticatedMemberDto getMemberByToken(String token) {
-        try{
+        try {
             Member member = memberAuthRepository.findMemberByToken(token);
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
@@ -82,8 +89,8 @@ public class MemberAuthService {
                     .status(member.getEvent().isStatus())
                     .roleNamesDto(listRolesToDto.converter(member.getMemberRoleList()))
                     .build();
-            
-        }catch(Exception e) {
+
+        } catch (Exception e) {
             log.error("get Member By Token Error ={}", e.getMessage());
             return null;
         }
@@ -101,6 +108,6 @@ public class MemberAuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         // 인증 처리
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        authenticationManagerBuilder.getObject().authenticate(authenticationToken);
     }
 }
