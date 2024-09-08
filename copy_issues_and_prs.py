@@ -43,6 +43,19 @@ def get_issues_and_prs(repo):
         print("Error: Received non-JSON response")
     return None
 
+# 특정 PR의 상세 정보를 가져오기
+def get_pull_request_details(repo, pull_number):
+    """PR 번호를 통해 PR의 head와 base 브랜치 정보를 가져옵니다."""
+    url = f'https://api.github.com/repos/{repo}/pulls/{pull_number}'
+    response = requests.get(url, headers=headers)
+    
+    try:
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP error occurred when getting PR details: {e}")
+    return None
+
 # 이슈 생성
 def create_issue(repo, issue):
     check_rate_limit()  # Rate limit 체크
@@ -65,35 +78,43 @@ def create_issue(repo, issue):
 
 # Pull Request 생성
 def create_pull_request(repo, issue):
+    """PR의 head와 base 브랜치를 가져와서 PR을 복사합니다."""
     check_rate_limit()  # Rate limit 체크
-    if isinstance(issue, dict):
-        # Pull Request 관련 데이터에서 head와 base 브랜치 정보가 필요합니다.
-        pull_request_data = issue.get('pull_request', {})
-        
-        # PR 생성에 필요한 head와 base 브랜치가 반드시 필요함
-        head_branch = pull_request_data.get('head', {}).get('ref')
-        base_branch = pull_request_data.get('base', {}).get('ref')
+    if isinstance(issue, dict) and 'pull_request' in issue:
+        # 이슈에서 PR 번호를 가져옴
+        pr_url = issue.get('pull_request', {}).get('url')
+        if pr_url:
+            pr_number = pr_url.split('/')[-1]  # URL에서 pull_number 추출
+            pr_details = get_pull_request_details(repo, pr_number)
+            
+            if pr_details:
+                head_branch = pr_details.get('head', {}).get('ref')
+                base_branch = pr_details.get('base', {}).get('ref')
 
-        # head 또는 base 브랜치 정보가 없을 경우 오류 출력
-        if not head_branch or not base_branch:
-            print(f"Error: head or base branch is invalid. Head: {head_branch}, Base: {base_branch}")
-            return None
+                # head 또는 base 브랜치 정보가 없을 경우 오류 출력
+                if not head_branch or not base_branch:
+                    print(f"Error: head or base branch is invalid. Head: {head_branch}, Base: {base_branch}")
+                    return None
 
-        url = f'https://api.github.com/repos/{repo}/pulls'
-        data = {
-            'title': issue.get('title', 'No title'),
-            'body': issue.get('body', ''),
-            'head': head_branch,
-            'base': base_branch,
-            'state': issue.get('state', 'open')
-        }
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 201:
-            return response.json()
+                # PR 생성 요청
+                url = f'https://api.github.com/repos/{repo}/pulls'
+                data = {
+                    'title': issue.get('title', 'No title'),
+                    'body': issue.get('body', ''),
+                    'head': head_branch,
+                    'base': base_branch
+                }
+                response = requests.post(url, json=data, headers=headers)
+                if response.status_code == 201:
+                    return response.json()
+                else:
+                    print(f"Failed to create pull request: {response.status_code}, {response.text}")
+            else:
+                print("Failed to fetch pull request details.")
         else:
-            print(f"Failed to create pull request: {response.status_code}, {response.text}")
+            print("No valid pull_request URL found in the issue.")
     else:
-        print("Error: issue is not a dictionary")
+        print("Error: issue is not a dictionary or does not contain a pull_request field.")
     return None
 
 # 이슈 및 PR 복사 실행
