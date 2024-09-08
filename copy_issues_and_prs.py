@@ -1,5 +1,6 @@
 import requests
 import os
+import time  # 지연 시간을 추가하기 위해 time 모듈 사용
 
 # GitHub 토큰과 레포지토리 정보
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -60,7 +61,7 @@ def create_issue(repo, issue, is_pr=False):
         return response.json()
     else:
         print(f"Failed to create issue: {response.status_code}, {response.text}")
-    return None
+        return None
 
 # 모든 새로운 이슈 및 PR을 이슈로 복사 (생성 시간 순으로)
 def copy_new_issues_and_prs():
@@ -80,6 +81,7 @@ def copy_new_issues_and_prs():
                     new_issue = create_issue(PUBLIC_REPO, item, is_pr=True)
                     if new_issue:
                         print(f"Pull Request {item.get('title', 'No title')} copied to {PUBLIC_REPO} as issue #{new_issue.get('number')}")
+                    time.sleep(1)  # 각 PR 복사 후 1초 지연
                 else:
                     print(f"Pull Request {item.get('title', 'No title')} already exists in {PUBLIC_REPO}. Skipping.")
             else:  # 일반 이슈인 경우
@@ -87,6 +89,7 @@ def copy_new_issues_and_prs():
                     new_issue = create_issue(PUBLIC_REPO, item)
                     if new_issue:
                         print(f"Issue {item.get('title', 'No title')} copied to {PUBLIC_REPO} as issue #{new_issue.get('number')}")
+                    time.sleep(1)  # 각 이슈 복사 후 1초 지연
                 else:
                     print(f"Issue {item.get('title', 'No title')} already exists in {PUBLIC_REPO}. Skipping.")
 
