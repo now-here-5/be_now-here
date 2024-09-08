@@ -28,4 +28,4 @@ jobs:
           PRIVATE_REPO: 'now-here-5/be_now-here'
           PUBLIC_REPO: 'now-here-5/Now-Here'
         run: |
-          python .github/issue_mover/copy_issues_and_prs.py
+          python copy_issues_and_prs.py
