@@ -1,0 +1,79 @@
+name: Copy Issues and PRs from Private to Public
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 매시간 실행 (필요에 맞게 조정)
+  workflow_dispatch:  # 수동으로도 실행 가능
+
+jobs:
+  copy-issues-and-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Copy Issues and Pull Requests from Private to Public Repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHP_TOKEN }}
+          PRIVATE_REPO: 'now-here-5/be_now-here'
+          PUBLIC_REPO: 'now-here-5/Now-Here'
+        run: |
+          python -c "
+import requests
+
+GITHUB_TOKEN = '${{ secrets.GITHUB_TOKEN }}'
+PRIVATE_REPO = '${{ env.PRIVATE_REPO }}'
+PUBLIC_REPO = '${{ env.PUBLIC_REPO }}'
+
+headers = {
+    'Authorization': f'token {GITHUB_TOKEN}',
+    'Accept': 'application/vnd.github.v3+json'
+}
+
+def get_issues_and_prs(repo):
+    url = f'https://api.github.com/repos/{repo}/issues?state=all'
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+def create_issue(repo, issue):
+    url = f'https://api.github.com/repos/{repo}/issues'
+    data = {
+        'title': issue['title'],
+        'body': issue['body'],
+        'labels': [label['name'] for label in issue.get('labels', [])],
+        'state': issue['state']
+    }
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
+
+def create_pull_request(repo, issue):
+    url = f'https://api.github.com/repos/{repo}/pulls'
+    data = {
+        'title': issue['title'],
+        'body': issue['body'],
+        'head': 'source_branch',  # 기존 PR의 head 브랜치 이름으로 대체
+        'base': 'target_branch',  # 기존 PR의 base 브랜치 이름으로 대체
+        'state': issue['state']
+    }
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
+
+issues = get_issues_and_prs(PRIVATE_REPO)
+for issue in issues:
+    if 'pull_request' not in issue:
+        new_issue = create_issue(PUBLIC_REPO, issue)
+        print(f"Issue {issue['title']} copied to {PUBLIC_REPO} as #{new_issue['number']}")
+    else:
+        new_pr = create_pull_request(PUBLIC_REPO, issue)
+        print(f"Pull Request {issue['title']} copied to {PUBLIC_REPO} as #{new_pr['number']}")
+          "
