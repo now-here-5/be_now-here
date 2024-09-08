@@ -1,6 +1,8 @@
+import os
 import requests
 
-GITHUB_TOKEN = 'your_github_token_here'
+# GitHub 토큰을 환경 변수에서 가져오기 (보안 향상)
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # GitHub Actions에서는 secrets.GITHUB_TOKEN 설정 필요
 PRIVATE_REPO = 'now-here-5/be_now-here'
 PUBLIC_REPO = 'now-here-5/Now-Here'
 
@@ -9,61 +11,73 @@ headers = {
     'Accept': 'application/vnd.github.v3+json'
 }
 
+# 이슈 및 PR 가져오기
 def get_issues_and_prs(repo):
     url = f'https://api.github.com/repos/{repo}/issues?state=all'
     response = requests.get(url, headers=headers)
     
-    # 응답이 JSON인지 확인
     try:
-        response.raise_for_status()  # API 요청이 성공했는지 확인
-        return response.json()  # JSON 응답을 파싱하여 반환
-    except ValueError:
-        print("Error: Received non-JSON response")
-        return None
+        response.raise_for_status()  # 응답 상태 코드 확인 (200 OK 여부)
+        return response.json()  # 성공 시 JSON 반환
     except requests.exceptions.HTTPError as e:
         print(f"HTTP error occurred: {e}")
-        return None
+    except ValueError:
+        print("Error: Received non-JSON response")
+    return None
 
+# 이슈 생성
 def create_issue(repo, issue):
-    # issue 변수가 제대로 딕셔너리로 전달되는지 확인
     if isinstance(issue, dict):
         url = f'https://api.github.com/repos/{repo}/issues'
         data = {
-            'title': issue['title'],
-            'body': issue['body'],
+            'title': issue.get('title', 'No title'),
+            'body': issue.get('body', ''),
             'labels': [label['name'] for label in issue.get('labels', [])],
-            'state': issue['state']
+            'state': issue.get('state', 'open')  # 기본값 'open'으로 설정
         }
         response = requests.post(url, json=data, headers=headers)
-        return response.json()
+        if response.status_code == 201:
+            return response.json()
+        else:
+            print(f"Failed to create issue: {response.status_code}, {response.text}")
     else:
         print("Error: issue is not a dictionary")
-        return None
+    return None
 
+# Pull Request 생성
 def create_pull_request(repo, issue):
     if isinstance(issue, dict):
+        # Pull Request 관련 데이터에서 head와 base 브랜치 정보가 필요합니다.
+        pull_request_data = issue.get('pull_request', {})
+        head_branch = pull_request_data.get('head', {}).get('ref', 'default_head_branch')
+        base_branch = pull_request_data.get('base', {}).get('ref', 'default_base_branch')
+
         url = f'https://api.github.com/repos/{repo}/pulls'
         data = {
-            'title': issue['title'],
-            'body': issue['body'],
-            'head': 'source_branch',  # 기존 PR의 head 브랜치 이름으로 대체
-            'base': 'target_branch',  # 기존 PR의 base 브랜치 이름으로 대체
-            'state': issue['state']
+            'title': issue.get('title', 'No title'),
+            'body': issue.get('body', ''),
+            'head': head_branch,
+            'base': base_branch,
+            'state': issue.get('state', 'open')
         }
         response = requests.post(url, json=data, headers=headers)
-        return response.json()
+        if response.status_code == 201:
+            return response.json()
+        else:
+            print(f"Failed to create pull request: {response.status_code}, {response.text}")
     else:
         print("Error: issue is not a dictionary")
-        return None
+    return None
 
+# 이슈 및 PR 가져오기 실행
 issues = get_issues_and_prs(PRIVATE_REPO)
 if issues:
     for issue in issues:
-        if 'pull_request' not in issue:
+        if 'pull_request' not in issue:  # 일반 이슈인 경우
             new_issue = create_issue(PUBLIC_REPO, issue)
             if new_issue:
-                print(f"Issue {issue['title']} copied to {PUBLIC_REPO} as #{new_issue['number']}")
-        else:
+                print(f"Issue {issue.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_issue.get('number')}")
+        else:  # Pull Request인 경우
             new_pr = create_pull_request(PUBLIC_REPO, issue)
             if new_pr:
-                print(f"Pull Request {issue['title']} copied to {PUBLIC_REPO} as #{new_pr['number']}")
+                print(f"Pull Request {issue.get('title', 'No title')} copied to {PUBLIC_REPO} as #{new_pr.get('number')}")
