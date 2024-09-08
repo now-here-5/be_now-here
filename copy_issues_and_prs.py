@@ -15,6 +15,7 @@ headers = {
 def get_all_issues_and_prs(repo):
     url = f'https://api.github.com/repos/{repo}/issues?state=all'
     response = requests.get(url, headers=headers)
+    print(f"Fetching issues/PRs from {repo}, Status Code: {response.status_code}")
     try:
         response.raise_for_status()
         issues_and_prs = response.json()
@@ -65,9 +66,9 @@ def create_issue(repo, issue, is_pr=False):
 def copy_new_issues_and_prs():
     existing_items = get_existing_issues_and_prs(PUBLIC_REPO)  # 목적지 레포지토리의 기존 이슈 및 PR
     
-    if not existing_items:
-        print("Failed to fetch existing issues/PRs from the target repository.")
-        return
+    if existing_items is None:
+        print("No existing issues/PRs found or failed to fetch.")
+        existing_items = []  # 비어 있는 리스트로 설정
 
     issues_and_prs = get_all_issues_and_prs(PRIVATE_REPO)  # 원본 레포지토리의 이슈 및 PR
     
