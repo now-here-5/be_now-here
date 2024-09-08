@@ -29,9 +29,15 @@ def get_existing_issues_and_prs(repo):
     return get_all_issues_and_prs(repo)
 
 # 이슈 또는 PR이 이미 존재하는지 확인 (제목 기준 비교)
-def item_exists_in_repo(item, existing_items):
+def item_exists_in_repo(item, existing_items, is_pr=False):
+    # PR인 경우, [PR] 태그 없이 원래 제목으로 비교
+    title_to_compare = item['title']
+    if is_pr:
+        title_to_compare = f"[PR] {title_to_compare}"
+    
     for existing_item in existing_items:
-        if item['title'] == existing_item.get('title'):
+        # [PR]이 붙기 전의 제목으로 비교
+        if title_to_compare == existing_item.get('title'):
             return True
     return False
 
@@ -69,7 +75,7 @@ def copy_new_issues_and_prs():
         for item in issues_and_prs:
             # PR일 경우 이슈로 변환하여 [PR]을 제목에 추가
             if 'pull_request' in item:
-                if not item_exists_in_repo(item, existing_items):
+                if not item_exists_in_repo(item, existing_items, is_pr=True):
                     new_issue = create_issue(PUBLIC_REPO, item, is_pr=True)
                     if new_issue:
                         print(f"Pull Request {item.get('title', 'No title')} copied to {PUBLIC_REPO} as issue #{new_issue.get('number')}")
