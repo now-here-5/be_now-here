@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 
 # GitHub 토큰을 환경 변수에서 가져오기 (보안 향상)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # GitHub Actions에서는 secrets.GITHUB_TOKEN 설정 필요
@@ -11,9 +12,26 @@ headers = {
     'Accept': 'application/vnd.github.v3+json'
 }
 
+# Rate Limit 확인 함수
+def check_rate_limit():
+    rate_limit_url = 'https://api.github.com/rate_limit'
+    response = requests.get(rate_limit_url, headers=headers)
+    
+    if response.status_code == 200:
+        rate_limit_info = response.json()
+        remaining = rate_limit_info['resources']['core']['remaining']
+        reset_time = rate_limit_info['resources']['core']['reset']
+        print(f"Remaining requests: {remaining}, Reset time (epoch): {reset_time}")
+        
+        if remaining == 0:
+            wait_time = max(reset_time - int(time.time()), 0)
+            print(f"Rate limit reached. Sleeping for {wait_time} seconds.")
+            time.sleep(wait_time)
+
 # 이슈 및 PR 가져오기
 def get_issues_and_prs(repo):
     url = f'https://api.github.com/repos/{repo}/issues?state=all'
+    check_rate_limit()  # Rate limit 체크
     response = requests.get(url, headers=headers)
     
     try:
@@ -27,6 +45,7 @@ def get_issues_and_prs(repo):
 
 # 이슈 생성
 def create_issue(repo, issue):
+    check_rate_limit()  # Rate limit 체크
     if isinstance(issue, dict):
         url = f'https://api.github.com/repos/{repo}/issues'
         data = {
@@ -46,11 +65,19 @@ def create_issue(repo, issue):
 
 # Pull Request 생성
 def create_pull_request(repo, issue):
+    check_rate_limit()  # Rate limit 체크
     if isinstance(issue, dict):
         # Pull Request 관련 데이터에서 head와 base 브랜치 정보가 필요합니다.
         pull_request_data = issue.get('pull_request', {})
-        head_branch = pull_request_data.get('head', {}).get('ref', 'default_head_branch')
-        base_branch = pull_request_data.get('base', {}).get('ref', 'default_base_branch')
+        
+        # PR 생성에 필요한 head와 base 브랜치가 반드시 필요함
+        head_branch = pull_request_data.get('head', {}).get('ref')
+        base_branch = pull_request_data.get('base', {}).get('ref')
+
+        # head 또는 base 브랜치 정보가 없을 경우 오류 출력
+        if not head_branch or not base_branch:
+            print(f"Error: head or base branch is invalid. Head: {head_branch}, Base: {base_branch}")
+            return None
 
         url = f'https://api.github.com/repos/{repo}/pulls'
         data = {
@@ -69,7 +96,7 @@ def create_pull_request(repo, issue):
         print("Error: issue is not a dictionary")
     return None
 
-# 이슈 및 PR 가져오기 실행
+# 이슈 및 PR 복사 실행
 issues = get_issues_and_prs(PRIVATE_REPO)
 if issues:
     for issue in issues:
