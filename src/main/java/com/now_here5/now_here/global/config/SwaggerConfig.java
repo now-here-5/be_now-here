@@ -1,45 +1,10 @@
-//package com.now_here5.now_here.global.config;
-//
-//import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-//import io.swagger.v3.oas.models.OpenAPI;
-//import io.swagger.v3.oas.models.info.Info;
-//import io.swagger.v3.oas.models.servers.Server;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//
-//
-//@Configuration
-//@OpenAPIDefinition
-//public class SwaggerConfig{
-//    @Value("${swagger.enabled}")
-//    private boolean enabled;
-//
-//    @Value("${swagger.url}")
-//    private String url;
-//
-//    @Bean
-//    @ConditionalOnProperty(name = "swagger.enabled", havingValue = "true", matchIfMissing = true)
-//    public OpenAPI customOpenAPI() {
-//        if(!enabled){
-//            return null; // swagger is disabled.
-//        }
-//        return new OpenAPI()
-//                .info(new Info()
-//                        .title("NowHere API")
-//                        .title("API Documentation")
-//                        .version("1.0")
-//                        .description("API Documentation for the application"))
-//                .addServersItem(new Server().url(url));
-//    }
-//}
 package com.now_here5.now_here.global.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,6 +18,9 @@ public class SwaggerConfig {
                         .title("NowHere API")
                         .version("1.0")
                         .description("API Documentation"))
+                // HTTPS 서버 추가
+                .addServersItem(new Server().url("https://api.now-here.site").description("Production server"))
+                .addServersItem(new Server().url("http://api.now-here.site").description("Test server"))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
@@ -61,4 +29,3 @@ public class SwaggerConfig {
                                 .name("Authorization")));
     }
 }
-
