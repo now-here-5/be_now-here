@@ -15,6 +15,7 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.infra.notification.dto.NotificationRequestDto;
 import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -68,17 +69,17 @@ public class MatchingServiceImpl implements MatchingService {
 
                 matchingRepository.save(matching);
 
-                // receiver에게 받은 하트 알림을 전송
-                String message = String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname());
-                slackNotificationService.sendNotification(message);
+//                // receiver에게 받은 하트 알림을 전송
+//                String message = String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname());
+//                slackNotificationService.sendNotification(message);
 
-//                // receiver에게 FCM 알림 전송
-//                NotificationRequestDto notificationRequestDto  = NotificationRequestDto.builder()
-//                        .title("하트가 도착했어요!")
-//                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
-//                        .token(sender.getFcmToken())
-//                        .build();
-//                fcmNotificationService.sendMessages(notificationRequestDto);
+                // receiver에게 FCM 알림 전송
+                NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+                        .title("하트가 도착했어요!")
+                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
+                        .token(receiver.getFcmToken())
+                        .build();
+                fcmNotificationService.sendMessages(notificationRequestDto);
 
             } else {
                 log.error("Matching already exists between {} and {}", senderId, receiverId);
@@ -106,11 +107,27 @@ public class MatchingServiceImpl implements MatchingService {
             matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
             matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
 
-            // receiver / sender에게 매칭 알림 전송
-            String rMessage = String.format("%s님과 매칭되었습니다.", sender.getNickname());
-            slackNotificationService.sendNotification(rMessage);
-            String sMessage = String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname());
-            slackNotificationService.sendNotification(sMessage);
+
+            // receiver / sender에게  FCM 알림 전송
+            NotificationRequestDto rMessage = NotificationRequestDto.builder()
+                    .title("Now, Here 매칭 알림")
+                    .message(String.format("%s님과 매칭되었습니다.", sender.getNickname()))
+                    .token(receiver.getFcmToken())
+                    .build();
+            fcmNotificationService.sendMessages(rMessage);
+
+            NotificationRequestDto sMessage = NotificationRequestDto.builder()
+                    .title("Now, Here 매칭 알림")
+                    .message(String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname()))
+                    .token(sender.getFcmToken())
+                    .build();
+            fcmNotificationService.sendMessages(sMessage);
+
+            // receiver / sender에게 매칭 알림 전송 : 테스트용
+//            String rMessage = String.format("%s님과 매칭되었습니다.", sender.getNickname());
+//            slackNotificationService.sendNotification(rMessage);
+//            String sMessage = String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname());
+//            slackNotificationService.sendNotification(sMessage);
 
             // noticount 업데이트
             sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
@@ -138,18 +155,33 @@ public class MatchingServiceImpl implements MatchingService {
             matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
 
             // receiver / sender에게 매칭 알림 전송
-            String rMessage = String.format("%s님을 거절하셨습니다.", sender.getNickname());
-            slackNotificationService.sendNotification(rMessage);
-            String sMessage = String.format("%s님과 매칭에 실패했어요...", receiver.getNickname());
-            slackNotificationService.sendNotification(sMessage);
+            NotificationRequestDto rMessage = NotificationRequestDto.builder()
+                    .title("Now, Here")
+                    .message(String.format("%s님을 거절하셨습니다.", sender.getNickname()))
+                    .token(receiver.getFcmToken())
+                    .build();
+            fcmNotificationService.sendMessages(rMessage);
+
+            NotificationRequestDto sMessage = NotificationRequestDto.builder()
+                    .title("Now, Here")
+                    .message(String.format("%s님과 매칭에 실패했어요...", receiver.getNickname()))
+                    .token(sender.getFcmToken())
+                    .build();
+            fcmNotificationService.sendMessages(sMessage);
+
+            // receiver / sender에게 매칭 알림 전송 : 테스트
+//            String rMessage = String.format("%s님을 거절하셨습니다.", sender.getNickname());
+//            slackNotificationService.sendNotification(rMessage);
+//            String sMessage = String.format("%s님과 매칭에 실패했어요...", receiver.getNickname());
+//            slackNotificationService.sendNotification(sMessage);
 
             // noticount 업데이트
             sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
         } catch (Exception e) {
-            log.error("Failed to receive love from {} to {}: {}", senderId, receiverId, e.getMessage());
-            throw new RuntimeException("Failed to receive love", e);
+            log.error("Failed to reject love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw new RuntimeException("Failed to reject love", e);
         }
     }
 
@@ -276,7 +308,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long memberId = authMember.getMemberId();
         Member member = memberRepository.findActiveMemberById(memberId);
         try {
-              return member.getUnreadNotiCount();
+            return member.getUnreadNotiCount();
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
             return 0;

@@ -73,6 +73,11 @@ public class MatchingController {
         }
     }
 
+    @Operation(summary = "하트 거절하기", description = "특정 사용자의 하트를 거절합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Parameter(name = "senderId", description = "보내는 사람의 ID", required = true, schema = @Schema(example = "1"))
+    @ApiResponse(responseCode = "200", description = "L003 - 하트 거절 성공")
+    @ApiResponse(responseCode = "400", description = "L003 - 하트 거절 실패")
+
     @PatchMapping("/reject/{senderId}")
     public ResponseEntity<ResponseForm> rejecteLove(@PathVariable(name = "senderId") Long senderId) {
         try {
