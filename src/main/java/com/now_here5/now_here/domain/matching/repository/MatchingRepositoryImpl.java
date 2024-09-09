@@ -122,6 +122,20 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     }
 
     @Override
+    public boolean existsByMembers(Member member1, Member member2) {
+        try {
+            em.createQuery("SELECT m FROM Matching m WHERE (m.sender = :member1 AND m.receiver = :member2) OR (m.sender = :member2 AND m.receiver = :member1)", Matching.class)
+                    .setParameter("member1", member1)
+                    .setParameter("member2", member2)
+                    .getSingleResult();
+            return true;
+        } catch (Exception e) {
+            log.error("두 멤버로 매칭 조회 중 실패: {} {}", member1, member2, e);
+            return false;
+        }
+}
+
+    @Override
     public List<Matching> findByReceiverId(Long memberId) {
         try {
             return em.createQuery("SELECT m FROM Matching m WHERE m.receiver.id = :memberId", Matching.class)

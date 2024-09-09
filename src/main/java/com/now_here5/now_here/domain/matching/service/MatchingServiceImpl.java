@@ -1,7 +1,13 @@
 package com.now_here5.now_here.domain.matching.service;
 
 import com.now_here5.now_here.domain.matching.converter.MatchingListToDto;
-import com.now_here5.now_here.domain.matching.dto.*;
+import com.now_here5.now_here.domain.matching.dto.BannerListResponse;
+import com.now_here5.now_here.domain.matching.dto.MatchingWithNicknameResponse;
+import com.now_here5.now_here.domain.matching.dto.NotificationResponse;
+import com.now_here5.now_here.domain.matching.dto.ReceiverResponse;
+import com.now_here5.now_here.domain.matching.dto.SenderResponse;
+import com.now_here5.now_here.domain.matching.dto.SummaryDetailResponse;
+import com.now_here5.now_here.domain.matching.dto.SummaryResponse;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
@@ -9,12 +15,14 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.infra.notification.dto.NotificationRequestDto;
+import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -31,6 +39,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
     private final SlackNotificationService slackNotificationService;
+    private final FCMNotificationService fcmNotificationService;
     private final PreferenceBasedMBTIMatching matcher;
 
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
@@ -50,18 +59,32 @@ public class MatchingServiceImpl implements MatchingService {
         Member receiver = memberRepository.findActiveMemberById(receiverId);
 
         try {
-            Matching matching = Matching.builder()
-                    .sender(sender)
-                    .receiver(receiver)
-                    .status(Status.PENDING)
-                    .build();
-            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+            if (!matchingRepository.existsByMembers(sender, receiver)) {
+                Matching matching = Matching.builder()
+                        .sender(sender)
+                        .receiver(receiver)
+                        .status(Status.PENDING)
+                        .build();
+                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
-            matchingRepository.save(matching);
+                matchingRepository.save(matching);
 
-            // receiver에게 받은 하트 알림을 전송
-            String message = String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname());
-            slackNotificationService.sendNotification(message);
+                // receiver에게 받은 하트 알림을 전송
+                String message = String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname());
+                slackNotificationService.sendNotification(message);
+
+                // receiver에게 FCM 알림 전송
+                NotificationRequestDto notificationRequestDto  = NotificationRequestDto.builder()
+                        .title("하트가 도착했어요!")
+                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
+                        .token(sender.getFcmToken())
+                        .build();
+                fcmNotificationService.sendMessages(notificationRequestDto);
+
+            } else {
+                log.error("Matching already exists between {} and {}", senderId, receiverId);
+                throw new RuntimeException("Matching already exists");
+            }
         } catch (Exception e) {
             log.error("Failed to send love from {} to {}: {}", senderId, receiverId, e.getMessage());
             throw new RuntimeException("Failed to send love", e);
