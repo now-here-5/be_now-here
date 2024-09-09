@@ -5,6 +5,7 @@ import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.matching.entity.Status;
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -118,6 +119,22 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         } catch (Exception e) {
             log.error("보낸이와 받는이로 매칭 조회 중 실패: {} {}", sender, receiver, e);
             return null;
+        }
+    }
+
+    @Override
+    public boolean existsByMembers(Member member1, Member member2) {
+        try {
+            List<Matching> results = em.createQuery(
+                            "SELECT m FROM Matching m WHERE (m.sender = :member1 AND m.receiver = :member2) OR (m.sender = :member2 AND m.receiver = :member1)",
+                            Matching.class)
+                    .setParameter("member1", member1)
+                    .setParameter("member2", member2)
+                    .getResultList();
+
+            return !results.isEmpty();
+        } catch (NoResultException e) {
+            return false;
         }
     }
 

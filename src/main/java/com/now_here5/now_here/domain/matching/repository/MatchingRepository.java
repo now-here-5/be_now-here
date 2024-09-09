@@ -21,6 +21,8 @@ public interface MatchingRepository {
 
     Matching findBySenderAndReceiver(Member sender, Member receiver);
 
+    boolean existsByMembers(Member member1, Member member2);
+
     List<Matching> findByReceiverId(Long memberId);
 
     List<Matching> findBySenderId(Long memberId);
