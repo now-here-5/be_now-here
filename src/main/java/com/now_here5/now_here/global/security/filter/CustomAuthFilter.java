@@ -40,7 +40,7 @@ public class CustomAuthFilter extends GenericFilterBean {
         String customToken = resolveToken(httpServletRequest);
 
         String requestURI = httpServletRequest.getRequestURI();
-        log.warn("resolveToken : {}, requestURI : {} ",customToken, requestURI);
+        log.info("resolveToken : {}, requestURI : {} ",customToken, requestURI);
 
         if (StringUtils.hasText(customToken)) { // 토큰이 있을 때만 검증
             AuthenticatedMemberDto memberDto = memberAuthService.getMemberByToken(customToken);
@@ -59,7 +59,7 @@ public class CustomAuthFilter extends GenericFilterBean {
 
             log.debug("Security Context에 '{}' 인증 정보를 저장.",  SecurityContextHolder.getContext().getAuthentication().getName());
         } else {
-            log.warn("유효한 custom 토큰이 없습니다, uri: {}", requestURI);
+            log.warn("토큰이 없는 요청");
         }
 
         filterChain.doFilter(request, response); // 다음 필터로 넘어가기 (토큰이 없는 경우는 로그인으로)
