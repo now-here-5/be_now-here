@@ -36,6 +36,10 @@ jobs:
             context:
               preset: postgresql
 
+      # FCM 키를 디코딩하여 파일로 저장하는 단계
+      - name: Decode FCM Service Account Key
+        run: |
+          echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode > /tmp/firebase-key.json
 
       # 애플리케이션을 배포하는 단계 (PostgreSQL 기동 후 실행)
       - name: Deploy Application
@@ -50,6 +54,7 @@ jobs:
             options:
               ports: "8080"
               env:
+                # Database configuration
                 - name: DB_HOST
                   value: ${{ secrets.CT_DB_HOST }}
                 - name: DB_PORT
@@ -60,12 +65,31 @@ jobs:
                   value: ${{ secrets.CT_DB_USERNAME }}
                 - name: DB_PASSWORD
                   value: ${{ secrets.CT_DB_PASSWORD }}
-                - name: XOR_KEY
-                  value: ${{ secrets.XOR_KEY }}
+
+                # Email configuration
+                - name: MAIL_HOST
+                  value: ${{ secrets.MAIL_HOST }}
+                - name: MAIL_PORT
+                  value: ${{ secrets.MAIL_PORT }}
+                - name: MAIL_USERNAME
+                  value: ${{ secrets.MAIL_USERNAME }}
+                - name: MAIL_PASSWORD
+                  value: ${{ secrets.MAIL_PASSWORD }}
+
+                # Slack Webhook configuration
                 - name: SLACK_WEBHOOK_URL
                   value: ${{ secrets.SLACK_WEBHOOK_URL }}
                 - name: SLACK_INQUIRY_WEBHOOK_URL
                   value: ${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }}
+
+                # Encryption key
+                - name: XOR_KEY
+                  value: ${{ secrets.XOR_KEY }}
+
+                # Firebase 서비스 계정 키 경로 설정
+                - name: FCM_CREDENTIALS_PATH
+                  value: /tmp/firebase-key.json
+
               start: java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
               buildenv: []
             context:
