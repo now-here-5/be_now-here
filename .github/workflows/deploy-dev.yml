@@ -85,7 +85,7 @@ jobs:
                 - name: FCM_CREDENTIALS_PATH
                   value: ./src/main/resources/firebase-key.json
                 - name : FCM_SERVICE_ACCOUNT_KEY
-                    value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
+                  value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
 
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
               start: |
