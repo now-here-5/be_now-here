@@ -21,7 +21,7 @@ public class FcmConfig {
     @Value("${fcm.credentials.path}")
     private String serviceAccountKeyPath;
 
-    @Value("${fcm.service.account.key:}")  // 기본값을 false로 설정
+    @Value("${fcm.service.account.key}")  // 기본값을 false로 설정
     private String serviceAccountKeyBase64;
 
     @PostConstruct
