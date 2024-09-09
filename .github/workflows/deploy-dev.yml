@@ -36,12 +36,6 @@ jobs:
             context:
               preset: postgresql
 
-      # FCM 키를 미리 환경 변수에 주입하는 단계
-      - name: Set FCM Service Account Key
-        run: |
-          export FCM_SERVICE_ACCOUNT_KEY="${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}"
-          echo "FCM Service Account Key set."
-
       # 애플리케이션을 배포하는 단계 (PostgreSQL 기동 후 실행)
       - name: Deploy Application
         uses: cloudtype-github-actions/deploy@v1
@@ -87,18 +81,15 @@ jobs:
                 - name: XOR_KEY
                   value: ${{ secrets.XOR_KEY }}
 
-                # Firebase 서비스 계정 키 경로 설정 및 환경 변수
+                # Firebase 서비스 계정 키 경로 설정
                 - name: FCM_CREDENTIALS_PATH
                   value: ./src/main/resources/firebase-key.json
-                - name: FCM_SERVICE_ACCOUNT_KEY
-                  value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
-
+                - name : FCM_SERVICE_ACCOUNT_KEY
+                    value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
+                - name : JAVA_ENCODE
+                    value: true
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
               start: |
-                # FCM 키를 디코딩하여 리소스 폴더로 저장하는 과정 추가
-                echo "${FCM_SERVICE_ACCOUNT_KEY}" | base64 --decode > ./src/main/resources/firebase-key.json
-
-                # 애플리케이션 시작
                 java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
 
               buildenv: []
