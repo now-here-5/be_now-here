@@ -77,20 +77,20 @@ jobs:
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server -p 8080:8080 \
-              -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \  # db properties
+              -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
               -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
-              -e XOR_KEY=${{ secrets.XOR_KEY }} \ 
+              -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-              -e MAIL_HOST=${{ secrets.MAIL_HOST }} \  # email properties
-              -e MAIL_PORT=${{ secrets.MAIL_PORT }} \  
-              -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \  
-              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \  
-              -e TZ=Asia/Seoul \  
-              -e FCM_CREDENTIALS_PATH=$DEPLOYMENT_DIR/firebase-key.json \  # FCM 경로 환경 변수 설정
+              -e MAIL_HOST=${{ secrets.MAIL_HOST }} \
+              -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
+              -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
+              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e TZ=Asia/Seoul \
+              -e FCM_CREDENTIALS_PATH=$DEPLOYMENT_DIR/firebase-key.json \
               ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1
