@@ -1,6 +1,7 @@
 package com.now_here5.now_here.infra.notification.service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
 import com.google.firebase.messaging.WebpushNotification;
@@ -36,22 +37,29 @@ public class FCMserviceImpl implements FCMNotificationService {
                         .build())
                 .setToken(notificationRequestDto.getToken())
                 .build();
-        String response = FirebaseMessaging.getInstance().sendAsync(message).get();
-        log.info(">>>>Send message : " + response);
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("Successfully sent message: {}", response);
+        } catch (FirebaseMessagingException e) {
+            log.info("Error sending message: {}", e.getMessage());
+        }
+        log.info(">>>>Send message: Title={}, Body={}",
+                notificationRequestDto.getTitle(),
+                notificationRequestDto.getMessage());
     }
 
     @Override
     @Transactional
     public boolean saveFCMToken(String token, String memberId) {
-        {
-            try {
-                Member user = memberRepository.findActiveMemberById(Long.valueOf(memberId));
-                fcmNotificationRepository.saveToken(token, user);
-                return true;
-            } catch (Exception e) {
-                log.error("Failed to update description: {}", e.getMessage());
-                return false;
-            }
+
+        try {
+            Member user = memberRepository.findActiveMemberById(Long.valueOf(memberId));
+            fcmNotificationRepository.saveToken(token, user);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to update description: {}", e.getMessage());
+            return false;
         }
+
     }
 }
