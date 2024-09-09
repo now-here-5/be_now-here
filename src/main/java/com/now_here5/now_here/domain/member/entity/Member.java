@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -71,6 +72,11 @@ public class Member extends FullAudit {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Setter
+    @Column(name = "fcmToken")
+    private String fcmToken;
+
+    // 연관관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
@@ -150,5 +156,6 @@ public class Member extends FullAudit {
     public void deactivate() {
         this.active = false;
     }
+
 }
 

@@ -18,10 +18,8 @@ public class MemberRole {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id"),
-            @JoinColumn(name = "receiver_active", referencedColumnName = "active")
-    })
+
+    @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)

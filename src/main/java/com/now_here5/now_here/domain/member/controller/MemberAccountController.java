@@ -7,7 +7,7 @@ import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.util.CustomXOR;
-import com.now_here5.now_here.infra.notification.service.NotificationService;
+import com.now_here5.now_here.infra.email.service.EmailCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,13 +30,13 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member Account API", description = "회원 계정 관련 API")
 public class MemberAccountController {
     private final MemberService memberService;
-    private final NotificationService notificationService;
+    private final EmailCodeService emailCodeService;
     private final InteractionService interactionService;
     private final CustomXOR customXOR;
 
     @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
-    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "email", description = "이메일", required = true, schema = @Schema(example = "now.here@gmail.com"))
     @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -44,15 +44,15 @@ public class MemberAccountController {
     @GetMapping("/verify/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "phone") String phone) {
+            @RequestParam(name = "email") String email) {
 
-        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), phone);
+        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
 
         if (duplicated) {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
         }
 
-        boolean sent = memberService.sendCode(phone);
+        boolean sent = memberService.sendCode(email);
 
         return sent ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_REQUEST)) :
@@ -68,7 +68,7 @@ public class MemberAccountController {
     public ResponseEntity<ResponseForm> verifyPhone(
             @RequestParam(name = "phone") String phone) {
 
-        String savedCode = notificationService.getPhoneCode(phone);
+        String savedCode = emailCodeService.getEmailCode(phone);
 
         return savedCode != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_GET_SUCCESS, savedCode)) :

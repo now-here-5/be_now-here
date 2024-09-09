@@ -15,7 +15,7 @@ import com.now_here5.now_here.domain.member.entity.*;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.notification.service.NotificationService;
+import com.now_here5.now_here.infra.email.service.EmailCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
-    private final NotificationService notificationService;
+    private final EmailCodeService emailCodeService;
     private final RegisterDtoToMember registerDtoToMember;
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
@@ -38,7 +38,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean sendCode(String phone) {
         try{
-            return notificationService.sendVerificationCode(phone);
+            return emailCodeService.sendVerificationCode(phone);
         } catch (Exception e) {
             log.error("Failed to send verification code to notification number: {}", phone);
             return false;
@@ -47,7 +47,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean verifyCode(String phone, String code) {
-        return notificationService.verifyCode(phone, code);
+        return emailCodeService.verifyCode(phone, code);
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class MemberServiceImpl implements MemberService {
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
         log.warn("event id : {}", eventId);
         try{
-            if(!notificationService.isVerifiedPhone(registerMemberRequest.getPhone())){
+            if(!emailCodeService.isVerifiedEmail(registerMemberRequest.getPhone())){
                 log.debug("Phone number {} is not verified", registerMemberRequest.getPhone());
                 throw new Exception("Phone number is not verified");
             }

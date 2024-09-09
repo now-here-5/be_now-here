@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface MemberService {
 
-    boolean sendCode(String phone);
+    boolean sendCode(String email);
 
     boolean verifyCode(String phone, String code);
 

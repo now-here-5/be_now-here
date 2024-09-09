@@ -51,10 +51,30 @@
 </head>
 <body>
 <div class="container">
-    <h1>안녕하세요. Now, here 입니다.</h1>
-    <p>"Now, here"에서 <strong>%s</strong>으로 인증코드를 발송했습니다.</p>
-    <p>인증코드를 입력해주세요:</p>
-    <strong>%s</strong>
+
+    <!-- 로고 이미지 절대 경로로 사용 -->
+    <img src="https://your-domain.com/images/logo.png" alt="Now, here Logo" style="width: 100%; margin-bottom: 20px;">
+
+    <h1 th:text="${title}">이메일 제목</h1> <!-- 타이틀 동적 처리 -->
+
+    <div style="font-size: 18px; color: #555; margin-top: 20px;">
+        <!-- 인증 코드일 경우 -->
+        <div th:if="${emailType == 'CODE'}">
+            <p>Now, here에서 <strong>인증코드</strong>를 발송했습니다.</p>
+            <p>인증코드를 입력해주세요 👉:</p>
+            <strong th:text="${code}"></strong> <!-- 동적으로 코드 삽입 -->
+        </div>
+
+        <!-- 문의사항일 경우 -->
+        <div th:if="${emailType == 'INQUIRY'}">
+            <p>이전에 문의하신 사항에 대해 답변 드립니다.!</p>
+            <p>이전 문의사항👉: <strong th:text="${inquiry}"></strong></p>
+            <br><br>
+            <strong th:text="${answer}"></strong> <!-- 동적으로 답변 삽입 -->
+        </div>
+    </div>
+
 </div>
+
 </body>
 </html>

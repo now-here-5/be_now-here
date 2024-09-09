@@ -1,5 +1,6 @@
-package com.now_here5.now_here.infra.notification.repository;
+package com.now_here5.now_here.infra.email.repository;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,7 @@ public class MemoryRepository {
         return Boolean.valueOf(findCheckCodeBy(target));
     }
 
+    @Transactional
     public void saveCheckCode(String target, String checkCode) { // CREATE
 
         checkCodeMap.remove(target);

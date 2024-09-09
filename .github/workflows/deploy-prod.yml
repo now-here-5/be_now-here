@@ -24,11 +24,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
-
       - name: Log in to GitHub Container Registry
         run: |
           echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
 
       - name: Build and Push Docker Image
         run: |
@@ -36,7 +34,6 @@ jobs:
                               --cache-to type=local,dest=/tmp/.buildx-cache \
                               -t ghcr.io/${{ github.repository }}:latest \
                               --push .
-
 
       # PostgreSQL VM 접속 및 상태 확인 단계
       - name: Check and Start PostgreSQL on Separate VM
@@ -53,6 +50,7 @@ jobs:
               sudo systemctl start postgresql
             fi
 
+
       # 애플리케이션 VM 배포 단계
       - name: Deploy Spring Boot on OCI VM
         uses: appleboy/ssh-action@v1.0.3
@@ -61,15 +59,15 @@ jobs:
           username: ${{ secrets.OCI_VM_USERNAME }}
           key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
           script: |
-            DEPLOYMENT_DIR="/home/username/app"
+            DEPLOYMENT_DIR="/home/now-here/app"
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
               mkdir -p "$DEPLOYMENT_DIR"
             fi
             
             cd "$DEPLOYMENT_DIR"
+            echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode > firebase-key.json
             
-
             echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             if ! docker pull ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to pull Docker image"
@@ -79,14 +77,20 @@ jobs:
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server -p 8080:8080 \
-              -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
+              -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \  # db properties
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
               -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
-              -e XOR_KEY=${{ secrets.XOR_KEY }} \
+              -e XOR_KEY=${{ secrets.XOR_KEY }} \ 
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
+              -e MAIL_HOST=${{ secrets.MAIL_HOST }} \  # email properties
+              -e MAIL_PORT=${{ secrets.MAIL_PORT }} \  
+              -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \  
+              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \  
+              -e TZ=Asia/Seoul \  
+              -e FCM_CREDENTIALS_PATH=$DEPLOYMENT_DIR/firebase-key.json \  # FCM 경로 환경 변수 설정
               ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1

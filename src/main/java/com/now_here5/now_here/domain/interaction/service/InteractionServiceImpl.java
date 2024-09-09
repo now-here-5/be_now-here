@@ -12,6 +12,8 @@ import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.infra.email.service.EmailCodeService;
+import com.now_here5.now_here.infra.email.service.EmailInquiryService;
 import com.now_here5.now_here.infra.notification.service.NotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class InteractionServiceImpl implements InteractionService {
     private final MemberRepository memberRepository;
     private final AuthUtil authUtil;
     private final SlackInquiryHandlerService slackInquiryHandlerService;
-    private final NotificationService notificationService;
+    private final EmailInquiryService emailInquiryService;
     private final MatchingRepository matchingRepository;
 
     @Transactional
@@ -49,21 +51,20 @@ public class InteractionServiceImpl implements InteractionService {
     @Transactional
     @Override
     public void createInquiry(InquiryRequest inquiryRequest) {
-        Long memberId = authUtil.getMemberByAuthentication().getMemberId();
-
         Inquiry.InquiryBuilder builder = Inquiry.builder();
-        builder.content(inquiryRequest.getContent());
-
-        builder.phoneNumber(inquiryRequest.getPhoneNumber());
-        if(memberId == null) {
-            log.warn("Member ID is null");
-        }else{
+        try {
+            Long memberId = authUtil.getMemberByAuthentication().getMemberId();
             builder.member(memberRepository.findActiveMemberById(memberId));
+        }catch(Exception e){
+            log.error("토큰이 없는 문의사항 작성: {}", e.getMessage());
+        }finally {
+            builder.content(inquiryRequest.getContent())
+                    .email(inquiryRequest.getEmail());
         }
 
         Inquiry newInquiry = builder.build();
         interactionRepository.saveInquiry(newInquiry);
-        slackInquiryHandlerService.sendSlackNotification(newInquiry.getId(), newInquiry.getContent(), newInquiry.getPhoneNumber());
+        slackInquiryHandlerService.sendSlackNotification(newInquiry.getId(), newInquiry.getContent(), newInquiry.getEmail());
     }
 
     @Transactional
@@ -75,15 +76,8 @@ public class InteractionServiceImpl implements InteractionService {
 
             foundInquiry.updateAnswer(answer);
 
-            String responseMessage = String.format("[Now, Here] 질문에 대한 답변: %s", answer);
-            InquiryResponse inquiryResponse = InquiryResponse.builder()
-                    .inquiryId(inquiryId)
-                    .answer(responseMessage)
-                    .inquiryContent(foundInquiry.getContent())
-                    .build();
-
             // SMS 전송
-            notificationService.sendSms(foundInquiry.getPhoneNumber(), responseMessage);
+            emailInquiryService.sendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
         } else {
             log.info("Inquiry not found for ID: {}", inquiryId);
         }

@@ -48,8 +48,9 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers("/slack/**").permitAll()
-
+                                .requestMatchers(HttpMethod.POST, "*/inquiry").permitAll()
                                 // 비유저 대상
+                                .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/register/**").permitAll()
