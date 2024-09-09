@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @Slf4j
@@ -29,7 +29,8 @@ public class NotificationController {
     @ApiResponse(responseCode = "400", description = "F001 - FCM 토큰 저장 실패")
     @PostMapping("/saveFCMToken")
     public ResponseEntity<ResponseForm> saveFCMToken(
-            @RequestBody String token, @RequestBody String memberId) {
+            @RequestParam String token,
+            @RequestParam String memberId) {
         boolean saved = fcmNotificationService.saveFCMToken(token, memberId);
 
         return saved ?
