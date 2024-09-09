@@ -7,5 +7,5 @@ import lombok.Getter;
 @Builder
 public class InquiryRequest {
     private String content;
-    private String phoneNumber;
+    private String email;
 }

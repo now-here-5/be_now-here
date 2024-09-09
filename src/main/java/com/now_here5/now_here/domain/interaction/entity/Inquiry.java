@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @Table(name = "inquiry")
 public class Inquiry extends Interaction {
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "answer")
     private String answer;
@@ -24,9 +24,9 @@ public class Inquiry extends Interaction {
     private LocalDateTime answeredAt; // 답변 시간 (답변이 있을 때만 해당)
 
     @Builder
-    public Inquiry(String content, Member member, String phoneNumber, String answer) {
+    public Inquiry(String content, Member member, String email, String answer) {
         super(content, member);
-        this.phoneNumber = phoneNumber;
+        this.email = email;
         this.answer = answer;
     }
 

@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers("/slack/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/inquiry").permitAll()
                                 // 비유저 대상
+                                .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/register/**").permitAll()
