@@ -15,7 +15,6 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.notification.dto.NotificationRequestDto;
 import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
@@ -73,13 +72,13 @@ public class MatchingServiceImpl implements MatchingService {
                 String message = String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname());
                 slackNotificationService.sendNotification(message);
 
-                // receiver에게 FCM 알림 전송
-                NotificationRequestDto notificationRequestDto  = NotificationRequestDto.builder()
-                        .title("하트가 도착했어요!")
-                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
-                        .token(sender.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(notificationRequestDto);
+//                // receiver에게 FCM 알림 전송
+//                NotificationRequestDto notificationRequestDto  = NotificationRequestDto.builder()
+//                        .title("하트가 도착했어요!")
+//                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
+//                        .token(sender.getFcmToken())
+//                        .build();
+//                fcmNotificationService.sendMessages(notificationRequestDto);
 
             } else {
                 log.error("Matching already exists between {} and {}", senderId, receiverId);
