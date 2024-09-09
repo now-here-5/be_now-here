@@ -86,8 +86,7 @@ jobs:
                   value: ./src/main/resources/firebase-key.json
                 - name : FCM_SERVICE_ACCOUNT_KEY
                     value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
-                - name : JAVA_ENCODE
-                    value: true
+
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
               start: |
                 java -Duser.timezone=Asia/Seoul -jar ./build/libs/now_here-0.0.1-SNAPSHOT.jar
