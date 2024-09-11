@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "inquiry")
 public class Inquiry extends Interaction {
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Column(name = "answer")

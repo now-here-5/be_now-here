@@ -9,6 +9,7 @@ import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.global.security.dto.TokenDto;
+import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandler;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.global.security.service.CustomAuthenticationToken;
@@ -16,6 +17,7 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,6 +80,10 @@ public class MemberAuthService {
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try {
             Member member = memberAuthRepository.findMemberByToken(token);
+            if (member == null) {
+                log.error("get Member By Token Error ={}", "Member Not Found");
+                throw new AccessDeniedException("Member Not Found by Token");
+            }
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
                     .nickname(member.getNickname())
@@ -102,7 +108,7 @@ public class MemberAuthService {
 
         /// CustomAuthenticationToken 생성, 여기에 eventID를 추가
         CustomAuthenticationToken authenticationToken =
-                new CustomAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword(), eventId);
+                new CustomAuthenticationToken(loginRequest.getAccountId(), loginRequest.getPassword(), eventId);
 
         // 인증 성공 후 SecurityContext에 Authentication 객체 저장
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

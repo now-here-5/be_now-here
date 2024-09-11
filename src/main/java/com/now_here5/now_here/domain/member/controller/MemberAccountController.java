@@ -46,11 +46,11 @@ public class MemberAccountController {
             @PathVariable(name = "event_id") String eventId,
             @RequestParam(name = "email") String email) {
 
-        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
-
-        if (duplicated) {
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
-        }
+//        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
+//
+//        if (duplicated) {
+//            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
+//        }
 
         boolean sent = memberService.sendCode(email);
 
@@ -86,13 +86,30 @@ public class MemberAccountController {
             @PathVariable(name = "event_id") String eventId,
             @RequestParam(name = "nickname") String nickname) {
 
-
         boolean isDuplicated = memberService.checkNicknameDuplicated(customXOR.decrypt(eventId), nickname);
 
         return isDuplicated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.NICKNAME_DUPLICATED)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.NICKNAME_QUALIFIED));
     }
+
+    @Operation(summary = "아이디 중복 확인", description = "이벤트 ID와 아이디를 사용하여 아이디 중복 여부를 확인합니다.")
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Parameter(name = "accountId", description = "아이디", required = true, schema = @Schema(example = "ACC14"))
+    @ApiResponse(responseCode = "200", description = "A004 - 사용 가능한 아이디입니다.")
+    @ApiResponse(responseCode = "400", description = "A004 - 중복된 아이디입니다.")
+    @GetMapping("/verify/account-id/{event_id}")
+    public ResponseEntity<ResponseForm> checkIAccountIdIsDuplicated(
+            @PathVariable(name = "event_id") String eventId,
+            @RequestParam(name = "accountId") String accountId) {
+
+        boolean isDuplicated = memberService.checkAccountIdDuplicated(customXOR.decrypt(eventId), accountId);
+
+        return isDuplicated ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_DUPLICATED)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_QUALIFIED));
+    }
+
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
     @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
@@ -121,13 +138,13 @@ public class MemberAccountController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = RegisterMemberRequest.class,
-                            requiredProperties = {"phone", "password", "nickname", "birth", "mbti", "gender", "description"}
+                            requiredProperties = {"accountId", "password", "nickname", "birth", "mbti", "gender", "description", "snsId"}
                     ),
                     examples = @ExampleObject(
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"accountId\": \"hj1234\", \"snsId\": \"hcons\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )
@@ -143,8 +160,7 @@ public class MemberAccountController {
 
         String token = memberService.registerMember(customXOR.decrypt(eventId), registerMemberRequest);
 
-
-        return token != null ?
+        return !token.isEmpty() ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_FAIL));
     }

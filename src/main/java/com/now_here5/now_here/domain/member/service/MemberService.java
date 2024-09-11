@@ -18,9 +18,9 @@ public interface MemberService {
 
     boolean deactivateMember();
 
-    boolean checkPhoneDuplicated(Long eventId, String phone);
-
     boolean checkNicknameDuplicated(Long eventId, String nickname);
+
+    boolean checkAccountIdDuplicated(Long eventId, String accountId);
 
     List<MemberRecommendResponse> recommendMembers();
 
@@ -36,8 +36,9 @@ public interface MemberService {
 
     boolean updateMbti(String mbti);
 
+    boolean updateSnsId(String snsId);
+
     ProfileResponse getProfile();
 
     PersonalInfoResponse getPersonalInfo();
-
 }

@@ -62,12 +62,19 @@ jobs:
             DEPLOYMENT_DIR="/home/now-here/app"
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
-              mkdir -p "$DEPLOYMENT_DIR"
+              sudo mkdir -p "$DEPLOYMENT_DIR"
             fi
             
             cd "$DEPLOYMENT_DIR"
-            echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode > firebase-key.json
             
+            if [ -f "$DEPLOYMENT_DIR/firebase-key.json" ]; then
+              echo "firebase-key.json already exists, using the existing file."
+            else
+              echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode | sudo tee "$DEPLOYMENT_DIR/firebase-key.json" > /dev/null
+              echo "firebase-key.json has been created."
+            fi
+
+        
             echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             if ! docker pull ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to pull Docker image"
@@ -90,7 +97,8 @@ jobs:
               -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
               -e TZ=Asia/Seoul \
-              -e FCM_CREDENTIALS_PATH=$DEPLOYMENT_DIR/firebase-key.json \
+              -v $DEPLOYMENT_DIR/firebase-key.json:/app/firebase-key.json \
+              -e FCM_CREDENTIALS_PATH=/app/firebase-key.json \
               ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1

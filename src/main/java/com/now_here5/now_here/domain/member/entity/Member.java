@@ -24,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"event_id", "phone_num"}),
+        @UniqueConstraint(columnNames = {"event_id", "account_id"}),
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
 })
 public class Member extends FullAudit {
@@ -34,20 +34,23 @@ public class Member extends FullAudit {
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
+    @Column(name = "account_id", nullable = false, length = 15)
+    private String accountId; // 변경 불가. (로그인 아이디)
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
     @Column(name = "token", unique = true)
     private String token;
 
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @Column(name = "phone_num", nullable = false, length = 11)
-    private String phoneNumber;
-
     @Column(name = "nick_name", nullable = false, length = 8)
     private String nickname;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column(name="sns_id", nullable = false, length = 50)
+    private String snsId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
@@ -91,12 +94,11 @@ public class Member extends FullAudit {
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Builder
-    public Member(String token, LocalDate birthday, String phoneNumber, String nickname, String password,
-                  Gender gender, MBTI mbti, String description, boolean active,
-                  Event event) {
+    public Member(String token, LocalDate birthday, String accountId, String nickname, String snsId,
+                  String password, Gender gender, MBTI mbti, String description, boolean active, Event event) {
         this.token = token;
         this.birthday = birthday;
-        this.phoneNumber = phoneNumber;
+        this.accountId = accountId;
         this.nickname = nickname;
         this.password = password;
         this.gender = gender;
@@ -104,11 +106,13 @@ public class Member extends FullAudit {
         this.description = description;
         this.active = active;
         this.event = event;
+        this.snsId = snsId;
+
+        //default
         this.unreadNotiCount = 0;
         this.notiSetting = true;
         this.popupCount = 0;
 
-        // Add this member to the event's member list if it's not already present
         setEvent(event);
     }
 
@@ -137,6 +141,10 @@ public class Member extends FullAudit {
         this.nickname = newNickName;
     }
 
+    public void updateSnsId(String newSnsId) {
+        this.snsId = newSnsId;
+    }
+
     // 편의 메서드
     public void setEvent(Event event) {
         this.event = event;
@@ -148,6 +156,7 @@ public class Member extends FullAudit {
     public void updateUnreadNotiCount(int unreadNotiCount) {
         this.unreadNotiCount = unreadNotiCount;
     }
+
     // 상태 관리 메서드
     public void activate() {
         this.active = true;
