@@ -72,6 +72,8 @@ public enum ResponseCode {
     PHONE_VERIFY_SUCCESS(200, "A003", "휴대폰 인증에 성공했습니다."),
     PHONE_VERIFY_FAIL(400, "A003", "휴대폰 인증에 실패했습니다."),
 
+    ACCOUNT_ID_DUPLICATED(200, "A004", "중복된 아이디입니다."),
+    ACCOUNT_ID_QUALIFIED(200, "A004", "사용 가능한 아이디입니다."),
     // development - only
     PHONE_GET_SUCCESS(200, "A001-D", "개발용 인증 번호 조회에 성공했습니다."),
     PHONE_GET_FAIL(400, "A001-D", "개발용 인증 번호 조회에 실패했습니다."),

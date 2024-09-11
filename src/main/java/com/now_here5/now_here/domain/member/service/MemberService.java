@@ -20,6 +20,8 @@ public interface MemberService {
 
     boolean checkNicknameDuplicated(Long eventId, String nickname);
 
+    boolean checkAccountIdDuplicated(Long eventId, String accountId);
+
     List<MemberRecommendResponse> recommendMembers();
 
     EventListResponse getAssignedEventsByMember();

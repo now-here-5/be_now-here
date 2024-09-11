@@ -93,6 +93,24 @@ public class MemberAccountController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.NICKNAME_QUALIFIED));
     }
 
+    @Operation(summary = "아이디 중복 확인", description = "이벤트 ID와 아이디를 사용하여 아이디 중복 여부를 확인합니다.")
+    @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
+    @Parameter(name = "accountId", description = "아이디", required = true, schema = @Schema(example = "ACC14"))
+    @ApiResponse(responseCode = "200", description = "A004 - 사용 가능한 아이디입니다.")
+    @ApiResponse(responseCode = "400", description = "A004 - 중복된 아이디입니다.")
+    @GetMapping("/verify/account-id/{event_id}")
+    public ResponseEntity<ResponseForm> checkIAccountIdIsDuplicated(
+            @PathVariable(name = "event_id") String eventId,
+            @RequestParam(name = "accountId") String accountId) {
+
+        boolean isDuplicated = memberService.checkAccountIdDuplicated(customXOR.decrypt(eventId), accountId);
+
+        return isDuplicated ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_DUPLICATED)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_QUALIFIED));
+    }
+
+
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
     @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))

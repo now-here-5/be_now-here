@@ -94,6 +94,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public boolean checkAccountIdDuplicated(Long eventId, String accountId) {
+        return memberRepository.isAccountIdDuplicatedInEvent(accountId, eventId);
+    }
+
+    @Override
     public List<MemberRecommendResponse> recommendMembers() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Member member = memberRepository.findMemberById(authMember.getMemberId());
