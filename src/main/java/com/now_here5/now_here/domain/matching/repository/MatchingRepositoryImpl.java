@@ -35,10 +35,9 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("배너에 적힐 10명의 매칭을 찾는 도중에 에러가 발생했습니다: {}", status, e);
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
-
 
     @Override
     public void save(Matching matching) {
@@ -46,7 +45,6 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             em.persist(matching);
         } catch (Exception e) {
             log.error("매칭 저장 중에 실패: {}", matching, e);
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -66,7 +64,6 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             em.merge(matching);
         } catch (Exception e) {
             log.error("매칭 업데이트 중 실패: {}", matching, e);
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -81,7 +78,6 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             }
         } catch (Exception e) {
             log.error("ID로 매칭 삭제 중 실패: {}", matchingId, e);
-            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -93,7 +89,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getSingleResult();
         } catch (Exception e) {
             log.error("Failed to count matchings by receiverId: {}", memberId, e);
-            throw new RuntimeException(e.getMessage());
+            return 0L; // 0을 반환하여 처리
         }
     }
 
@@ -105,7 +101,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getSingleResult();
         } catch (Exception e) {
             log.error("Failed to count matchings by senderId: {}", memberId, e);
-            throw new RuntimeException(e.getMessage());
+            return 0L; // 0을 반환하여 처리
         }
     }
 
@@ -116,6 +112,9 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .setParameter("sender", sender)
                     .setParameter("receiver", receiver)
                     .getSingleResult();
+        } catch (NoResultException e) {
+            log.warn("No matching found between sender {} and receiver {}.", sender.getId(), receiver.getId());
+            return null; // 결과가 없을 때 null 반환
         } catch (Exception e) {
             log.error("보낸이와 받는이로 매칭 조회 중 실패: {} {}", sender, receiver, e);
             return null;
@@ -134,6 +133,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
 
             return !results.isEmpty();
         } catch (NoResultException e) {
+            log.warn("No matching found between {} and {}", member1, member2);
             return false;
         }
     }
@@ -146,7 +146,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("받는 이로 매칭 조회 중 실패: {}", memberId, e);
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
 
@@ -158,7 +158,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("보낸 이로 매칭 조회 중 실패: {}", memberId, e);
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
 
@@ -184,11 +184,9 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("Failed to find matchings with counterpart nickname: memberId={}, error={}", memberId, e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
-
-
 
     @Override
     public List<Matching> findAcceptedMatchingsBySenderOrReceiver(Long memberId) {
@@ -201,7 +199,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("매칭 조회 중 실패: memberId={}, status=ACCEPTED, error={}", memberId, e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
 
@@ -216,7 +214,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .getResultList();
         } catch (Exception e) {
             log.error("어제의 매칭 조회중 실패: {}", e.getMessage());
-            throw new RuntimeException(e.getMessage());
+            return List.of(); // 빈 리스트 반환
         }
     }
 }
