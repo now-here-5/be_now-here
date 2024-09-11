@@ -92,7 +92,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public boolean isAcoountIdDuplicatedInEvent(String accountId, Long eventId) {
+    public boolean isAccountIdDuplicatedInEvent(String accountId, Long eventId) {
         try{
             return em.createQuery("select count(am) from Member am " +
                             "where am.accountId = :accountId " +

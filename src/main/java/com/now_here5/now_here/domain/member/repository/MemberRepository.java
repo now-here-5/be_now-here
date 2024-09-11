@@ -17,7 +17,7 @@ public interface MemberRepository {
 
     boolean isNickNameDuplicatedInEvent(String nickname, Long eventId);
 
-    boolean isAcoountIdDuplicatedInEvent(String accountId, Long eventId);
+    boolean isAccountIdDuplicatedInEvent(String accountId, Long eventId);
 
     Member findMemberById(Long memberId);
 

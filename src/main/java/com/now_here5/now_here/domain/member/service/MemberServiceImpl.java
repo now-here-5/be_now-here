@@ -56,7 +56,7 @@ public class MemberServiceImpl implements MemberService {
         log.warn("event id : {}", eventId);
         try{
 
-            if(memberRepository.isAcoountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
+            if(memberRepository.isAccountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
                 log.debug("Account id {} is duplicated in event {}", registerMemberRequest.getAccountId(), eventId);
                 return "";
             }
@@ -200,6 +200,21 @@ public class MemberServiceImpl implements MemberService {
             return true;
         } catch (Exception e) {
             log.error("Failed to update mbti: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Transactional
+    @Override
+    public boolean updateSnsId(String snsId) {
+        try {
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            member.updateSnsId(snsId);
+
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to update snsId: {}", e.getMessage());
             return false;
         }
     }
