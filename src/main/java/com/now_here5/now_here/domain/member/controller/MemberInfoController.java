@@ -131,10 +131,10 @@ public class MemberInfoController {
     public ResponseEntity<ResponseForm> getNotificationSetting() {
         try {
             boolean notificationSetting = memberService.getNotificationSetting();
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_SUCCESS, notificationSetting));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.NOTIFICATION_READ_SUCCESS, notificationSetting));
         } catch (Exception e) {
             log.error("알림 설정 조회에 실패했습니다: {}", e.getMessage());
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.TOGGLE_NOTIFICATION_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.NOTIFICATION_READ_FAIL));
         }
     }
 
@@ -203,6 +203,7 @@ public class MemberInfoController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.MBTI_UPDATE_FAIL));
     }
 
+
     @Operation(summary = "SNS ID 업데이트", description = "회원의 SNS ID를 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "SNS ID 업데이트 요청",
@@ -221,10 +222,9 @@ public class MemberInfoController {
                     )
             )
     )
-
     @ApiResponse(responseCode = "200", description = "M011 - SNS ID 업데이트에 성공했습니다.")
     @ApiResponse(responseCode = "400", description = "M011 - SNS ID 업데이트에 실패했습니다.")
-
+    @PatchMapping("/update/sns-id")
     public ResponseEntity<ResponseForm> updateSnsId(
             @RequestBody UpdateSnsIdRequest updateSnsIdRequest) {
 

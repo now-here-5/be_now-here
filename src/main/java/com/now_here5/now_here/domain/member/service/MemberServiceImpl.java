@@ -88,7 +88,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
     @Override
     public boolean checkNicknameDuplicated(Long eventId, String nickname) {
         return memberRepository.isNickNameDuplicatedInEvent(nickname, eventId);
@@ -154,7 +153,7 @@ public class MemberServiceImpl implements MemberService {
             return member.isNotiSetting();
         }catch (Exception e){
             log.error("Failed to get notification setting: {}", e.getMessage());
-            throw  new RuntimeException("Failed to get notification setting");
+            throw new RuntimeException("Failed to get notification setting");
         }
     }
 

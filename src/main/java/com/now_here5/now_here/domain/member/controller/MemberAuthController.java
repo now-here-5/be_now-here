@@ -55,7 +55,6 @@ public class MemberAuthController {
             @RequestBody LoginRequest loginRequest,
             @PathVariable(value = "event_id") String eventId
     ) {
-
         TokenDto token = memberAuthService.login(loginRequest, customXOR.decrypt(eventId));
         return token != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_SUCCESS, token)) :

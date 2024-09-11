@@ -49,7 +49,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     ));
 
             if(member == null) {
-                log.warn("해당 전화번호로 가입된 유저가 없습니다.");
+                log.warn("해당 Account_id : {} 로 이벤트 : {} 가입된 유저가 없습니다 ",eventId, accountId);
                 throw new UsernameNotFoundException("notification not found");
             }
 

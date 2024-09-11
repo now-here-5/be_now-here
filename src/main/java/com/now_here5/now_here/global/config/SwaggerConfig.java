@@ -20,7 +20,8 @@ public class SwaggerConfig {
                         .description("API Documentation"))
                 // HTTPS 서버 추가
                 .addServersItem(new Server().url("https://api.now-here.site").description("Production server"))
-                .addServersItem(new Server().url("http://api.now-here.site").description("Test server"))
+                .addServersItem(new Server().url("https://port-0-now-here-server-754g42aluutr2qo.sel5.cloudtype.app/").description("Test server"))
+                .addServersItem(new Server().url("http://localhost:8080").description("Local server"))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)

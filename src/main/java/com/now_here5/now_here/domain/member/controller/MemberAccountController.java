@@ -86,7 +86,6 @@ public class MemberAccountController {
             @PathVariable(name = "event_id") String eventId,
             @RequestParam(name = "nickname") String nickname) {
 
-
         boolean isDuplicated = memberService.checkNicknameDuplicated(customXOR.decrypt(eventId), nickname);
 
         return isDuplicated ?
