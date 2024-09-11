@@ -46,11 +46,11 @@ public class MemberAccountController {
             @PathVariable(name = "event_id") String eventId,
             @RequestParam(name = "email") String email) {
 
-        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
-
-        if (duplicated) {
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
-        }
+//        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
+//
+//        if (duplicated) {
+//            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
+//        }
 
         boolean sent = memberService.sendCode(email);
 
@@ -121,13 +121,13 @@ public class MemberAccountController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = RegisterMemberRequest.class,
-                            requiredProperties = {"phone", "password", "nickname", "birth", "mbti", "gender", "description"}
+                            requiredProperties = {"accountId", "password", "nickname", "birth", "mbti", "gender", "description", "snsId"}
                     ),
                     examples = @ExampleObject(
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"accountId\": \"hj1234\", \"snsId\": \"hcons\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )
@@ -143,8 +143,7 @@ public class MemberAccountController {
 
         String token = memberService.registerMember(customXOR.decrypt(eventId), registerMemberRequest);
 
-
-        return token != null ?
+        return !token.isEmpty() ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_SUCCESS, token)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SIGNUP_FAIL));
     }

@@ -18,8 +18,6 @@ public interface MemberService {
 
     boolean deactivateMember();
 
-    boolean checkPhoneDuplicated(Long eventId, String phone);
-
     boolean checkNicknameDuplicated(Long eventId, String nickname);
 
     List<MemberRecommendResponse> recommendMembers();

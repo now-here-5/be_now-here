@@ -55,9 +55,10 @@ public class MemberServiceImpl implements MemberService {
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
         log.warn("event id : {}", eventId);
         try{
-            if(!emailCodeService.isVerifiedEmail(registerMemberRequest.getPhone())){
-                log.debug("Phone number {} is not verified", registerMemberRequest.getPhone());
-                throw new Exception("Phone number is not verified");
+
+            if(memberRepository.isAcoountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
+                log.debug("Account id {} is duplicated in event {}", registerMemberRequest.getAccountId(), eventId);
+                return "";
             }
 
             Member member = registerDtoToMember.converter(registerMemberRequest);
@@ -69,7 +70,7 @@ public class MemberServiceImpl implements MemberService {
 
         }catch(Exception e){
             log.error("Failed to register member: {}", e.getMessage());
-            return null;
+            return "";
         }
 
     }
@@ -87,29 +88,10 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Override
-    public boolean checkPhoneDuplicated(Long eventId, String phone) {
-        try{
-            List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
-            log.trace("notification number {} : ",members);
-            for(Member member : members){
-                if(member.getEvent().getId().equals(eventId)){
-
-                    log.debug("Phone number {} is duplicated in event {} : {}",
-                            phone, eventId, member.getEvent().getField());
-                    return true;
-                }
-            }
-            log.trace("notification number {} : ",members);
-                return false;
-        } catch (Exception e) {
-            return true;
-        }
-    }
 
     @Override
     public boolean checkNicknameDuplicated(Long eventId, String nickname) {
-        return memberRepository.isNickNameDuplicatedWith(nickname, eventId);
+        return memberRepository.isNickNameDuplicatedInEvent(nickname, eventId);
     }
 
     @Override
@@ -268,7 +250,8 @@ public class MemberServiceImpl implements MemberService {
                     member.getNickname(),
                     member.getBirthday().toString(),
                     member.getGender().toString(),
-                    member.getPhoneNumber(),
+                    member.getAccountId(),
+                    member.getSnsId(),
                     member.getDescription());
 
         } catch (Exception e) {

@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     // 주어진 사용자 정보를 전화번호를 기반으로 데이터베이스에서 찾아 UserDetails 객체로 반환
     @Override
-    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String accountId) throws UsernameNotFoundException {
 
         // 이벤트 ID가 필요하다면, 커스텀 토큰에서 꺼내 사용
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             Long eventId = customToken.getEventId();
 
-            Member member = memberAuthRepository.findMemberWithRolesByPhone(phone, eventId);
+            Member member = memberAuthRepository.findMemberWithRolesByAccountId(accountId, eventId);
 
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(member, null, new ArrayList<>()
@@ -55,7 +55,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             // UserDetails 객체로 변환하여 반환
             return new User(
-                    member.getPhoneNumber(),
+                    member.getAccountId(),
                     member.getPassword(),
                     getAuthorities(
                             listRolesToDto.converter(

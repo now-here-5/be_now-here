@@ -25,7 +25,6 @@ public abstract class Interaction extends CreatedDateAudit {
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) ) // 외래 키 제약 조건을 생성하지 않음
     private Member member;
 
-
     public Interaction(String content, Member member) {
         this.content = content;
         this.member = member;

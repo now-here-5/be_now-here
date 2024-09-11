@@ -16,15 +16,15 @@ public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
     @Override
-    public List<Member> findActiveMemberByPhone(String phoneNumber) {
+    public List<Member> findActiveMemberByAccountId(String accountId) {
         try{
             return em.createQuery("select m from Member m " +
                             "join fetch m.event " +
-                            "where m.phoneNumber = :phoneNumber " , Member.class)
-                    .setParameter("phoneNumber", phoneNumber)
+                            "where m.accountId = :accountId " , Member.class)
+                    .setParameter("accountId", accountId)
                     .getResultList();
         }catch (Exception e){
-            log.error("Failed to find active member by notification number: {}", phoneNumber);
+            log.error("Failed to find active member by account id: {}", accountId);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public boolean isNickNameDuplicatedWith(String nickname, Long eventId) {
+    public boolean isNickNameDuplicatedInEvent(String nickname, Long eventId) {
         try{
             return em.createQuery("select count(am) from Member am " +
                             "where am.nickname = :nickname " +
@@ -87,6 +87,21 @@ public class MemberRepositoryImpl implements MemberRepository {
                     .getSingleResult() > 0;
         }catch (Exception e){
             log.error("Failed to check nickname duplication: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isAcoountIdDuplicatedInEvent(String accountId, Long eventId) {
+        try{
+            return em.createQuery("select count(am) from Member am " +
+                            "where am.accountId = :accountId " +
+                            "and am.event.id = :eventId", Long.class)
+                    .setParameter("accountId", accountId)
+                    .setParameter("eventId", eventId)
+                    .getSingleResult() > 0;
+        }catch (Exception e){
+            log.error("Failed to check account id duplication: {}", e.getMessage());
             return false;
         }
     }

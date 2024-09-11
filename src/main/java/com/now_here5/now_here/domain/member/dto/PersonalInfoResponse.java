@@ -4,12 +4,14 @@ import lombok.Getter;
 
 @Getter
 public class PersonalInfoResponse extends ProfileResponse {
-    private final String phone;
+    private final String accountId;
     private final String description;
+    private final String string;
 
-    public PersonalInfoResponse(Long memberId, String mbti, String nickname, String birthdate, String gender, String phone, String description) {
+    public PersonalInfoResponse(Long memberId, String mbti, String nickname, String birthdate, String gender, String accountId, String description, String string) {
         super(memberId, mbti, nickname, birthdate, gender, description);
-        this.phone = phone;
+        this.accountId = accountId;
         this.description = description;
+        this.string = string;
     }
 }

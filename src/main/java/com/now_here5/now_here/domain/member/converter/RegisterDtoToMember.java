@@ -23,7 +23,8 @@ public class RegisterDtoToMember {
     public Member converter(RegisterMemberRequest registerRequest) {
         String encryptedPassword = passwordEncoder.encode(registerRequest.getPassword());
         return Member.builder()
-                .phoneNumber(registerRequest.getPhone())
+                .accountId(registerRequest.getAccountId())
+                .snsId(registerRequest.getSnsId())
                 .password(encryptedPassword)
                 .nickname(registerRequest.getNickname())
                 .gender(Gender.valueOf(registerRequest.getGender().toUpperCase()))

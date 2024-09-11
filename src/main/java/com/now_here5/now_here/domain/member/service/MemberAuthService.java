@@ -102,7 +102,7 @@ public class MemberAuthService {
 
         /// CustomAuthenticationToken 생성, 여기에 eventID를 추가
         CustomAuthenticationToken authenticationToken =
-                new CustomAuthenticationToken(loginRequest.getPhone(), loginRequest.getPassword(), eventId);
+                new CustomAuthenticationToken(loginRequest.getAccountId(), loginRequest.getPassword(), eventId);
 
         // 인증 성공 후 SecurityContext에 Authentication 객체 저장
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
