@@ -66,8 +66,15 @@ jobs:
             fi
             
             cd "$DEPLOYMENT_DIR"
-            echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode > firebase-key.json
             
+            if [ -f "$DEPLOYMENT_DIR/firebase-key.json" ]; then
+              echo "firebase-key.json already exists, using the existing file."
+            else
+              echo "${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}" | base64 --decode | sudo tee "$DEPLOYMENT_DIR/firebase-key.json" > /dev/null
+              echo "firebase-key.json has been created."
+            fi
+
+        
             echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             if ! docker pull ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to pull Docker image"
