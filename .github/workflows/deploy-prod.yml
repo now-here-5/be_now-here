@@ -62,7 +62,7 @@ jobs:
             DEPLOYMENT_DIR="/home/now-here/app"
             if [ ! -d "$DEPLOYMENT_DIR" ]; then
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
-              mkdir -p "$DEPLOYMENT_DIR"
+              sudo mkdir -p "$DEPLOYMENT_DIR"
             fi
             
             cd "$DEPLOYMENT_DIR"
