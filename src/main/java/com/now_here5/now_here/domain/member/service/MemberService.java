@@ -35,8 +35,8 @@ public interface MemberService {
     boolean updateMbti(String mbti);
 
     boolean updateSnsId(String snsId);
+
     ProfileResponse getProfile();
 
     PersonalInfoResponse getPersonalInfo();
-
 }

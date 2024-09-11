@@ -261,13 +261,14 @@ public class MemberServiceImpl implements MemberService {
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             return new PersonalInfoResponse(
                     member.getId(),
-                    member.getMbti().toString(),
-                    member.getNickname(),
-                    member.getBirthday().toString(),
-                    member.getGender().toString(),
                     member.getAccountId(),
                     member.getSnsId(),
-                    member.getDescription());
+                    member.getMbti().toString(),
+                    member.getNickname(),
+                    member.getGender().toString(),
+                    member.getBirthday().toString(),
+                    member.getDescription()
+                    );
 
         } catch (Exception e) {
             log.error("Failed to get personal info: {}", e.getMessage());
