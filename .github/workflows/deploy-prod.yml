@@ -90,7 +90,8 @@ jobs:
               -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
               -e TZ=Asia/Seoul \
-              -e FCM_CREDENTIALS_PATH=$DEPLOYMENT_DIR/firebase-key.json \
+              -v $DEPLOYMENT_DIR/firebase-key.json:/app/firebase-key.json \
+              -e FCM_CREDENTIALS_PATH=/app/firebase-key.json \
               ghcr.io/${{ github.repository }}:latest; then
               echo "Failed to run Docker container"
               exit 1
