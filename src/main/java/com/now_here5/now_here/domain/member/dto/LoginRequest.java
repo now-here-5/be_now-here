@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LoginRequest {
 
-    private final String phone;
+    private final String accountId;
 
     private final String password;
 

@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -55,9 +56,10 @@ public class MemberServiceImpl implements MemberService {
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
         log.warn("event id : {}", eventId);
         try{
-            if(!emailCodeService.isVerifiedEmail(registerMemberRequest.getPhone())){
-                log.debug("Phone number {} is not verified", registerMemberRequest.getPhone());
-                throw new Exception("Phone number is not verified");
+
+            if(memberRepository.isAccountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
+                log.debug("Account id {} is duplicated in event {}", registerMemberRequest.getAccountId(), eventId);
+                return "";
             }
 
             Member member = registerDtoToMember.converter(registerMemberRequest);
@@ -69,7 +71,7 @@ public class MemberServiceImpl implements MemberService {
 
         }catch(Exception e){
             log.error("Failed to register member: {}", e.getMessage());
-            return null;
+            return "";
         }
 
     }
@@ -88,28 +90,13 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean checkPhoneDuplicated(Long eventId, String phone) {
-        try{
-            List<Member> members =  memberRepository.findActiveMemberByPhone(phone);
-            log.trace("notification number {} : ",members);
-            for(Member member : members){
-                if(member.getEvent().getId().equals(eventId)){
-
-                    log.debug("Phone number {} is duplicated in event {} : {}",
-                            phone, eventId, member.getEvent().getField());
-                    return true;
-                }
-            }
-            log.trace("notification number {} : ",members);
-                return false;
-        } catch (Exception e) {
-            return true;
-        }
+    public boolean checkNicknameDuplicated(Long eventId, String nickname) {
+        return memberRepository.isNickNameDuplicatedInEvent(nickname, eventId);
     }
 
     @Override
-    public boolean checkNicknameDuplicated(Long eventId, String nickname) {
-        return memberRepository.isNickNameDuplicatedWith(nickname, eventId);
+    public boolean checkAccountIdDuplicated(Long eventId, String accountId) {
+        return memberRepository.isAccountIdDuplicatedInEvent(accountId, eventId);
     }
 
     @Override
@@ -172,7 +159,7 @@ public class MemberServiceImpl implements MemberService {
             return member.isNotiSetting();
         }catch (Exception e){
             log.error("Failed to get notification setting: {}", e.getMessage());
-            throw  new RuntimeException("Failed to get notification setting");
+            throw new RuntimeException("Failed to get notification setting");
         }
     }
 
@@ -187,6 +174,21 @@ public class MemberServiceImpl implements MemberService {
             return true;
         } catch (Exception e) {
             log.error("Failed to update description: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Transactional
+    @Override
+    public boolean updateBirthday(LocalDate birthday) {
+        try {
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            member.updateBirthday(birthday);
+
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to update birthday: {}", e.getMessage());
             return false;
         }
     }
@@ -218,6 +220,21 @@ public class MemberServiceImpl implements MemberService {
             return true;
         } catch (Exception e) {
             log.error("Failed to update mbti: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Transactional
+    @Override
+    public boolean updateSnsId(String snsId) {
+        try {
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            member.updateSnsId(snsId);
+
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to update snsId: {}", e.getMessage());
             return false;
         }
     }
@@ -264,12 +281,14 @@ public class MemberServiceImpl implements MemberService {
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             return new PersonalInfoResponse(
                     member.getId(),
+                    member.getAccountId(),
+                    member.getSnsId(),
                     member.getMbti().toString(),
                     member.getNickname(),
-                    member.getBirthday().toString(),
                     member.getGender().toString(),
-                    member.getPhoneNumber(),
-                    member.getDescription());
+                    member.getBirthday().toString(),
+                    member.getDescription()
+                    );
 
         } catch (Exception e) {
             log.error("Failed to get personal info: {}", e.getMessage());

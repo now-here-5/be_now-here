@@ -231,29 +231,19 @@ public class MatchingServiceImpl implements MatchingService {
 
             return matchings.stream()
                     .map(m -> {
-                        if (m.getReceiver().getId().equals(memberId)) {
-                            // 내가 receiver인 경우
-                            return SummaryDetailResponse.builder()
-                                    .memberId(m.getSender().getId().toString())
-                                    .mbti(m.getSender().getMbti().toString())
-                                    .birthdate(m.getSender().getBirthday().toString())
-                                    .nickname(m.getSender().getNickname())
-                                    .gender(m.getSender().getGender().toString())
-                                    .description(m.getSender().getDescription())
-                                    .phoneNumber(m.getSender().getPhoneNumber())
-                                    .build();
-                        } else {
-                            // 내가 sender인 경우
-                            return SummaryDetailResponse.builder()
-                                    .memberId(m.getReceiver().getId().toString())
-                                    .mbti(m.getReceiver().getMbti().toString())
-                                    .birthdate(m.getReceiver().getBirthday().toString())
-                                    .nickname(m.getReceiver().getNickname())
-                                    .gender(m.getReceiver().getGender().toString())
-                                    .description(m.getReceiver().getDescription())
-                                    .phoneNumber(m.getReceiver().getPhoneNumber())
-                                    .build();
-                        }
+                        Member me = m.getReceiver().getId().equals(memberId) ? m.getSender() : m.getReceiver();
+                        // 내가 sender인 경우 -> m.getReceiver()
+                        // 내가 receiver인 경우 -> m.getSender()
+
+                        return SummaryDetailResponse.builder()
+                                .memberId(me.getId().toString())
+                                .mbti(me.getMbti().toString())
+                                .birthdate(me.getBirthday().toString())
+                                .nickname(me.getNickname())
+                                .gender(me.getGender().toString())
+                                .description(me.getDescription())
+                                .snsId(me.getSnsId())
+                                .build();
                     })
                     .toList();
 

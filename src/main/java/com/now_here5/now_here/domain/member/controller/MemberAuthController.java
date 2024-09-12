@@ -38,12 +38,12 @@ public class MemberAuthController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = LoginRequest.class,
-                            requiredProperties = {"phone", "password"}
+                            requiredProperties = {"accountId", "password"}
                     ),
                     examples = @ExampleObject(
                             name = "LoginRequestExample",
                             summary = "Example of LoginRequest",
-                            value = "{\"phone\": \"01012345678\", \"password\": \"1234\"}"
+                            value = "{\"accountId\": \"hj1234\", \"password\": \"1234\"}"
                     )
             )
     )
@@ -55,7 +55,6 @@ public class MemberAuthController {
             @RequestBody LoginRequest loginRequest,
             @PathVariable(value = "event_id") String eventId
     ) {
-
         TokenDto token = memberAuthService.login(loginRequest, customXOR.decrypt(eventId));
         return token != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGIN_SUCCESS, token)) :

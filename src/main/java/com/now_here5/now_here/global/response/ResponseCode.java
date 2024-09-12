@@ -53,8 +53,12 @@ public enum ResponseCode {
     MBTI_UPDATE_FAIL(400, "M009", "MBTI 수정에 실패했습니다."),
     TOGGLE_NOTIFICATION_SUCCESS(200, "M010", "알림 설정 변경에 성공했습니다."),
     TOGGLE_NOTIFICATION_FAIL(400, "M010", "알림 설정 변경에 실패했습니다."),
-
-
+    SNS_ID_UPDATE_SUCCESS(200, "M011", "SNS ID 수정에 성공했습니다."),
+    SNS_ID_UPDATE_FAIL(400, "M011", "SNS ID 수정에 실패했습니다."),
+    NOTIFICATION_READ_SUCCESS(200, "M012", "알림 읽음 처리에 성공했습니다."),
+    NOTIFICATION_READ_FAIL(400, "M012", "알림 읽음 처리에 실패했습니다."),
+    BIRTHDAY_UPDATE_SUCCESS(200, "M013", "생일 수정에 성공했습니다."),
+    BIRTHDAY_UPDATE_FAIL(400, "M013", "생일 수정에 실패했습니다."),
     // Sign-up
     SIGNUP_SUCCESS(200, "S001", "회원가입에 성공했습니다."),
     SIGNUP_FAIL(400, "S001", "회원가입에 실패했습니다."),
@@ -70,6 +74,8 @@ public enum ResponseCode {
     PHONE_VERIFY_SUCCESS(200, "A003", "휴대폰 인증에 성공했습니다."),
     PHONE_VERIFY_FAIL(400, "A003", "휴대폰 인증에 실패했습니다."),
 
+    ACCOUNT_ID_DUPLICATED(200, "A004", "중복된 아이디입니다."),
+    ACCOUNT_ID_QUALIFIED(200, "A004", "사용 가능한 아이디입니다."),
     // development - only
     PHONE_GET_SUCCESS(200, "A001-D", "개발용 인증 번호 조회에 성공했습니다."),
     PHONE_GET_FAIL(400, "A001-D", "개발용 인증 번호 조회에 실패했습니다."),

@@ -6,6 +6,8 @@ import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
 import com.now_here5.now_here.domain.member.dto.ProfileResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MemberService {
@@ -18,9 +20,9 @@ public interface MemberService {
 
     boolean deactivateMember();
 
-    boolean checkPhoneDuplicated(Long eventId, String phone);
-
     boolean checkNicknameDuplicated(Long eventId, String nickname);
+
+    boolean checkAccountIdDuplicated(Long eventId, String accountId);
 
     List<MemberRecommendResponse> recommendMembers();
 
@@ -30,14 +32,17 @@ public interface MemberService {
 
     boolean updateDescription(String description);
 
+    boolean updateBirthday(LocalDate birthday);
+
     boolean updateNotificationSetting(boolean notification);
 
     boolean updateNickName(String nickName);
 
     boolean updateMbti(String mbti);
 
+    boolean updateSnsId(String snsId);
+
     ProfileResponse getProfile();
 
     PersonalInfoResponse getPersonalInfo();
-
 }

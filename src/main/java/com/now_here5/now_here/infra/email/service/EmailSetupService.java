@@ -43,16 +43,18 @@ public class EmailSetupService {
     private String generateEmailContent(EmailFormDto emailForm, EmailContentType emailContentType) {
         Context context = new Context();
 
-        if (emailContentType == EmailContentType.INQUIRY) {
-            context.setVariable("emailType", "INQUIRY");
-            context.setVariable("inquiry", emailForm.getInquiry());
-            context.setVariable("answer", emailForm.getContent());
-        } else {
-            context.setVariable("emailType", "CODE");
-            context.setVariable("title", "인증코드 발송");
-            context.setVariable("code", emailForm.getContent());
-        }
+//        if (emailContentType == EmailContentType.INQUIRY) {
+//            context.setVariable("emailType", "INQUIRY");
+//            context.setVariable("inquiry", emailForm.getInquiry());
+//            context.setVariable("answer", emailForm.getContent());
+//        } else {
+//            context.setVariable("emailType", "CODE");
+//            context.setVariable("title", "인증코드 발송");
+//            context.setVariable("code", emailForm.getContent());
+//        }
 
+        context.setVariable("inquiry", emailForm.getInquiry());
+        context.setVariable("answer", emailForm.getContent());
         return templateEngine.process("emailTemplate", context);  // Thymeleaf 템플릿 처리
     }
 }
