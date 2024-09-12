@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -233,5 +234,37 @@ public class MemberInfoController {
         return updated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SNS_ID_UPDATE_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.SNS_ID_UPDATE_FAIL));
+    }
+
+    @Operation(summary = "생일 업데이트", description = "회원의 생일을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "생일 업데이트 요청",
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                            implementation = UpdateBirthdayRequest.class,
+                            requiredProperties = {"birthday"}
+                    ),
+                    examples = @ExampleObject(
+                            description = "UpdateBirthdayRequestExample",
+                            name = "UpdateBirthdayRequestExample",
+                            summary = "Example of UpdateBirthdayRequest",
+                            value = "{\"birthday\": \"1999-01-01\"}"
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "M013 - 생일 업데이트에 성공했습니다.")
+    @ApiResponse(responseCode = "400", description = "M013 - 생일 업데이트에 실패했습니다.")
+    @PatchMapping("/update/birthday")
+    public ResponseEntity<ResponseForm> updateBirthday(
+            @RequestBody UpdateBirthdayRequest updateBirthdayRequest) {
+
+        boolean updated = memberService.updateBirthday(updateBirthdayRequest.getBirthday());
+
+        return updated ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.BIRTHDAY_UPDATE_SUCCESS)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.BIRTHDAY_UPDATE_FAIL));
     }
 }

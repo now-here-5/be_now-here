@@ -130,7 +130,8 @@ public class Member extends FullAudit {
     }
 
     public int updatePopupCount(int num) {
-        return this.popupCount = num;
+        this.popupCount = num;
+        return this.popupCount;
     }
 
     public void updateMbti(MBTI mbti) {
@@ -145,6 +146,9 @@ public class Member extends FullAudit {
         this.snsId = newSnsId;
     }
 
+    public void updateBirthday(LocalDate newBirthday) {
+        this.birthday = newBirthday;
+    }
     // 편의 메서드
     public void setEvent(Event event) {
         this.event = event;

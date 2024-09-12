@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -173,6 +174,21 @@ public class MemberServiceImpl implements MemberService {
             return true;
         } catch (Exception e) {
             log.error("Failed to update description: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @Transactional
+    @Override
+    public boolean updateBirthday(LocalDate birthday) {
+        try {
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
+            Member member = memberRepository.findMemberById(memberDto.getMemberId());
+            member.updateBirthday(birthday);
+
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to update birthday: {}", e.getMessage());
             return false;
         }
     }

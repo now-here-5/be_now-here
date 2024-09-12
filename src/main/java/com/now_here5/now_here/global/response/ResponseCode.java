@@ -57,6 +57,8 @@ public enum ResponseCode {
     SNS_ID_UPDATE_FAIL(400, "M011", "SNS ID 수정에 실패했습니다."),
     NOTIFICATION_READ_SUCCESS(200, "M012", "알림 읽음 처리에 성공했습니다."),
     NOTIFICATION_READ_FAIL(400, "M012", "알림 읽음 처리에 실패했습니다."),
+    BIRTHDAY_UPDATE_SUCCESS(200, "M013", "생일 수정에 성공했습니다."),
+    BIRTHDAY_UPDATE_FAIL(400, "M013", "생일 수정에 실패했습니다."),
     // Sign-up
     SIGNUP_SUCCESS(200, "S001", "회원가입에 성공했습니다."),
     SIGNUP_FAIL(400, "S001", "회원가입에 실패했습니다."),

@@ -6,6 +6,8 @@ import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
 import com.now_here5.now_here.domain.member.dto.ProfileResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MemberService {
@@ -29,6 +31,8 @@ public interface MemberService {
     boolean getNotificationSetting();
 
     boolean updateDescription(String description);
+
+    boolean updateBirthday(LocalDate birthday);
 
     boolean updateNotificationSetting(boolean notification);
 
