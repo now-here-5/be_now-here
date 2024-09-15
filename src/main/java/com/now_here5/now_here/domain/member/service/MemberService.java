@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface MemberService {
 
-    boolean sendCode(String email);
+    boolean sendCode(String phoneNumber);
 
     boolean verifyCode(String phone, String code);
 
