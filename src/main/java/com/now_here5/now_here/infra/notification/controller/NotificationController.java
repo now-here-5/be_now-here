@@ -1,16 +1,11 @@
 package com.now_here5.now_here.infra.notification.controller;
 
-import com.now_here5.now_here.global.response.ResponseCode;
-import com.now_here5.now_here.global.response.ResponseForm;
-import com.now_here5.now_here.infra.notification.dto.FCMTokenRequest;
-import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.now_here5.now_here.infra.notification.dto.SmsRequest;
+import com.now_here5.now_here.infra.notification.service.SmsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,19 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/notification")
 public class NotificationController {
 
-    private final FCMNotificationService fcmNotificationService;
+    private final SmsService smsService;
 
-    @Operation(summary = "FCM 토큰 저장", description = "회원의 FCM 토큰을 저장합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "F001 - FCM 토큰 저장 성공")
-    @ApiResponse(responseCode = "400", description = "F001 - FCM 토큰 저장 실패")
-    @PostMapping("/saveFCMToken")
-    public ResponseEntity<ResponseForm> saveFCMToken(
-            @RequestBody FCMTokenRequest request) {
-        boolean saved = fcmNotificationService.saveFCMToken(request.getToken(), request.getMemberId());
-
-        return saved ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.FCM_TOKEN_SAVE_SUCCESS)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.FCM_TOKEN_SAVE_FAIL));
+    @PostMapping
+    public void sendSms(@Valid @RequestBody SmsRequest smsRequest) {
+        smsService.sendSms(smsRequest);
     }
 
 }

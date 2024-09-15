@@ -15,9 +15,9 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.notification.dto.NotificationRequestDto;
-import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
-import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
+import com.now_here5.now_here.global.util.CustomXOR;
+import com.now_here5.now_here.infra.notification.dto.SmsRequest;
+import com.now_here5.now_here.infra.notification.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.now_here5.now_here.domain.member.entity.Gender.MALE;
 
 @Service
 @Slf4j
@@ -38,9 +40,9 @@ public class MatchingServiceImpl implements MatchingService {
     private final MatchingListToDto matchingListToDto;
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
-    private final SlackNotificationService slackNotificationService;
-    private final FCMNotificationService fcmNotificationService;
+    private final SmsService smsService;
     private final PreferenceBasedMBTIMatching matcher;
+    private final CustomXOR xor;
 
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
@@ -57,7 +59,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
-        
+
         try {
             if (!matchingRepository.existsByMembers(sender, receiver)) {
                 Matching matching = Matching.builder()
@@ -66,17 +68,20 @@ public class MatchingServiceImpl implements MatchingService {
                         .status(Status.PENDING)
                         .build();
                 receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-                
-                matchingRepository.save(matching);
-                
-                NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                        .title("하트가 도착했어요!")
-                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                log.info("notification message: {}", notificationRequestDto.getMessage());
-//                fcmNotificationService.sendMessages(notificationRequestDto); // 알림 보내기
 
+                matchingRepository.save(matching);
+
+                if (receiver.getGender() == MALE) {
+                    Long eventId = receiver.getEvent().getId();
+                    String encryptEventId = xor.encrypt(eventId);
+
+                    SmsRequest smsRequest = SmsRequest.builder()
+                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️\n" +
+                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/" + encryptEventId)
+                            .phoneNumber(receiver.getPhoneNumber())
+                            .build();
+                    smsService.sendSms(smsRequest);
+                }
             } else {
                 log.error("Matching already exists between {} and {}", senderId, receiverId);
             }
@@ -92,6 +97,8 @@ public class MatchingServiceImpl implements MatchingService {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
+        Long eventId = sender.getEvent().getId();
+        String encryptEventId = xor.encrypt(eventId);
 
         try {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
@@ -102,23 +109,14 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
 
-//                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-//                        .title("Now, Here 매칭 알림")
-//                        .message(String.format("%s님과 매칭되었습니다.", sender.getNickname()))
-//                        .token(receiver.getFcmToken())
-//                        .build();
-//                fcmNotificationService.sendMessages(rMessage);
-
-                NotificationRequestDto sMessage = NotificationRequestDto.builder()
-                        .title("Now, Here 매칭 알림")
-                        .message(String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname()))
-                        .token(sender.getFcmToken())
+                SmsRequest smsRequest = SmsRequest.builder()
+                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다.\n" +
+                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/" + encryptEventId)
+                        .phoneNumber(sender.getPhoneNumber())
                         .build();
-                log.info("notification message: {}", sMessage.getMessage());
-                // fcmNotificationService.sendMessages(sMessage); : TODO :  알림 보내기
 
+                smsService.sendSms(smsRequest);
                 sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-//                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -143,22 +141,8 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
 
-//                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-//                        .title("Now, Here")
-//                        .message(String.format("%s님을 거절하셨습니다.", sender.getNickname()))
-//                        .token(receiver.getFcmToken())
-//                        .build();
-//                fcmNotificationService.sendMessages(rMessage);
-//
-//                NotificationRequestDto sMessage = NotificationRequestDto.builder()
-//                        .title("Now, Here")
-//                        .message(String.format("%s님과 매칭에 실패했어요...", receiver.getNickname()))
-//                        .token(sender.getFcmToken())
-//                        .build();
-//                fcmNotificationService.sendMessages(sMessage);
+                sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
 
-                sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1); // TODO : receiver.getUnreadNotiCount() + 1 하는게 맞는지 확인 sender?
-//                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -240,9 +224,9 @@ public class MatchingServiceImpl implements MatchingService {
 
             return matchings.stream()
                     .map(m -> {
-                        Member me = m.getReceiver().getId().equals(memberId) ? m.getSender() : m.getReceiver();
                         // 내가 sender인 경우 -> m.getReceiver()
                         // 내가 receiver인 경우 -> m.getSender()
+                        Member me = m.getReceiver().getId().equals(memberId) ? m.getSender() : m.getReceiver();
 
                         return SummaryDetailResponse.builder()
                                 .memberId(me.getId().toString())
