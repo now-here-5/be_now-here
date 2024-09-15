@@ -1,17 +1,14 @@
 package com.now_here5.now_here.domain.member.service;
 
 
-import com.now_here5.now_here.domain.event.converter.EventListToDto;
-import com.now_here5.now_here.domain.event.repository.EventRepository;
+import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.domain.member.entity.Member;
+import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
-import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.global.security.dto.TokenDto;
-import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandler;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
-import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.global.security.service.CustomAuthenticationToken;
 import com.now_here5.now_here.global.util.AuthUtil;
 import jakarta.transaction.Transactional;
@@ -20,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -84,6 +80,10 @@ public class MemberAuthService {
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try {
             Member member = memberAuthRepository.findMemberByToken(token);
+            if (member == null) {
+                log.error("get Member By Token Error ={}", "Member Not Found");
+                throw new AccessDeniedException("Member Not Found by Token");
+            }
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
                     .nickname(member.getNickname())
@@ -96,11 +96,8 @@ public class MemberAuthService {
                     .roleNamesDto(listRolesToDto.converter(member.getMemberRoleList()))
                     .build();
 
-        } catch (AuthenticationException e) {
-            log.error("authentication failed: {}", e.getMessage());
-            throw e;
-        }catch (Exception e) {
-            log.error("getMemberByToken error ={}", e.getMessage());
+        } catch (Exception e) {
+            log.error("get Member By Token Error ={}", e.getMessage());
             return null;
         }
 
