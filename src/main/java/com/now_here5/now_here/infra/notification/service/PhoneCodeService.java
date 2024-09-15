@@ -1,6 +1,7 @@
 package com.now_here5.now_here.infra.notification.service;
 
 import com.now_here5.now_here.global.util.RandomNumberUntil;
+import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 import com.now_here5.now_here.infra.notification.repository.MemoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PhoneCodeService {
     private final MemoryRepository memoryRepository;
+    private final SmsService smsService;
 
     public boolean sendVerificationCode(String phoneNumber) {
         try {
@@ -20,7 +22,8 @@ public class PhoneCodeService {
             log.info("send to phone number : {}, verification code : {}", phoneNumber, randomCode);
 
             memoryRepository.saveCheckCode(phoneNumber, randomCode); // 랜덤 번호, 이메일 저장.
-            // 여기에 보내야됨, phoneNumber, randomCode 사용 : TODO => SMS API 연동
+            SmsRequest smsrequest = SmsRequest.builder().phoneNumber(phoneNumber).message(randomCode).build();
+            smsService.sendSms(smsrequest);
             return true;
 
         } catch (Exception e) {

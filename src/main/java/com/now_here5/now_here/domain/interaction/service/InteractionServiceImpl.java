@@ -90,16 +90,13 @@ public class InteractionServiceImpl implements InteractionService {
 /* 로직 설명
 1. 최초 한번 매칭 후 매칭 현황 페이지 접속 시:
     - 매칭이 되었는지 확인 (매칭 테이블에서 현재 사용자 ID로 매칭된 accepted 상태가 있으면 true, 없으면 false 반환).
-    - TODO: boolean isMatched(member_id) 메서드 작성 필요.
 
 2. 하루 기준 오늘 매칭 페이지 3번째 접속 시:
     - getFeedbackStatus() 메서드가 호출될 때마다 popUpCount를 업데이트하고, 현재 카운트를 바탕으로 팝업 표시 여부 결정.
     - popUpCount가 4일 때 true를 반환하여 팝업 표시, 그 외에는 false 반환.
-    - TODO: int updatePopupCount(int num) 메서드 작성 필요.
 
 3. 하루 기준 오늘 의견을 full로 작성하지 않은 경우:
     - 오늘 작성된 피드백(의견과 별점 모두)이 있는지 확인하여, 있으면 false, 없으면 true 반환.
-    - TODO: boolean isFeedbackFullyWrittenToday(member_id) 메서드 작성 필요.
 */
 
 /* 확인 순서:
