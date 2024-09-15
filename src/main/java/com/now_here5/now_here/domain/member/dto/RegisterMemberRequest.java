@@ -10,8 +10,7 @@ import java.time.LocalDate;
 @Builder
 @RequiredArgsConstructor
 public class RegisterMemberRequest {
-    private final String accountId;
-    private final String snsId;
+    private final String phoneNumber;
     private final String password;
     private final String nickname;
     private final LocalDate birth;

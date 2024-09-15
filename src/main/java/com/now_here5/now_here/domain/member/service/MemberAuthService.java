@@ -51,10 +51,13 @@ public class MemberAuthService {
     public TokenDto login(LoginRequest loginRequest, Long eventId) {
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
+
             String newToken = tokenGenerator.generateUniqueToken();
+
             Authentication authentication = authUtil.getAuthentication();
             Member tempMember = (Member) authentication.getPrincipal();
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
+
             return new TokenDto(newToken);
         } catch (Exception e) {
             log.error("login Error ={}", e.getMessage());
@@ -108,7 +111,7 @@ public class MemberAuthService {
 
         /// CustomAuthenticationToken 생성, 여기에 eventID를 추가
         CustomAuthenticationToken authenticationToken =
-                new CustomAuthenticationToken(loginRequest.getAccountId(), loginRequest.getPassword(), eventId);
+                new CustomAuthenticationToken(loginRequest.getPhoneNumber(), loginRequest.getPassword(), eventId);
 
         // 인증 성공 후 SecurityContext에 Authentication 객체 저장
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

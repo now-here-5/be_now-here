@@ -15,7 +15,7 @@ import com.now_here5.now_here.domain.member.entity.*;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
+import com.now_here5.now_here.infra.notification.service.PhoneCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
-    private final EmailCodeService emailCodeService;
+    private final PhoneCodeService phoneCodeService;
     private final RegisterDtoToMember registerDtoToMember;
     private final EventRepository eventRepository;
     private final AuthUtil authUtil;
@@ -37,18 +37,18 @@ public class MemberServiceImpl implements MemberService {
     private final PreferenceBasedMBTIMatching matcher;
 
     @Override
-    public boolean sendCode(String phone) {
+    public boolean sendCode(String phoneNumber) {
         try{
-            return emailCodeService.sendVerificationCode(phone);
+            return phoneCodeService.sendVerificationCode(phoneNumber);
         } catch (Exception e) {
-            log.error("Failed to send verification code to notification number: {}", phone);
+            log.error("Failed to send verification code to notification number: {}", phoneNumber);
             return false;
         }
     }
 
     @Override
     public boolean verifyCode(String phone, String code) {
-        return emailCodeService.verifyCode(phone, code);
+        return phoneCodeService.verifyCode(phone, code);
     }
 
     @Transactional
@@ -57,8 +57,8 @@ public class MemberServiceImpl implements MemberService {
         log.warn("event id : {}", eventId);
         try{
 
-            if(memberRepository.isAccountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
-                log.debug("Account id {} is duplicated in event {}", registerMemberRequest.getAccountId(), eventId);
+            if(!phoneCodeService.isPhoneVerified(registerMemberRequest.getPhoneNumber())){
+                log.error("Phone number is not verified");
                 return "";
             }
 
@@ -95,8 +95,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean checkAccountIdDuplicated(Long eventId, String accountId) {
-        return memberRepository.isAccountIdDuplicatedInEvent(accountId, eventId);
+    public boolean checkIfPhoneDuplicated(Long eventId, String phone) {
+        return memberRepository.isPhoneDuplicated(phone, eventId);
     }
 
     @Override
@@ -226,21 +226,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public boolean updateSnsId(String snsId) {
-        try {
-            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
-            Member member = memberRepository.findMemberById(memberDto.getMemberId());
-            member.updateSnsId(snsId);
-
-            return true;
-        } catch (Exception e) {
-            log.error("Failed to update snsId: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    @Transactional
-    @Override
     public boolean updateNickName(String nickName) {
         try {
 
@@ -281,8 +266,7 @@ public class MemberServiceImpl implements MemberService {
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             return new PersonalInfoResponse(
                     member.getId(),
-                    member.getAccountId(),
-                    member.getSnsId(),
+                    member.getPhoneNumber(),
                     member.getMbti().toString(),
                     member.getNickname(),
                     member.getGender().toString(),

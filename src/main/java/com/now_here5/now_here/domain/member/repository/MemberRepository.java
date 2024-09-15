@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MemberRepository {
 
-    List<Member> findActiveMemberByAccountId(String accountId);
+    List<Member> findActiveMemberByPhoneNumber(String phoneNumber);
 
     boolean deactivateMember(Long memberId);
 
@@ -17,7 +17,7 @@ public interface MemberRepository {
 
     boolean isNickNameDuplicatedInEvent(String nickname, Long eventId);
 
-    boolean isAccountIdDuplicatedInEvent(String accountId, Long eventId);
+    boolean isPhoneDuplicated(String phone, Long eventId);
 
     Member findMemberById(Long memberId);
 

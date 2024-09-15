@@ -13,11 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Repository
 @Slf4j
-public class FcmNotificationRepository implements NotificationRepository {
+public class FcmNotificationRepository   {
     private final EntityManager em;
-    AuthUtil authUtil;
-    private final MemberRepository memberRepository;
-
 
     @Transactional
     public void saveToken(String token, Member member) {

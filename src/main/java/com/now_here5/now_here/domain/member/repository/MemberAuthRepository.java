@@ -47,16 +47,16 @@ public class MemberAuthRepository {
         }
     }
 
-    public Member findMemberWithRolesByAccountId(String accountId, Long eventId){
+    public Member findMemberWithRolesByPhoneNumber(String phoneNumber, Long eventId){
         try {
             return em.createQuery("select am from Member am " +
                             "left join fetch am.memberRoleList " +
                             "join fetch am.event e " +
                             "join fetch e.location " +
-                            "where am.accountId = :accountId " +
+                            "where am.phoneNumber = :phoneNumber " +
                             "and am.event.id = :eventId " +
                             "and am.active = true", Member.class) // 사용자가 탈퇴한 경우에는 로그인을 할 수 없도록 방지.
-                    .setParameter("accountId", accountId)
+                    .setParameter("phoneNumber", phoneNumber)
                     .setParameter("eventId", eventId)
                     .getSingleResult();
         } catch (Exception e) {

@@ -7,7 +7,7 @@ import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.util.CustomXOR;
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
+import com.now_here5.now_here.infra.notification.service.PhoneCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,13 +30,15 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member Account API", description = "회원 계정 관련 API")
 public class MemberAccountController {
     private final MemberService memberService;
-    private final EmailCodeService emailCodeService;
+    private final PhoneCodeService phoneCodeService;
     private final InteractionService interactionService;
     private final CustomXOR customXOR;
 
-    @Operation(summary = "휴대폰 번호 인증 요청", description = "인증 전 같은 이벤트로 휴대폰이 중복되는지 확인합니다.")
+    @Operation(summary = "휴대폰 번호 인증 요청",
+            description = "인증 전 같은 이벤트로 휴대폰이 가입됐는지 확인합니다. " +
+            "따라서 인증번호를 요청하면, 중복 조회도 가능합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
-    @Parameter(name = "email", description = "이메일", required = true, schema = @Schema(example = "now.here@gmail.com"))
+    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -44,15 +46,15 @@ public class MemberAccountController {
     @GetMapping("/verify/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "email") String email) {
+            @RequestParam(name = "phone") String phone ) {
 
-//        boolean duplicated = memberService.checkPhoneDuplicated(customXOR.decrypt(eventId), email);
-//
-//        if (duplicated) {
-//            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
-//        }
+        boolean duplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phone);
 
-        boolean sent = memberService.sendCode(email);
+        if (duplicated) {
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
+        }
+
+        boolean sent = memberService.sendCode(phone);
 
         return sent ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_REQUEST)) :
@@ -68,7 +70,7 @@ public class MemberAccountController {
     public ResponseEntity<ResponseForm> verifyPhone(
             @RequestParam(name = "phone") String phone) {
 
-        String savedCode = emailCodeService.getEmailCode(phone);
+        String savedCode = phoneCodeService.getPhoneCodeFromCacheMemory(phone);
 
         return savedCode != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_GET_SUCCESS, savedCode)) :
@@ -93,23 +95,22 @@ public class MemberAccountController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.NICKNAME_QUALIFIED));
     }
 
-    @Operation(summary = "아이디 중복 확인", description = "이벤트 ID와 아이디를 사용하여 아이디 중복 여부를 확인합니다.")
+    @Operation(summary = "핸드폰 중복 확인", description = "이벤트 ID와 휴대폰 번호를 사용하여 번호 중복 여부를 확인합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
-    @Parameter(name = "accountId", description = "아이디", required = true, schema = @Schema(example = "ACC14"))
-    @ApiResponse(responseCode = "200", description = "A004 - 사용 가능한 아이디입니다.")
-    @ApiResponse(responseCode = "400", description = "A004 - 중복된 아이디입니다.")
-    @GetMapping("/verify/account-id/{event_id}")
-    public ResponseEntity<ResponseForm> checkIAccountIdIsDuplicated(
+    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @ApiResponse(responseCode = "200", description = "A004 - 사용 가능한 휴대폰 번호입니다.")
+    @ApiResponse(responseCode = "400", description = "A004 - 중복된 핸드폰 번호입니다.")
+    @GetMapping("/verify/phone/{event_id}")
+    public ResponseEntity<ResponseForm> checkIfPhoneDuplicated(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "accountId") String accountId) {
+            @RequestParam(name = "phone") String phone) {
 
-        boolean isDuplicated = memberService.checkAccountIdDuplicated(customXOR.decrypt(eventId), accountId);
+        boolean isDuplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phone);
 
         return isDuplicated ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_DUPLICATED)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.ACCOUNT_ID_QUALIFIED));
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_QUALIFIED));
     }
-
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
     @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
@@ -124,6 +125,7 @@ public class MemberAccountController {
             @RequestParam(name = "code") String code) {
 
         boolean isVerified = memberService.verifyCode(phone, code);
+
         return isVerified ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_FAIL));
@@ -138,13 +140,13 @@ public class MemberAccountController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = RegisterMemberRequest.class,
-                            requiredProperties = {"accountId", "password", "nickname", "birth", "mbti", "gender", "description", "snsId"}
+                            requiredProperties = {"phoneNumber", "password", "nickname", "birth", "mbti", "gender", "description"}
                     ),
                     examples = @ExampleObject(
                             description = "RegisterMemberRequestExample",
                             name = "RegisterMemberRequestExample",
                             summary = "Example of RegisterMemberRequest",
-                            value = "{\"accountId\": \"hj1234\", \"snsId\": \"hcons\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
+                            value = "{\"phoneNumber\": \"01012345678\", \"password\": \"1234\", \"nickname\": \"user123\", \"birth\": \"1990-01-01\", \"mbti\": \"INTJ\", \"gender\": \"male\", \"description\": \"A brief description\"}"
                     )
             )
     )
@@ -156,7 +158,6 @@ public class MemberAccountController {
 
             @PathVariable(name = "event_id") String eventId,
             @RequestBody RegisterMemberRequest registerMemberRequest) {
-
 
         String token = memberService.registerMember(customXOR.decrypt(eventId), registerMemberRequest);
 

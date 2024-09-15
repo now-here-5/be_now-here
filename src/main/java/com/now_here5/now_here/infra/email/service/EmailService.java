@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EmailSenderService {
+public class EmailService {
 
     private static final String ENCODING_UTF8 = "UTF-8";
     private final JavaMailSender javaMailSender;
@@ -32,4 +32,6 @@ public class EmailSenderService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
+
+
 }
