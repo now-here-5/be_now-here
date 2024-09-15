@@ -16,15 +16,15 @@ public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
     @Override
-    public List<Member> findActiveMemberByAccountId(String accountId) {
+    public List<Member> findActiveMemberByPhoneNumber(String phoneNumber) {
         try{
             return em.createQuery("select m from Member m " +
                             "join fetch m.event " +
-                            "where m.accountId = :accountId " , Member.class)
-                    .setParameter("accountId", accountId)
+                            "where m.phoneNumber = :phoneNumber " , Member.class)
+                    .setParameter("phoneNumber", phoneNumber)
                     .getResultList();
         }catch (Exception e){
-            log.error("Failed to find active member by account id: {}", accountId);
+            log.error("Failed to find active member by phoneNumber: {}", phoneNumber);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -92,16 +92,16 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public boolean isAccountIdDuplicatedInEvent(String accountId, Long eventId) {
+    public boolean isPhoneDuplicated(String phoneNumber, Long eventId) {
         try{
             return em.createQuery("select count(am) from Member am " +
-                            "where am.accountId = :accountId " +
+                            "where am.phoneNumber = :phoneNumber " +
                             "and am.event.id = :eventId", Long.class)
-                    .setParameter("accountId", accountId)
+                    .setParameter("phoneNumber", phoneNumber)
                     .setParameter("eventId", eventId)
                     .getSingleResult() > 0;
         }catch (Exception e){
-            log.error("Failed to check account id duplication: {}", e.getMessage());
+            log.error("Failed to check phone number duplication: {}", e.getMessage());
             return false;
         }
     }

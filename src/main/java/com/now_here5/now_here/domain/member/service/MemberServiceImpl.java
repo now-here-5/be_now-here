@@ -57,8 +57,8 @@ public class MemberServiceImpl implements MemberService {
         log.warn("event id : {}", eventId);
         try{
 
-            if(memberRepository.isAccountIdDuplicatedInEvent(registerMemberRequest.getAccountId(), eventId)){
-                log.debug("Account id {} is duplicated in event {}", registerMemberRequest.getAccountId(), eventId);
+            if(memberRepository.isPhoneDuplicated(registerMemberRequest.getPhoneNumber(), eventId)){
+                log.debug("phone number {} is duplicated in event {}", registerMemberRequest.getPhoneNumber(), eventId);
                 return "";
             }
 
@@ -95,8 +95,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean checkAccountIdDuplicated(Long eventId, String accountId) {
-        return memberRepository.isAccountIdDuplicatedInEvent(accountId, eventId);
+    public boolean checkIfPhoneDuplicated(Long eventId, String phone) {
+        return memberRepository.isPhoneDuplicated(phone, eventId);
     }
 
     @Override
@@ -226,21 +226,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public boolean updateSnsId(String snsId) {
-        try {
-            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
-            Member member = memberRepository.findMemberById(memberDto.getMemberId());
-            member.updateSnsId(snsId);
-
-            return true;
-        } catch (Exception e) {
-            log.error("Failed to update snsId: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    @Transactional
-    @Override
     public boolean updateNickName(String nickName) {
         try {
 
@@ -281,8 +266,7 @@ public class MemberServiceImpl implements MemberService {
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             return new PersonalInfoResponse(
                     member.getId(),
-                    member.getAccountId(),
-                    member.getSnsId(),
+                    member.getPhoneNumber(),
                     member.getMbti().toString(),
                     member.getNickname(),
                     member.getGender().toString(),

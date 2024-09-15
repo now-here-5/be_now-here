@@ -12,16 +12,16 @@ public class SummaryDetailResponse {
     private final String nickname;
     private String gender;
     private String description;
-    private String snsId;
+    private String phoneNumber;
 
     @Builder
-    public SummaryDetailResponse(String memberId, String mbti, String birthdate, String nickname, String gender, String description, String snsId) {
+    public SummaryDetailResponse(String memberId, String mbti, String birthdate, String nickname, String gender, String description, String phoneNumber) {
         this.memberId = memberId;
         this.mbti = mbti;
         this.birthdate = birthdate;
         this.nickname = nickname;
         this.gender = gender;
         this.description = description;
-        this.snsId = snsId;
+        this.phoneNumber = phoneNumber;
     }
 }

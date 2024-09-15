@@ -108,7 +108,8 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public Matching findBySenderAndReceiver(Member sender, Member receiver) {
         try {
-            return em.createQuery("SELECT m FROM Matching m WHERE m.sender = :sender AND m.receiver = :receiver", Matching.class)
+            return em.createQuery("SELECT m FROM Matching m " +
+                            "WHERE m.sender = :sender AND m.receiver = :receiver", Matching.class)
                     .setParameter("sender", sender)
                     .setParameter("receiver", receiver)
                     .getSingleResult();

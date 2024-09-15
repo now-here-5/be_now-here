@@ -57,7 +57,7 @@ public class MatchingServiceImpl implements MatchingService {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
-
+        
         try {
             if (!matchingRepository.existsByMembers(sender, receiver)) {
                 Matching matching = Matching.builder()
@@ -66,15 +66,16 @@ public class MatchingServiceImpl implements MatchingService {
                         .status(Status.PENDING)
                         .build();
                 receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-
+                
                 matchingRepository.save(matching);
-
+                
                 NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
                         .title("하트가 도착했어요!")
                         .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
                         .token(receiver.getFcmToken())
                         .build();
-                fcmNotificationService.sendMessages(notificationRequestDto);
+                log.info("notification message: {}", notificationRequestDto.getMessage());
+//                fcmNotificationService.sendMessages(notificationRequestDto); // 알림 보내기
 
             } else {
                 log.error("Matching already exists between {} and {}", senderId, receiverId);
@@ -101,22 +102,23 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
 
-                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-                        .title("Now, Here 매칭 알림")
-                        .message(String.format("%s님과 매칭되었습니다.", sender.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(rMessage);
+//                NotificationRequestDto rMessage = NotificationRequestDto.builder()
+//                        .title("Now, Here 매칭 알림")
+//                        .message(String.format("%s님과 매칭되었습니다.", sender.getNickname()))
+//                        .token(receiver.getFcmToken())
+//                        .build();
+//                fcmNotificationService.sendMessages(rMessage);
 
                 NotificationRequestDto sMessage = NotificationRequestDto.builder()
                         .title("Now, Here 매칭 알림")
                         .message(String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname()))
                         .token(sender.getFcmToken())
                         .build();
-                fcmNotificationService.sendMessages(sMessage);
+                log.info("notification message: {}", sMessage.getMessage());
+                // fcmNotificationService.sendMessages(sMessage); : TODO :  알림 보내기
 
                 sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+//                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -141,22 +143,22 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
 
-                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-                        .title("Now, Here")
-                        .message(String.format("%s님을 거절하셨습니다.", sender.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(rMessage);
+//                NotificationRequestDto rMessage = NotificationRequestDto.builder()
+//                        .title("Now, Here")
+//                        .message(String.format("%s님을 거절하셨습니다.", sender.getNickname()))
+//                        .token(receiver.getFcmToken())
+//                        .build();
+//                fcmNotificationService.sendMessages(rMessage);
+//
+//                NotificationRequestDto sMessage = NotificationRequestDto.builder()
+//                        .title("Now, Here")
+//                        .message(String.format("%s님과 매칭에 실패했어요...", receiver.getNickname()))
+//                        .token(sender.getFcmToken())
+//                        .build();
+//                fcmNotificationService.sendMessages(sMessage);
 
-                NotificationRequestDto sMessage = NotificationRequestDto.builder()
-                        .title("Now, Here")
-                        .message(String.format("%s님과 매칭에 실패했어요...", receiver.getNickname()))
-                        .token(sender.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(sMessage);
-
-                sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+                sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1); // TODO : receiver.getUnreadNotiCount() + 1 하는게 맞는지 확인 sender?
+//                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -185,13 +187,16 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             List<Matching> matchings = matchingRepository.findByReceiverId(memberId);
             return matchings.stream()
-                    .map(m -> new SenderResponse(
-                            m.getSender().getId(),
-                            m.getSender().getMbti().toString(),
-                            m.getSender().getBirthday().toString(),
-                            m.getSender().getNickname(),
-                            m.getSender().getGender().toString(),
-                            m.getSender().getDescription()))
+                    .map(m -> {
+                        Member sender = m.getSender();
+                        return new SenderResponse(
+                                sender.getId(),
+                                sender.getMbti().toString(),
+                                sender.getBirthday().toString(),
+                                sender.getNickname(),
+                                sender.getGender().toString(),
+                                sender.getDescription());
+                    })
                     .toList();
         } catch (Exception e) {
             log.error("Failed to get sender list for member {}: {}", memberId, e.getMessage());
@@ -207,13 +212,17 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             List<Matching> matchings = matchingRepository.findBySenderId(memberId);
             return matchings.stream()
-                    .map(m -> new ReceiverResponse(
-                            m.getReceiver().getId(),
-                            m.getReceiver().getMbti().toString(),
-                            m.getReceiver().getBirthday().toString(),
-                            m.getReceiver().getNickname(),
-                            m.getReceiver().getGender().toString(),
-                            m.getReceiver().getDescription()))
+                    .map(m ->
+                    {
+                        Member receiver = m.getReceiver();
+                        return new ReceiverResponse(
+                                receiver.getId(),
+                                receiver.getMbti().toString(),
+                                receiver.getBirthday().toString(),
+                                receiver.getNickname(),
+                                receiver.getGender().toString(),
+                                receiver.getDescription());
+                    })
                     .toList();
         } catch (Exception e) {
             log.error("Failed to get receiver list for member {}: {}", memberId, e.getMessage());
@@ -242,7 +251,7 @@ public class MatchingServiceImpl implements MatchingService {
                                 .nickname(me.getNickname())
                                 .gender(me.getGender().toString())
                                 .description(me.getDescription())
-                                .snsId(me.getSnsId())
+                                .phoneNumber(me.getPhoneNumber())
                                 .build();
                     })
                     .toList();
@@ -262,7 +271,8 @@ public class MatchingServiceImpl implements MatchingService {
             List<MatchingWithNicknameResponse> matchings = matchingRepository.findMatchingWithNickname(memberId);
             member.updateUnreadNotiCount(0);
             return matchings.stream()
-                    .map(matching -> createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
+                    .map(matching ->
+                            createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {

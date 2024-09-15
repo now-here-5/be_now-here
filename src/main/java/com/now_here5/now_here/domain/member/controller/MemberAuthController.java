@@ -38,12 +38,12 @@ public class MemberAuthController {
                     mediaType = "application/json",
                     schema = @Schema(
                             implementation = LoginRequest.class,
-                            requiredProperties = {"accountId", "password"}
+                            requiredProperties = {"phoneNumber", "password"}
                     ),
                     examples = @ExampleObject(
                             name = "LoginRequestExample",
                             summary = "Example of LoginRequest",
-                            value = "{\"accountId\": \"hj1234\", \"password\": \"1234\"}"
+                            value = "{\"phoneNumber\": \"01012345678\", \"password\": \"1234\"}"
                     )
             )
     )
