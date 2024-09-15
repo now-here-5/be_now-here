@@ -15,8 +15,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "matching", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"sender_member_id",  "receiver_member_id"})
-})
+        @UniqueConstraint(columnNames = {"sender_member_id", "receiver_member_id"}),
+},
+        indexes = {
+                @Index(name = "idx_matching_status", columnList = "status"),
+                @Index(name = "idx_matching_created_at", columnList = "createdAt"),
+                @Index(name = "idx_sender_receiver_member_id", columnList = "sender_member_id, receiver_member_id", unique = true)
+        }
+)
 @Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Matching extends CreatedDateAudit {

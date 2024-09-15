@@ -15,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -38,9 +39,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"event_id", "phone_number"}),
+        @UniqueConstraint(columnNames = {"event_id", "phone_number"}), // 복합 유니크 제약 조건
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
-})
+},
+        indexes = {
+                @Index(name = "idx_event_id", columnList = "event_id"), // event_id 인덱스
+                @Index(name = "idx_phone_number", columnList = "phone_number"), // 전화번호 인덱스
+                @Index(name = "idx_nick_name", columnList = "nick_name") // 닉네임 인덱스
+        }
+)
 public class Member extends FullAudit {
 
     @Id

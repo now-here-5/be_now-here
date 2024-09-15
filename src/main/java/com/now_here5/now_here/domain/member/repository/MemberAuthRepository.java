@@ -17,7 +17,7 @@ public class MemberAuthRepository {
 
     private final EntityManager em;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Member findMemberByToken(String token) {
         try {
             return em.createQuery("select am from Member am " +
@@ -52,6 +52,7 @@ public class MemberAuthRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     public Member findMemberWithRolesByPhoneNumber(String phoneNumber, Long eventId){
         try {
             return em.createQuery("select am from Member am " +

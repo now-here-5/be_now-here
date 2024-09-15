@@ -34,7 +34,7 @@ public class InteractionController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.FEEDBACK_CREATE_SUCCESS));
         } catch (Exception e) {
             log.error("피드백 작성 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.FEEDBACK_CREATE_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.FEEDBACK_CREATE_FAIL));
         }
     }
 
@@ -49,7 +49,7 @@ public class InteractionController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.INQUIRY_CREATE_SUCCESS));
         } catch (Exception e) {
             log.error("문의 작성 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.INQUIRY_CREATE_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.INQUIRY_CREATE_FAIL));
         }
     }
 

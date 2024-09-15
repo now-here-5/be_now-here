@@ -16,7 +16,13 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "event")
+@Table(name = "event", indexes = {
+        @Index(name = "idx_event_status", columnList = "status"),
+        @Index(name = "idx_event_period_start", columnList = "period_start"),
+        @Index(name = "idx_event_period_end", columnList = "period_end"),
+        @Index(name = "idx_event_location_id", columnList = "location_id"),
+        @Index(name = "idx_event_status_period", columnList = "status, period_start, period_end") // 복합 인덱스
+})
 public class Event extends FullAudit {
 
     @Id

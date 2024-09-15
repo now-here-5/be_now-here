@@ -6,6 +6,7 @@ import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -19,6 +20,7 @@ public class SmsService {
         this.smsSender = smsSender;
     }
 
+    @Async
     public void sendSms(SmsRequest smsRequest) {
         // Uncomment the line below to actually send the SMS
         // smsSender.sendSms(smsRequest);
