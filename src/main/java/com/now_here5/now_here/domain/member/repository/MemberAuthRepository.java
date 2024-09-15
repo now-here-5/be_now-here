@@ -3,8 +3,10 @@ package com.now_here5.now_here.domain.member.repository;
 
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +28,12 @@ public class MemberAuthRepository {
                             "and am.active = true", Member.class) // 혹시 토큰을 만들더라도, 사용자가 탈퇴한 경우에는 토큰을 사용할 수 없도록 방지.
                     .setParameter("token", token)
                     .getSingleResult();
+        } catch (NoResultException e) {
+            throw new BadCredentialsException("Invalid token");
+
         } catch (Exception e) {
-            log.error("isValidToken error ={}, token ={}", e.getMessage(),token);
-            return null ; // 토큰이 유효하지 않은 것으로 간주.
+            log.error("findMemberByToken error ={}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

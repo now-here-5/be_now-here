@@ -7,12 +7,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
@@ -29,6 +32,7 @@ public class CustomAuthFilter extends GenericFilterBean {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     private final MemberAuthService memberAuthService;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
@@ -37,27 +41,33 @@ public class CustomAuthFilter extends GenericFilterBean {
         log.trace("doFilter for token");
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         String customToken = resolveToken(httpServletRequest);
 
         String requestURI = httpServletRequest.getRequestURI();
-        log.info("resolveToken : {}, requestURI : {} ",customToken, requestURI);
+        log.info("resolveToken : {}, requestURI : {} ", customToken, requestURI);
 
         if (StringUtils.hasText(customToken)) { // 토큰이 있을 때만 검증
-            AuthenticatedMemberDto memberDto = memberAuthService.getMemberByToken(customToken);
+            try {
+                AuthenticatedMemberDto memberDto = memberAuthService.getMemberByToken(customToken);
 
-            List<GrantedAuthority> authorities =
-                    memberDto.getRoleNamesDto() != null ?
-                            memberDto.getRoleNamesDto().getRoleNames().stream()
-                                    .map(SimpleGrantedAuthority::new) // 역할을 권한으로 변환
-                                    .collect(Collectors.toList())// 스트림 결과를 리스트로 변환
-                            : new ArrayList<>(); // null일 경우 빈 리스트 반환
+                List<GrantedAuthority> authorities =
+                        memberDto.getRoleNamesDto() != null ?
+                                memberDto.getRoleNamesDto().getRoleNames().stream()
+                                        .map(SimpleGrantedAuthority::new)
+                                        .collect(Collectors.toList())
+                                : new ArrayList<>();
 
+                // 인증 성공 시 SecurityContextHolder 설정
+                SecurityContextHolder.getContext()
+                        .setAuthentication(new UsernamePasswordAuthenticationToken(memberDto, null, authorities));
 
-            // 인증 성공 시 SecurityContextHolder 설정
-            SecurityContextHolder.getContext()
-                    .setAuthentication(new UsernamePasswordAuthenticationToken(memberDto, null, authorities));
-
-            log.debug("Security Context에 '{}' 인증 정보를 저장.",  SecurityContextHolder.getContext().getAuthentication().getName());
+                log.debug("Security Context에 '{}' 인증 정보를 저장.", SecurityContextHolder.getContext().getAuthentication().getName());
+            } catch (AuthenticationException e) {
+                log.error("Access denied: {}", e.getMessage());
+                authenticationEntryPoint.commence(httpServletRequest, httpServletResponse, e);
+                return;
+            }
         } else {
             log.warn("토큰이 없는 요청");
         }

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -83,10 +84,6 @@ public class MemberAuthService {
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try {
             Member member = memberAuthRepository.findMemberByToken(token);
-            if (member == null) {
-                log.error("get Member By Token Error ={}", "Member Not Found");
-                throw new AccessDeniedException("Member Not Found by Token");
-            }
             return AuthenticatedMemberDto.builder()
                     .memberId(member.getId())
                     .nickname(member.getNickname())
@@ -99,8 +96,11 @@ public class MemberAuthService {
                     .roleNamesDto(listRolesToDto.converter(member.getMemberRoleList()))
                     .build();
 
-        } catch (Exception e) {
-            log.error("get Member By Token Error ={}", e.getMessage());
+        } catch (AuthenticationException e) {
+            log.error("authentication failed: {}", e.getMessage());
+            throw e;
+        }catch (Exception e) {
+            log.error("getMemberByToken error ={}", e.getMessage());
             return null;
         }
 
