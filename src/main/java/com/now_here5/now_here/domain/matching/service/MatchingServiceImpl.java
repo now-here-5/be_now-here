@@ -75,18 +75,25 @@ public class MatchingServiceImpl implements MatchingService {
                     Long eventId = receiver.getEvent().getId();
                     String encryptEventId = xor.encrypt(eventId);
 
+//                    SmsRequest smsRequest = SmsRequest.builder()
+//                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️\n" +
+//                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/" + encryptEventId)
+//                            .phoneNumber(receiver.getPhoneNumber())
+//                            .build();
+
                     SmsRequest smsRequest = SmsRequest.builder()
-                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️\n" +
-                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/" + encryptEventId)
+                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status")
                             .phoneNumber(receiver.getPhoneNumber())
                             .build();
+
                     smsService.sendSms(smsRequest);
                 }
             } else {
-                log.error("Matching already exists between {} and {}", senderId, receiverId);
+                throw new IllegalArgumentException("Matching already exists");
             }
         } catch (Exception e) {
             log.error("Failed to send love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw e;
         }
     }
 
@@ -109,9 +116,14 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
 
+//                SmsRequest smsRequest = SmsRequest.builder()
+//                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다." +
+//                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/" + encryptEventId)
+//                        .phoneNumber(sender.getPhoneNumber())
+//                        .build();
+
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다.\n" +
-                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/" + encryptEventId)
+                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. 지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status")
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
@@ -122,6 +134,7 @@ public class MatchingServiceImpl implements MatchingService {
             }
         } catch (Exception e) {
             log.error("Failed to receive love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw e;
         }
     }
 

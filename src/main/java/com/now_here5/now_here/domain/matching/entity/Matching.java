@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "matching", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"sender_member_id", "sender_active", "receiver_member_id", "receiver_active"})
+        @UniqueConstraint(columnNames = {"sender_member_id",  "receiver_member_id"})
 })
 @Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -33,24 +33,16 @@ public class Matching extends CreatedDateAudit {
     @Column(name = "sender_member_id", nullable = false)
     private Long senderMemberId;
 
-    @Column(name = "sender_active", nullable = false)
-    private Boolean senderActive;
-
     @Column(name = "receiver_member_id", nullable = false)
     private Long receiverMemberId;
 
-    @Column(name = "receiver_active", nullable = false)
-    private Boolean receiverActive;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_member_id", referencedColumnName = "member_id", insertable = false, updatable = false)
-    @JoinColumn(name = "sender_active", referencedColumnName = "active", insertable = false, updatable = false)
 
     private Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_member_id", referencedColumnName = "member_id", insertable = false, updatable = false)
-    @JoinColumn(name = "receiver_active", referencedColumnName = "active", insertable = false, updatable = false)
 
     private Member receiver;
 
@@ -60,16 +52,13 @@ public class Matching extends CreatedDateAudit {
         this.receiver = receiver;
         this.status = status;
         this.senderMemberId = sender.getId();
-        this.senderActive = true;
         this.receiverMemberId = receiver.getId();
-        this.receiverActive = true;
     }
 
     public void setSender(Member sender) {
         this.sender = sender;
         if (sender != null) {
             this.senderMemberId = sender.getId();
-            this.senderActive = true;
             if (!sender.getSentMatchings().contains(this)) {
                 sender.getSentMatchings().add(this);
             }
@@ -80,7 +69,6 @@ public class Matching extends CreatedDateAudit {
         this.receiver = receiver;
         if (receiver != null) {
             this.receiverMemberId = receiver.getId();
-            this.receiverActive = true;
             if (!receiver.getReceivedMatchings().contains(this)) {
                 receiver.getReceivedMatchings().add(this);
             }

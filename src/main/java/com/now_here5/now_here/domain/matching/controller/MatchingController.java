@@ -53,7 +53,7 @@ public class MatchingController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS));
         } catch (Exception e) {
             log.error("하트 보내기 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_SEND_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_FAIL));
         }
     }
 
@@ -69,7 +69,7 @@ public class MatchingController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_RECEIVE_SUCCESS));
         } catch (Exception e) {
             log.error("하트 받기 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_RECEIVE_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_RECEIVE_FAIL));
         }
     }
 
@@ -85,7 +85,7 @@ public class MatchingController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_REJECT_SUCCESS));
         } catch (Exception e) {
             log.error("하트 거절 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.LOVE_REJECT_FAIL));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_REJECT_FAIL));
         }
     }
 
@@ -165,7 +165,7 @@ public class MatchingController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.NOTIFICATION_COUNT_QUERY_SUCCESS, notificationCount));
         } catch (Exception e) {
             log.error("알림 개수 조회 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(ResponseForm.of(ResponseCode.NOTIFICATION_COUNT_QUERY_FAIL, 0));
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.NOTIFICATION_COUNT_QUERY_FAIL, 0));
         }
     }
 }
