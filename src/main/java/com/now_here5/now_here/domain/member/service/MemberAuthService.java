@@ -106,7 +106,7 @@ public class MemberAuthService {
 
     private void setAuthentication(LoginRequest loginRequest, Long eventId) {
 
-        /// CustomAuthenticationToken 생성, 여기에 eventID를 추가
+        // CustomAuthenticationToken 생성, 여기에 eventID를 추가
         CustomAuthenticationToken authenticationToken =
                 new CustomAuthenticationToken(loginRequest.getPhoneNumber(), loginRequest.getPassword(), eventId);
 
