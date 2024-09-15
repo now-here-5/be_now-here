@@ -2,7 +2,6 @@ package com.now_here5.now_here.domain.interaction.service;
 
 import com.now_here5.now_here.domain.interaction.dto.FeedbackRequect;
 import com.now_here5.now_here.domain.interaction.dto.InquiryRequest;
-import com.now_here5.now_here.domain.interaction.dto.InquiryResponse;
 import com.now_here5.now_here.domain.interaction.dto.WithdrawalReasonRequest;
 import com.now_here5.now_here.domain.interaction.entity.Feedback;
 import com.now_here5.now_here.domain.interaction.entity.Inquiry;
@@ -12,9 +11,7 @@ import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
 import com.now_here5.now_here.infra.email.service.EmailInquiryService;
-import com.now_here5.now_here.infra.notification.service.NotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +74,7 @@ public class InteractionServiceImpl implements InteractionService {
             foundInquiry.updateAnswer(answer);
 
             // SMS 전송
-            emailInquiryService.sendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
+            emailInquiryService.setUpEamilAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
         } else {
             log.info("Inquiry not found for ID: {}", inquiryId);
         }

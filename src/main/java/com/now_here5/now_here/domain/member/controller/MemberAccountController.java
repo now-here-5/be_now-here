@@ -7,7 +7,7 @@ import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.response.ResponseCode;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.util.CustomXOR;
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
+import com.now_here5.now_here.infra.notification.service.PhoneCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member Account API", description = "회원 계정 관련 API")
 public class MemberAccountController {
     private final MemberService memberService;
-    private final EmailCodeService emailCodeService;
+    private final PhoneCodeService phoneCodeService;
     private final InteractionService interactionService;
     private final CustomXOR customXOR;
 
@@ -70,7 +70,7 @@ public class MemberAccountController {
     public ResponseEntity<ResponseForm> verifyPhone(
             @RequestParam(name = "phone") String phone) {
 
-        String savedCode = emailCodeService.getEmailCode(phone); // TODO: change to phoneCodeService
+        String savedCode = phoneCodeService.getPhoneCodeFromCacheMemory(phone);
 
         return savedCode != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_GET_SUCCESS, savedCode)) :
@@ -124,7 +124,7 @@ public class MemberAccountController {
             @RequestParam(name = "phone") String phone,
             @RequestParam(name = "code") String code) {
 
-        boolean isVerified = memberService.verifyCode(phone, code); // TODO: change to phoneCodeService
+        boolean isVerified = memberService.verifyCode(phone, code);
 
         return isVerified ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_SUCCESS)) :

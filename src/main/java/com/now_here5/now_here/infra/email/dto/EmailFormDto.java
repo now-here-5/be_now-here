@@ -8,8 +8,7 @@ import lombok.Getter;
 @Getter
 public class EmailFormDto {
     private final String email;
-    private final String nickname;
     private final String title;
-    private final String content;
+    private final String answer;
     private final String inquiry;
 }
