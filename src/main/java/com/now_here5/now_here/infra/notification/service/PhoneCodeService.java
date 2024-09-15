@@ -20,7 +20,9 @@ public class PhoneCodeService {
             log.info("send to phone number : {}, verification code : {}", phoneNumber, randomCode);
 
             memoryRepository.saveCheckCode(phoneNumber, randomCode); // 랜덤 번호, 이메일 저장.
+            // 여기에 보내야됨, phoneNumber, randomCode 사용 : TODO => SMS API 연동
             return true;
+
         } catch (Exception e) {
             log.error("Failed to send verification code: {}", e.getMessage());
             return false;

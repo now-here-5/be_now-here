@@ -38,23 +38,23 @@ public class MemberAccountController {
             description = "인증 전 같은 이벤트로 휴대폰이 가입됐는지 확인합니다. " +
             "따라서 인증번호를 요청하면, 중복 조회도 가능합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
-    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
 
-    @GetMapping("/verify/{event_id}")
+    @GetMapping("/verify/phone/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "phone") String phone ) {
+            @RequestParam(name = "phoneNumber") String phoneNumber ) {
 
-        boolean duplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phone);
+        boolean duplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phoneNumber);
 
         if (duplicated) {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
         }
 
-        boolean sent = memberService.sendCode(phone);
+        boolean sent = memberService.sendCode(phoneNumber);
 
         return sent ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_REQUEST)) :
@@ -62,15 +62,15 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 조회", description = "개발용으로 휴대폰 번호를 사용하여 인증 코드를 조회합니다.")
-    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "200", description = "A001-D - 개발용 인증 코드를 조회했습니다.")
     @ApiResponse(responseCode = "400", description = "A001-D - 개발용 인증 코드를 조회하지 못했습니다.")
 
-    @GetMapping("/verify/code")
+    @GetMapping("/verify/dev-code")
     public ResponseEntity<ResponseForm> verifyPhone(
-            @RequestParam(name = "phone") String phone) {
+            @RequestParam(name = "phoneNumber") String phoneNumber) {
 
-        String savedCode = phoneCodeService.getPhoneCodeFromCacheMemory(phone);
+        String savedCode = phoneCodeService.getPhoneCodeFromCacheMemory(phoneNumber);
 
         return savedCode != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_GET_SUCCESS, savedCode)) :
@@ -97,15 +97,15 @@ public class MemberAccountController {
 
     @Operation(summary = "핸드폰 중복 확인", description = "이벤트 ID와 휴대폰 번호를 사용하여 번호 중복 여부를 확인합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
-    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @ApiResponse(responseCode = "200", description = "A004 - 사용 가능한 휴대폰 번호입니다.")
     @ApiResponse(responseCode = "400", description = "A004 - 중복된 핸드폰 번호입니다.")
-    @GetMapping("/verify/phone/{event_id}")
+    @GetMapping("/verify/duplicated-phone/{event_id}")
     public ResponseEntity<ResponseForm> checkIfPhoneDuplicated(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "phone") String phone) {
+            @RequestParam(name = "phoneNumber") String phoneNumber) {
 
-        boolean isDuplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phone);
+        boolean isDuplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phoneNumber);
 
         return isDuplicated ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED)) :
@@ -113,7 +113,7 @@ public class MemberAccountController {
     }
 
     @Operation(summary = "인증 코드 확인", description = "휴대폰 번호와 인증 코드를 사용하여 인증 코드를 확인합니다.")
-    @Parameter(name = "phone", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
     @Parameter(name = "code", description = "인증 코드", required = true, schema = @Schema(example = "123456"))
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증에 성공했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -121,10 +121,10 @@ public class MemberAccountController {
     @PostMapping("/verify/code")
 
     public ResponseEntity<ResponseForm> verifyReceivedCode(
-            @RequestParam(name = "phone") String phone,
+            @RequestParam(name = "phoneNumber") String phoneNumber,
             @RequestParam(name = "code") String code) {
 
-        boolean isVerified = memberService.verifyCode(phone, code);
+        boolean isVerified = memberService.verifyCode(phoneNumber, code);
 
         return isVerified ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_SUCCESS)) :
