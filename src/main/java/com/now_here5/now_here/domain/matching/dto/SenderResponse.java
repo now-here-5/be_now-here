@@ -1,26 +1,17 @@
 package com.now_here5.now_here.domain.matching.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-
-@Builder
 @Getter
+@AllArgsConstructor
+@Builder
 public class SenderResponse {
-    private final Long senderId;
-    private final String mbti;
-    private final String birthdate;
-    private final String nickname;
+    private Long id;
+    private String mbti;
+    private String birthday;
+    private String nickname;
     private String gender;
     private String description;
-
-    @Builder
-    public SenderResponse(Long senderId, String mbti, String birthdate, String nickname, String gender, String description) {
-        this.senderId = senderId;
-        this.mbti = mbti;
-        this.birthdate = birthdate;
-        this.nickname = nickname;
-        this.gender = gender;
-        this.description = description;
-    }
 }

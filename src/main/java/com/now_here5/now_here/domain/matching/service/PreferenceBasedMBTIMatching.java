@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -76,8 +77,9 @@ public class PreferenceBasedMBTIMatching {
         return preferences.get(userMbti).getOrDefault(potentialMatchMbti, 0.5);
     }
 
-    // @Async : 비동기적으로 메서드를 실행하도록 지정하면, 성능을 개선할 가능성이 큼.
+
     // 매칭 성공 여부에 따라 선호도 가중치를 업데이트하는 메서드
+    @Async
     public void updatePreferences(MBTI userMbti, MBTI matchedMbti, Gender gender, boolean success) {
         Map<MBTI, Map<MBTI, Double>> preferences = (gender == Gender.MALE) ? malePreferences : femalePreferences;
         preferences.putIfAbsent(userMbti, new EnumMap<>(MBTI.class));

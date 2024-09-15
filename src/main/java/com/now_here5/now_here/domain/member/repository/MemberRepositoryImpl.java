@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
+    @Transactional(readOnly = true)
     @Override
     public List<Member> findActiveMemberByPhoneNumber(String phoneNumber) {
         try{
@@ -60,7 +62,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
-
+    @Transactional(readOnly = true)
     @Override
     public Member findActiveMemberById(Long memberId) {
         try{
@@ -76,6 +78,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean isNickNameDuplicatedInEvent(String nickname, Long eventId) {
         try{
@@ -91,6 +94,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean isPhoneDuplicated(String phoneNumber, Long eventId) {
         try{
@@ -131,7 +135,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
-
+    @Transactional(readOnly = true)
     @Override
     public Member findMemberById(Long memberId) {
         try{
@@ -142,6 +146,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Member> findMembersByMemberIdAndEventIdAndGender(Long memberId, Long eventId, Gender gender) {
         try {

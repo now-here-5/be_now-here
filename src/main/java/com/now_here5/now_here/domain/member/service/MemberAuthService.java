@@ -11,7 +11,6 @@ import com.now_here5.now_here.global.security.dto.TokenDto;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import com.now_here5.now_here.global.security.service.CustomAuthenticationToken;
 import com.now_here5.now_here.global.util.AuthUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,6 +18,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
@@ -76,7 +76,7 @@ public class MemberAuthService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try {
             Member member = memberAuthRepository.findMemberByToken(token);

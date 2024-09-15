@@ -187,16 +187,19 @@ public class InteractionServiceImpl implements InteractionService {
         interactionRepository.saveWithdrawalReason(withdrawalReason);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Feedback> getFeedbacksByMemberId(Long memberId) {
         return interactionRepository.findFeedbacksByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Inquiry> getInquiriesByMemberId(Long memberId) {
         return interactionRepository.findInquiriesByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<WithdrawalReason> getWithdrawalReasonsByMemberId(Long memberId) {
         return interactionRepository.findWithdrawalReasonsByMemberId(memberId);

@@ -44,6 +44,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final PreferenceBasedMBTIMatching matcher;
     private final CustomXOR xor;
 
+    @Transactional(readOnly = true)
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
     public List<BannerListResponse> getBannerList() {
@@ -164,6 +165,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<SummaryResponse> getSummary() {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
@@ -176,6 +178,7 @@ public class MatchingServiceImpl implements MatchingService {
                 .build());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<SenderResponse> getSenderList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -201,6 +204,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReceiverResponse> getReceiverList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -259,6 +263,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<NotificationResponse> getNotificationList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -269,7 +274,7 @@ public class MatchingServiceImpl implements MatchingService {
             member.updateUnreadNotiCount(0);
             return matchings.stream()
                     .map(matching ->
-                            createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
+                            createNotificationResponse(matching, memberId))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -278,6 +283,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Integer getNotificationCount() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -291,33 +297,48 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
-    private NotificationResponse createNotificationResponse(Matching matching, String counterpartNickname, Long memberId) {
-        String title = "";
-        String content = "";
+    private NotificationResponse createNotificationResponse(MatchingWithNicknameResponse matching, Long memberId) {
+        String title = getTitle(matching, memberId);
+        String content = getContent(matching, memberId);
 
-        if (matching.getSender().getId().equals(memberId)) {
-            // 내가 sender인 경우
-            if (matching.getStatus() == Status.ACCEPTED) {
-                title = "매칭 성공!";
-                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
-            } else if (matching.getStatus() == Status.REJECTED) {
-                title = "매칭 실패";
-                content = String.format("%s님과의 매칭에 실패했어요.", counterpartNickname);
-            }
-        } else if (matching.getReceiver().getId().equals(memberId)) {
-            // 내가 receiver인 경우
-            if (matching.getStatus() == Status.ACCEPTED) {
-                title = "매칭 성공!";
-                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
-            } else if (matching.getStatus() == Status.PENDING) {
-                title = "받은 하트";
-                content = String.format("%s님이 회원님에게 하트를 보냈어요.", counterpartNickname);
-            }
-        }
         return NotificationResponse.builder()
                 .title(title)
-                .memberName(counterpartNickname)
+                .memberName(matching.getCounterpartNickname())
                 .content(content)
                 .build();
+    }
+
+    private String getTitle(MatchingWithNicknameResponse matching, Long memberId) {
+        if (matching.getMatching().getSender().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return "매칭 성공!";
+            } else if (matching.getMatching().getStatus() == Status.REJECTED) {
+                return "매칭 실패";
+            }
+        } else if (matching.getMatching().getReceiver().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return "매칭 성공!";
+            } else if (matching.getMatching().getStatus() == Status.PENDING) {
+                return "받은 하트";
+            }
+        }
+        return "";
+    }
+
+    private String getContent(MatchingWithNicknameResponse matching, Long memberId) {
+        if (matching.getMatching().getSender().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return String.format("%s님과 매칭되었어요.", matching.getCounterpartNickname());
+            } else if (matching.getMatching().getStatus() == Status.REJECTED) {
+                return String.format("%s님과의 매칭에 실패했어요.", matching.getCounterpartNickname());
+            }
+        } else if (matching.getMatching().getReceiver().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return String.format("%s님과 매칭되었어요.", matching.getCounterpartNickname());
+            } else if (matching.getMatching().getStatus() == Status.PENDING) {
+                return String.format("%s님이 회원님에게 하트를 보냈어요.", matching.getCounterpartNickname());
+            }
+        }
+        return "";
     }
 }

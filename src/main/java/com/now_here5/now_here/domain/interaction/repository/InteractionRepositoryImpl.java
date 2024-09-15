@@ -66,6 +66,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Feedback findFeedbackById(Long id) {
         try {
@@ -76,6 +77,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Inquiry findInquiryById(Long id) {
         try {
@@ -86,6 +88,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public WithdrawalReason findWithdrawalReasonById(Long id) {
         try {
@@ -96,6 +99,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Feedback> findAllFeedback() {
         try {
@@ -107,6 +111,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Inquiry> findAllInquiries() {
         try {
@@ -118,6 +123,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<WithdrawalReason> findAllWithdrawalReasons() {
         try {
@@ -129,6 +135,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Feedback> findFeedbacksByMemberId(Long memberId) {
         try {
@@ -141,6 +148,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Inquiry> findInquiriesByMemberId(Long memberId) {
         try {
@@ -153,6 +161,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<WithdrawalReason> findWithdrawalReasonsByMemberId(Long memberId) {
         try {

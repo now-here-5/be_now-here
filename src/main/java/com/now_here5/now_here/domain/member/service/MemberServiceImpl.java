@@ -89,16 +89,19 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean checkNicknameDuplicated(Long eventId, String nickname) {
         return memberRepository.isNickNameDuplicatedInEvent(nickname, eventId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean checkIfPhoneDuplicated(Long eventId, String phone) {
         return memberRepository.isPhoneDuplicated(phone, eventId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MemberRecommendResponse> recommendMembers() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -139,7 +142,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public EventListResponse getAssignedEventsByMember() {
         try{
             List<Event> events =  eventRepository.getSignedEventsByMember(true,
@@ -151,6 +154,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean getNotificationSetting() {
         try{
@@ -240,7 +244,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public ProfileResponse getProfile() {
         try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
@@ -260,6 +264,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
     public PersonalInfoResponse getPersonalInfo() {
         try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
