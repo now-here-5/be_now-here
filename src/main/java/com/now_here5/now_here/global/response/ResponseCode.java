@@ -154,12 +154,9 @@ public enum ResponseCode {
     WITHDRAWAL_REASON_QUERY_SUCCESS(200, "I006", "WITHDRAWAL_REASON 조회에 성공했습니다."),
     WITHDRAWAL_REASON_QUERY_FAIL(400, "I006", "WITHDRAWAL_REASON 조회에 실패했습니다."),
     FEEDBACK_STATUS_FAIL(400, "I007", "피드백 상태 조회에 실패했습니다."),
-    FEEDBACK_STATUS_SUCCESS(200, "I007", "피드백 상태 조회에 성공했습니다."),
+    FEEDBACK_STATUS_SUCCESS(200, "I007", "피드백 상태 조회에 성공했습니다.");
 
-    // Notification
-    FCM_TOKEN_SAVE_SUCCESS(200, "N001", "FCM 토큰 저장에 성공했습니다."),
-    FCM_TOKEN_SAVE_FAIL(400, "N001", "FCM 토큰 저장에 실패했습니다."),
-    ;
+
 
 
     // field
