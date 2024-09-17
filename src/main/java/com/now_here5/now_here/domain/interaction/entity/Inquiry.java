@@ -11,7 +11,11 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "inquiry")
+@Table(name = "inquiry", indexes = {
+        @Index(name = "idx_inquiry_member_id", columnList = "member_id"),  // 멤버 ID 인덱스
+        @Index(name = "idx_inquiry_created_at", columnList = "created_at"), // 문의 생성 시간 인덱스
+        @Index(name = "idx_inquiry_email", columnList = "email")  // 이메일로 조회할 가능성이 있는 경우
+})
 public class Inquiry extends Interaction {
 
     @Column(name = "email", nullable = false)

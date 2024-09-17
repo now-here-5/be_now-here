@@ -4,12 +4,27 @@ import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
 import com.now_here5.now_here.global.entity.FullAudit;
-import jakarta.persistence.*;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -24,9 +39,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"event_id", "account_id"}),
+        @UniqueConstraint(columnNames = {"event_id", "phone_number"}), // 복합 유니크 제약 조건
         @UniqueConstraint(columnNames = {"event_id", "nick_name"})
-})
+},
+        indexes = {
+                @Index(name = "idx_event_id", columnList = "event_id"), // event_id 인덱스
+                @Index(name = "idx_phone_number", columnList = "phone_number"), // 전화번호 인덱스
+                @Index(name = "idx_nick_name", columnList = "nick_name") // 닉네임 인덱스
+        }
+)
 public class Member extends FullAudit {
 
     @Id
@@ -34,8 +55,8 @@ public class Member extends FullAudit {
     @Column(name = "member_id", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "account_id", nullable = false, length = 15)
-    private String accountId; // 변경 불가. (로그인 아이디)
+    @Column(name = "phone_number", nullable = true, length = 11)
+    private String phoneNumber;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -48,9 +69,6 @@ public class Member extends FullAudit {
 
     @Column(name = "nick_name", nullable = false, length = 8)
     private String nickname;
-
-    @Column(name="sns_id", nullable = false, length = 50)
-    private String snsId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
@@ -75,10 +93,6 @@ public class Member extends FullAudit {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    @Setter
-    @Column(name = "fcmToken")
-    private String fcmToken;
-
     // 연관관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
@@ -94,11 +108,12 @@ public class Member extends FullAudit {
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @Builder
-    public Member(String token, LocalDate birthday, String accountId, String nickname, String snsId,
-                  String password, Gender gender, MBTI mbti, String description, boolean active, Event event) {
+    public Member(String token, LocalDate birthday, String phoneNumber, String nickname,
+                  String password, Gender gender, MBTI mbti, String description,
+                  boolean active, Event event) {
         this.token = token;
         this.birthday = birthday;
-        this.accountId = accountId;
+        this.phoneNumber = phoneNumber;
         this.nickname = nickname;
         this.password = password;
         this.gender = gender;
@@ -106,7 +121,6 @@ public class Member extends FullAudit {
         this.description = description;
         this.active = active;
         this.event = event;
-        this.snsId = snsId;
 
         //default
         this.unreadNotiCount = 0;
@@ -142,10 +156,6 @@ public class Member extends FullAudit {
         this.nickname = newNickName;
     }
 
-    public void updateSnsId(String newSnsId) {
-        this.snsId = newSnsId;
-    }
-
     public void updateBirthday(LocalDate newBirthday) {
         this.birthday = newBirthday;
     }
@@ -164,10 +174,6 @@ public class Member extends FullAudit {
     // 상태 관리 메서드
     public void activate() {
         this.active = true;
-    }
-
-    public void deactivate() {
-        this.active = false;
     }
 
 }

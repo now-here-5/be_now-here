@@ -205,39 +205,8 @@ public class MemberInfoController {
     }
 
 
-    @Operation(summary = "SNS ID 업데이트", description = "회원의 SNS ID를 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "SNS ID 업데이트 요청",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(
-                            implementation = UpdateSnsIdRequest.class,
-                            requiredProperties = {"snsId"}
-                    ),
-                    examples = @ExampleObject(
-                            description = "UpdateSnsIdRequestExample",
-                            name = "UpdateSnsIdRequestExample",
-                            summary = "Example of UpdateSnsIdRequest",
-                            value = "{\"snsId\": \"sns_1334\"}"
-                    )
-            )
-    )
-    @ApiResponse(responseCode = "200", description = "M011 - SNS ID 업데이트에 성공했습니다.")
-    @ApiResponse(responseCode = "400", description = "M011 - SNS ID 업데이트에 실패했습니다.")
-    @PatchMapping("/update/sns-id")
-    public ResponseEntity<ResponseForm> updateSnsId(
-            @RequestBody UpdateSnsIdRequest updateSnsIdRequest) {
-
-        boolean updated = memberService.updateSnsId(updateSnsIdRequest.getSnsId());
-
-        return updated ?
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.SNS_ID_UPDATE_SUCCESS)) :
-                ResponseEntity.ok(ResponseForm.of(ResponseCode.SNS_ID_UPDATE_FAIL));
-    }
 
     @Operation(summary = "생일 업데이트", description = "회원의 생일을 업데이트합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "생일 업데이트 요청",
             required = true,

@@ -9,6 +9,7 @@ import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +23,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     private final EntityManager em;
 
     @Override
+    @Transactional(readOnly = true)
     public List<Object[]> findMemberForBanner(Status status) {
         try {
             return em.createQuery("SELECT s.nickname, s.mbti, s.gender, r.nickname, r.mbti, s.gender " +
@@ -48,6 +50,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Matching findById(Long matchingId) {
         try {
@@ -81,6 +84,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Long countByReceiverId(Long memberId) {
         try {
@@ -93,6 +97,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Long countBySenderId(Long memberId) {
         try {
@@ -105,10 +110,12 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Matching findBySenderAndReceiver(Member sender, Member receiver) {
         try {
-            return em.createQuery("SELECT m FROM Matching m WHERE m.sender = :sender AND m.receiver = :receiver", Matching.class)
+            return em.createQuery("SELECT m FROM Matching m " +
+                            "WHERE m.sender = :sender AND m.receiver = :receiver", Matching.class)
                     .setParameter("sender", sender)
                     .setParameter("receiver", receiver)
                     .getSingleResult();
@@ -121,6 +128,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public boolean existsByMembers(Member member1, Member member2) {
         try {
@@ -138,6 +146,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Matching> findByReceiverId(Long memberId) {
         try {
@@ -150,6 +159,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Matching> findBySenderId(Long memberId) {
         try {
@@ -162,6 +172,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MatchingWithNicknameResponse> findMatchingWithNickname(Long memberId) {
         try {
@@ -188,6 +199,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Matching> findAcceptedMatchingsBySenderOrReceiver(Long memberId) {
         try {
@@ -203,6 +215,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Matching> findMatchingsFromYesterday() {
         try {

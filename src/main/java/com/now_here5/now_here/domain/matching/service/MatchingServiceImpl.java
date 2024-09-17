@@ -15,9 +15,9 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.notification.dto.NotificationRequestDto;
-import com.now_here5.now_here.infra.notification.service.FCMNotificationService;
-import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
+import com.now_here5.now_here.global.util.CustomXOR;
+import com.now_here5.now_here.infra.notification.dto.SmsRequest;
+import com.now_here5.now_here.infra.notification.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.now_here5.now_here.domain.member.entity.Gender.MALE;
 
 @Service
 @Slf4j
@@ -38,10 +40,11 @@ public class MatchingServiceImpl implements MatchingService {
     private final MatchingListToDto matchingListToDto;
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
-    private final SlackNotificationService slackNotificationService;
-    private final FCMNotificationService fcmNotificationService;
+    private final SmsService smsService;
     private final PreferenceBasedMBTIMatching matcher;
+    private final CustomXOR xor;
 
+    @Transactional(readOnly = true)
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
     public List<BannerListResponse> getBannerList() {
@@ -69,18 +72,29 @@ public class MatchingServiceImpl implements MatchingService {
 
                 matchingRepository.save(matching);
 
-                NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                        .title("하트가 도착했어요!")
-                        .message(String.format("%s님이 %s님에게 하트를 보냈습니다.", sender.getNickname(), receiver.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(notificationRequestDto);
+                if (receiver.getGender() == MALE) {
+                    Long eventId = receiver.getEvent().getId();
+                    String encryptEventId = xor.encrypt(eventId);
 
+//                    SmsRequest smsRequest = SmsRequest.builder()
+//                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️\n" +
+//                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/" + encryptEventId)
+//                            .phoneNumber(receiver.getPhoneNumber())
+//                            .build();
+
+                    SmsRequest smsRequest = SmsRequest.builder()
+                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status")
+                            .phoneNumber(receiver.getPhoneNumber())
+                            .build();
+
+                    smsService.sendSms(smsRequest);
+                }
             } else {
-                log.error("Matching already exists between {} and {}", senderId, receiverId);
+                throw new IllegalArgumentException("Matching already exists");
             }
         } catch (Exception e) {
             log.error("Failed to send love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw e;
         }
     }
 
@@ -91,6 +105,8 @@ public class MatchingServiceImpl implements MatchingService {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
+        Long eventId = sender.getEvent().getId();
+        String encryptEventId = xor.encrypt(eventId);
 
         try {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
@@ -101,27 +117,25 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
 
-                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-                        .title("Now, Here 매칭 알림")
-                        .message(String.format("%s님과 매칭되었습니다.", sender.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(rMessage);
+//                SmsRequest smsRequest = SmsRequest.builder()
+//                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다." +
+//                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/" + encryptEventId)
+//                        .phoneNumber(sender.getPhoneNumber())
+//                        .build();
 
-                NotificationRequestDto sMessage = NotificationRequestDto.builder()
-                        .title("Now, Here 매칭 알림")
-                        .message(String.format("%s님이 하트를 수락하였습니다.", receiver.getNickname()))
-                        .token(sender.getFcmToken())
+                SmsRequest smsRequest = SmsRequest.builder()
+                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. 지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status")
+                        .phoneNumber(sender.getPhoneNumber())
                         .build();
-                fcmNotificationService.sendMessages(sMessage);
 
+                smsService.sendSms(smsRequest);
                 sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
         } catch (Exception e) {
             log.error("Failed to receive love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            throw e;
         }
     }
 
@@ -141,22 +155,8 @@ public class MatchingServiceImpl implements MatchingService {
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
 
-                NotificationRequestDto rMessage = NotificationRequestDto.builder()
-                        .title("Now, Here")
-                        .message(String.format("%s님을 거절하셨습니다.", sender.getNickname()))
-                        .token(receiver.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(rMessage);
+                sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
 
-                NotificationRequestDto sMessage = NotificationRequestDto.builder()
-                        .title("Now, Here")
-                        .message(String.format("%s님과 매칭에 실패했어요...", receiver.getNickname()))
-                        .token(sender.getFcmToken())
-                        .build();
-                fcmNotificationService.sendMessages(sMessage);
-
-                sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -165,6 +165,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<SummaryResponse> getSummary() {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
@@ -177,6 +178,7 @@ public class MatchingServiceImpl implements MatchingService {
                 .build());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<SenderResponse> getSenderList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -185,13 +187,16 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             List<Matching> matchings = matchingRepository.findByReceiverId(memberId);
             return matchings.stream()
-                    .map(m -> new SenderResponse(
-                            m.getSender().getId(),
-                            m.getSender().getMbti().toString(),
-                            m.getSender().getBirthday().toString(),
-                            m.getSender().getNickname(),
-                            m.getSender().getGender().toString(),
-                            m.getSender().getDescription()))
+                    .map(m -> {
+                        Member sender = m.getSender();
+                        return new SenderResponse(
+                                sender.getId(),
+                                sender.getMbti().toString(),
+                                sender.getBirthday().toString(),
+                                sender.getNickname(),
+                                sender.getGender().toString(),
+                                sender.getDescription());
+                    })
                     .toList();
         } catch (Exception e) {
             log.error("Failed to get sender list for member {}: {}", memberId, e.getMessage());
@@ -199,6 +204,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReceiverResponse> getReceiverList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -207,13 +213,17 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             List<Matching> matchings = matchingRepository.findBySenderId(memberId);
             return matchings.stream()
-                    .map(m -> new ReceiverResponse(
-                            m.getReceiver().getId(),
-                            m.getReceiver().getMbti().toString(),
-                            m.getReceiver().getBirthday().toString(),
-                            m.getReceiver().getNickname(),
-                            m.getReceiver().getGender().toString(),
-                            m.getReceiver().getDescription()))
+                    .map(m ->
+                    {
+                        Member receiver = m.getReceiver();
+                        return new ReceiverResponse(
+                                receiver.getId(),
+                                receiver.getMbti().toString(),
+                                receiver.getBirthday().toString(),
+                                receiver.getNickname(),
+                                receiver.getGender().toString(),
+                                receiver.getDescription());
+                    })
                     .toList();
         } catch (Exception e) {
             log.error("Failed to get receiver list for member {}: {}", memberId, e.getMessage());
@@ -231,9 +241,9 @@ public class MatchingServiceImpl implements MatchingService {
 
             return matchings.stream()
                     .map(m -> {
-                        Member me = m.getReceiver().getId().equals(memberId) ? m.getSender() : m.getReceiver();
                         // 내가 sender인 경우 -> m.getReceiver()
                         // 내가 receiver인 경우 -> m.getSender()
+                        Member me = m.getReceiver().getId().equals(memberId) ? m.getSender() : m.getReceiver();
 
                         return SummaryDetailResponse.builder()
                                 .memberId(me.getId().toString())
@@ -242,7 +252,7 @@ public class MatchingServiceImpl implements MatchingService {
                                 .nickname(me.getNickname())
                                 .gender(me.getGender().toString())
                                 .description(me.getDescription())
-                                .snsId(me.getSnsId())
+                                .phoneNumber(me.getPhoneNumber())
                                 .build();
                     })
                     .toList();
@@ -253,6 +263,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<NotificationResponse> getNotificationList() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -262,7 +273,8 @@ public class MatchingServiceImpl implements MatchingService {
             List<MatchingWithNicknameResponse> matchings = matchingRepository.findMatchingWithNickname(memberId);
             member.updateUnreadNotiCount(0);
             return matchings.stream()
-                    .map(matching -> createNotificationResponse(matching.getMatching(), matching.getCounterpartNickname(), memberId))
+                    .map(matching ->
+                            createNotificationResponse(matching, memberId))
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -271,6 +283,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Integer getNotificationCount() {
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
@@ -284,33 +297,48 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
-    private NotificationResponse createNotificationResponse(Matching matching, String counterpartNickname, Long memberId) {
-        String title = "";
-        String content = "";
+    private NotificationResponse createNotificationResponse(MatchingWithNicknameResponse matching, Long memberId) {
+        String title = getTitle(matching, memberId);
+        String content = getContent(matching, memberId);
 
-        if (matching.getSender().getId().equals(memberId)) {
-            // 내가 sender인 경우
-            if (matching.getStatus() == Status.ACCEPTED) {
-                title = "매칭 성공!";
-                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
-            } else if (matching.getStatus() == Status.REJECTED) {
-                title = "매칭 실패";
-                content = String.format("%s님과의 매칭에 실패했어요.", counterpartNickname);
-            }
-        } else if (matching.getReceiver().getId().equals(memberId)) {
-            // 내가 receiver인 경우
-            if (matching.getStatus() == Status.ACCEPTED) {
-                title = "매칭 성공!";
-                content = String.format("%s님과 매칭되었어요.", counterpartNickname);
-            } else if (matching.getStatus() == Status.PENDING) {
-                title = "받은 하트";
-                content = String.format("%s님이 회원님에게 하트를 보냈어요.", counterpartNickname);
-            }
-        }
         return NotificationResponse.builder()
                 .title(title)
-                .memberName(counterpartNickname)
+                .memberName(matching.getCounterpartNickname())
                 .content(content)
                 .build();
+    }
+
+    private String getTitle(MatchingWithNicknameResponse matching, Long memberId) {
+        if (matching.getMatching().getSender().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return "매칭 성공!";
+            } else if (matching.getMatching().getStatus() == Status.REJECTED) {
+                return "매칭 실패";
+            }
+        } else if (matching.getMatching().getReceiver().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return "매칭 성공!";
+            } else if (matching.getMatching().getStatus() == Status.PENDING) {
+                return "받은 하트";
+            }
+        }
+        return "";
+    }
+
+    private String getContent(MatchingWithNicknameResponse matching, Long memberId) {
+        if (matching.getMatching().getSender().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return String.format("%s님과 매칭되었어요.", matching.getCounterpartNickname());
+            } else if (matching.getMatching().getStatus() == Status.REJECTED) {
+                return String.format("%s님과의 매칭에 실패했어요.", matching.getCounterpartNickname());
+            }
+        } else if (matching.getMatching().getReceiver().getId().equals(memberId)) {
+            if (matching.getMatching().getStatus() == Status.ACCEPTED) {
+                return String.format("%s님과 매칭되었어요.", matching.getCounterpartNickname());
+            } else if (matching.getMatching().getStatus() == Status.PENDING) {
+                return String.format("%s님이 회원님에게 하트를 보냈어요.", matching.getCounterpartNickname());
+            }
+        }
+        return "";
     }
 }

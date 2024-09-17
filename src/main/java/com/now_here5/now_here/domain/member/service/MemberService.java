@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface MemberService {
 
-    boolean sendCode(String email);
+    boolean sendCode(String phoneNumber);
 
     boolean verifyCode(String phone, String code);
 
@@ -22,7 +22,7 @@ public interface MemberService {
 
     boolean checkNicknameDuplicated(Long eventId, String nickname);
 
-    boolean checkAccountIdDuplicated(Long eventId, String accountId);
+    boolean checkIfPhoneDuplicated(Long eventId, String phone);
 
     List<MemberRecommendResponse> recommendMembers();
 
@@ -39,8 +39,6 @@ public interface MemberService {
     boolean updateNickName(String nickName);
 
     boolean updateMbti(String mbti);
-
-    boolean updateSnsId(String snsId);
 
     ProfileResponse getProfile();
 

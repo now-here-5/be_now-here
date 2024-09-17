@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class EventRepositoryImpl implements EventRepository {
     private final EntityManager em;
 
+    @Transactional(readOnly = true)
     @Override
     public List<Event> getEventList(boolean status) {
         try{
@@ -28,6 +30,7 @@ public class EventRepositoryImpl implements EventRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Event getEventDetail(Long eventId) {
         try{
@@ -38,7 +41,7 @@ public class EventRepositoryImpl implements EventRepository {
         }
     }
 
-
+    @Transactional(readOnly = true)
     @Override
     public List<Event> getSignedEventsByMember(boolean active, Long memberId) {
         try{
@@ -89,6 +92,7 @@ public class EventRepositoryImpl implements EventRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Location getLocationById(Long locationId) {
         try{
@@ -99,6 +103,7 @@ public class EventRepositoryImpl implements EventRepository {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Location> getLocationList() {
         try{

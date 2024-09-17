@@ -2,7 +2,6 @@ package com.now_here5.now_here.domain.interaction.service;
 
 import com.now_here5.now_here.domain.interaction.dto.FeedbackRequect;
 import com.now_here5.now_here.domain.interaction.dto.InquiryRequest;
-import com.now_here5.now_here.domain.interaction.dto.InquiryResponse;
 import com.now_here5.now_here.domain.interaction.dto.WithdrawalReasonRequest;
 import com.now_here5.now_here.domain.interaction.entity.Feedback;
 import com.now_here5.now_here.domain.interaction.entity.Inquiry;
@@ -12,9 +11,7 @@ import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.util.AuthUtil;
-import com.now_here5.now_here.infra.email.service.EmailCodeService;
 import com.now_here5.now_here.infra.email.service.EmailInquiryService;
-import com.now_here5.now_here.infra.notification.service.NotificationService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +74,7 @@ public class InteractionServiceImpl implements InteractionService {
             foundInquiry.updateAnswer(answer);
 
             // SMS 전송
-            emailInquiryService.sendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
+            emailInquiryService.setUpEamilAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
         } else {
             log.info("Inquiry not found for ID: {}", inquiryId);
         }
@@ -93,16 +90,13 @@ public class InteractionServiceImpl implements InteractionService {
 /* 로직 설명
 1. 최초 한번 매칭 후 매칭 현황 페이지 접속 시:
     - 매칭이 되었는지 확인 (매칭 테이블에서 현재 사용자 ID로 매칭된 accepted 상태가 있으면 true, 없으면 false 반환).
-    - TODO: boolean isMatched(member_id) 메서드 작성 필요.
 
 2. 하루 기준 오늘 매칭 페이지 3번째 접속 시:
     - getFeedbackStatus() 메서드가 호출될 때마다 popUpCount를 업데이트하고, 현재 카운트를 바탕으로 팝업 표시 여부 결정.
     - popUpCount가 4일 때 true를 반환하여 팝업 표시, 그 외에는 false 반환.
-    - TODO: int updatePopupCount(int num) 메서드 작성 필요.
 
 3. 하루 기준 오늘 의견을 full로 작성하지 않은 경우:
     - 오늘 작성된 피드백(의견과 별점 모두)이 있는지 확인하여, 있으면 false, 없으면 true 반환.
-    - TODO: boolean isFeedbackFullyWrittenToday(member_id) 메서드 작성 필요.
 */
 
 /* 확인 순서:
@@ -193,16 +187,19 @@ public class InteractionServiceImpl implements InteractionService {
         interactionRepository.saveWithdrawalReason(withdrawalReason);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Feedback> getFeedbacksByMemberId(Long memberId) {
         return interactionRepository.findFeedbacksByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Inquiry> getInquiriesByMemberId(Long memberId) {
         return interactionRepository.findInquiriesByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<WithdrawalReason> getWithdrawalReasonsByMemberId(Long memberId) {
         return interactionRepository.findWithdrawalReasonsByMemberId(memberId);

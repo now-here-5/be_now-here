@@ -2,18 +2,21 @@ package com.now_here5.now_here.domain.matching.service;
 
 import com.now_here5.now_here.domain.matching.entity.MatchingStatistics;
 import com.now_here5.now_here.domain.matching.repository.MatchingStatisticsRepository;
-import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Gender;
+import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Member;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -70,14 +73,16 @@ public class PreferenceBasedMBTIMatching {
     // 특정 MBTI와 성별에 대한 선호도 점수를 반환하는 메서드
     public double getPreferenceScore(MBTI userMbti, MBTI potentialMatchMbti, Gender gender) {
         Map<MBTI, Map<MBTI, Double>> preferences = (gender == Gender.MALE) ? malePreferences : femalePreferences;
-        preferences.putIfAbsent(userMbti, new HashMap<>());
+        preferences.putIfAbsent(userMbti, new EnumMap<>(MBTI.class));
         return preferences.get(userMbti).getOrDefault(potentialMatchMbti, 0.5);
     }
 
+
     // 매칭 성공 여부에 따라 선호도 가중치를 업데이트하는 메서드
+    @Async
     public void updatePreferences(MBTI userMbti, MBTI matchedMbti, Gender gender, boolean success) {
         Map<MBTI, Map<MBTI, Double>> preferences = (gender == Gender.MALE) ? malePreferences : femalePreferences;
-        preferences.putIfAbsent(userMbti, new HashMap<>());
+        preferences.putIfAbsent(userMbti, new EnumMap<>(MBTI.class));
 
         // 동적 조정법 : 가중치가 극단에 갈수록 안정성을 높임
         double baseAdjustment = 0.1;

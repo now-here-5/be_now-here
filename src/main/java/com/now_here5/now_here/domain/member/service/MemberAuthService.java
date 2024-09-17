@@ -1,20 +1,16 @@
 package com.now_here5.now_here.domain.member.service;
 
 
-import com.now_here5.now_here.domain.event.converter.EventListToDto;
-import com.now_here5.now_here.domain.event.repository.EventRepository;
+import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.domain.member.entity.Member;
+import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.converter.ListRolesToDto;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
-import com.now_here5.now_here.domain.member.dto.LoginRequest;
 import com.now_here5.now_here.global.security.dto.TokenDto;
-import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandler;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
-import com.now_here5.now_here.domain.member.repository.MemberAuthRepository;
 import com.now_here5.now_here.global.security.service.CustomAuthenticationToken;
 import com.now_here5.now_here.global.util.AuthUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,6 +18,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
@@ -51,10 +48,13 @@ public class MemberAuthService {
     public TokenDto login(LoginRequest loginRequest, Long eventId) {
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
+
             String newToken = tokenGenerator.generateUniqueToken();
+
             Authentication authentication = authUtil.getAuthentication();
             Member tempMember = (Member) authentication.getPrincipal();
             memberAuthRepository.updateTokenById(newToken, tempMember.getId());
+
             return new TokenDto(newToken);
         } catch (Exception e) {
             log.error("login Error ={}", e.getMessage());
@@ -76,7 +76,7 @@ public class MemberAuthService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public AuthenticatedMemberDto getMemberByToken(String token) {
         try {
             Member member = memberAuthRepository.findMemberByToken(token);
@@ -106,9 +106,9 @@ public class MemberAuthService {
 
     private void setAuthentication(LoginRequest loginRequest, Long eventId) {
 
-        /// CustomAuthenticationToken 생성, 여기에 eventID를 추가
+        // CustomAuthenticationToken 생성, 여기에 eventID를 추가
         CustomAuthenticationToken authenticationToken =
-                new CustomAuthenticationToken(loginRequest.getAccountId(), loginRequest.getPassword(), eventId);
+                new CustomAuthenticationToken(loginRequest.getPhoneNumber(), loginRequest.getPassword(), eventId);
 
         // 인증 성공 후 SecurityContext에 Authentication 객체 저장
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

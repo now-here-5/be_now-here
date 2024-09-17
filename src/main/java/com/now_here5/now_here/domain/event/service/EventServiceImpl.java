@@ -23,6 +23,8 @@ public class EventServiceImpl implements EventService {
     private final EventListToDto eventListToDto;
     private final AuthUtil authUtil;
     private final CustomXOR customXOR;
+
+    @Transactional(readOnly = true)
     @Override
     public EventResponse getEventDetail(Long eventId) {
 
@@ -42,6 +44,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventListResponse getEventList(boolean status) {
         try{
@@ -52,6 +55,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventTimeResponse getEventTime() {
         try {
@@ -61,30 +65,10 @@ public class EventServiceImpl implements EventService {
                 throw new IllegalStateException("Authenticated member 또는 event가 null입니다.");
             }
 
-//            Long eventId = authMember.getEventId();
-//            Event event = eventRepository.getEventDetail(eventId);
-//            LocalDateTime now = LocalDateTime.now();
-//            LocalDateTime end = event.getPeriodEnd();
-
             LocalDateTime end = authMember.getEndsAt();
             if (end == null) {
                 throw new IllegalStateException("Event end time이 null입니다.");
             }
-
-            // 남은 시간 계산
-//            Duration duration = Duration.between(now, end);
-//
-//            long days = duration.toDays();
-//            duration = duration.minusDays(days);
-//            long hours = duration.toHours();
-//            duration = duration.minusHours(hours);
-//            long minutes = duration.toMinutes();
-//            duration = duration.minusMinutes(minutes);
-//            long seconds = duration.getSeconds();
-
-//            return EventTimeResponse.builder()
-//                    .eventTime(String.format("%d일 %d시간 %d분 %d초", days, hours, minutes, seconds))
-//                    .build();
 
             return EventTimeResponse.builder()
                     .eventTime(end)
@@ -111,6 +95,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public  List<LocationResponse> getLocationList() {
 
@@ -130,6 +115,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String getLocation(Long locationId) {
         try{

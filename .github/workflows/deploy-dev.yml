@@ -80,12 +80,14 @@ jobs:
                 # Encryption key
                 - name: XOR_KEY
                   value: ${{ secrets.XOR_KEY }}
-
-                # Firebase 서비스 계정 키 경로 설정
-                - name: FCM_CREDENTIALS_PATH
-                  value: ./src/main/resources/firebase-key.json
-                - name : FCM_SERVICE_ACCOUNT_KEY
-                  value: ${{ secrets.FCM_SERVICE_ACCOUNT_KEY }}
+                
+                # Twilio configuration
+                - name: TWILIO_ACCOUNT_SID
+                  value: ${{ secrets.TWILIO_ACCOUNT_SID }}
+                - name: TWILIO_AUTH_TOKEN
+                    value: ${{ secrets.TWILIO_AUTH_TOKEN }}
+                - name: TWILIO_TRIAL_NUMBER 
+                    value: ${{ secrets.TWILIO_TRIAL_NUMBER }}
 
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
               start: |
