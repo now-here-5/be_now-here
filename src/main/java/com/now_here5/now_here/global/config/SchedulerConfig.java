@@ -14,7 +14,7 @@ public class SchedulerConfig {
     @Value("${scheduling.thread.pool.size}")
     private int poolSize;
 
-    @Bean
+    @Bean(name = "taskScheduler")
     public TaskScheduler taskScheduler() {
 
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

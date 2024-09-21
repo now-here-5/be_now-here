@@ -54,7 +54,7 @@ public class InteractionServiceImpl implements InteractionService {
             throw new RuntimeException(e.getMessage());
         }finally {
             // 피드백 작성 시, 하트는 제공 여부는 필히 판단 해야 됨.
-            memberservice.offerSpecialHeartIfQualified(); // 비동기적으로 처리
+            memberservice.offerSpecialHeartIfQualified(authUtil.getMemberByAuthentication().getMemberId()); // 비동기적으로 처리
         }
     }
 

@@ -132,12 +132,12 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public boolean isExistsByMemberIds(Long id1, Long id2) {
         try {
-            return em.createQuery("SELECT m FROM Matching m " +
+            return em.createQuery("SELECT count(m) FROM Matching m " +
                             "WHERE (m.sender.id = :id1 AND m.receiver.id = :id2) " +
-                            "   OR (m.sender.id = :id2 AND m.receiver.id = :id1)", Matching.class)
+                            "   OR (m.sender.id = :id2 AND m.receiver.id = :id1)", Long.class)
                     .setParameter("id1", id1)
                     .setParameter("id2", id2)
-                    .getSingleResult() != null;
+                    .getSingleResult() > 0;
         } catch (NoResultException e) {
             log.warn("No matching found between {} and {}", id1, id2);
             return false;

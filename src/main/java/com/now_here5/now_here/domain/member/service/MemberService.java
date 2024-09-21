@@ -44,5 +44,5 @@ public interface MemberService {
 
     PersonalInfoResponse getPersonalInfo();
 
-    void offerSpecialHeartIfQualified();
+    void offerSpecialHeartIfQualified(Long memberId);
 }
