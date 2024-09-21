@@ -3,8 +3,10 @@ package com.now_here5.now_here.domain.member.repository;
 import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -171,4 +173,19 @@ public class MemberRepositoryImpl implements MemberRepository {
             throw new RuntimeException("Failed to find members", e);
         }
     }
+
+    @Override
+    public int getSpecialHeartCountByMemberId(Long memberId) {
+        try{
+            return em.createQuery("select m.specialHeart from Member m " +
+                            "where m.id = :memberId", Integer.class)
+                    .setParameter("memberId", memberId)
+                    .getSingleResult();
+        }catch(NoResultException e){
+            log.error("Failed to get special heart count by memberId: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+
 }

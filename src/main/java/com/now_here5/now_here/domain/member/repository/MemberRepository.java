@@ -26,4 +26,8 @@ public interface MemberRepository {
     void initializePopupValue();
 
     List<Member> findMembersByMemberIdAndEventIdAndGender(Long memberId, Long eventId, Gender gender);
+
+    int getSpecialHeartCountByMemberId(Long memberId);
+
+
 }

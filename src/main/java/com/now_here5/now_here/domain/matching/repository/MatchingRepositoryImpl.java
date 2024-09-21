@@ -130,18 +130,16 @@ public class MatchingRepositoryImpl implements MatchingRepository {
 
     @Transactional(readOnly = true)
     @Override
-    public boolean existsByMembers(Member member1, Member member2) {
+    public boolean isExistsByMemberIds(Long id1, Long id2) {
         try {
-            List<Matching> results = em.createQuery(
-                            "SELECT m FROM Matching m WHERE (m.sender = :member1 AND m.receiver = :member2) OR (m.sender = :member2 AND m.receiver = :member1)",
-                            Matching.class)
-                    .setParameter("member1", member1)
-                    .setParameter("member2", member2)
-                    .getResultList();
-
-            return !results.isEmpty();
+            return em.createQuery("SELECT m FROM Matching m " +
+                            "WHERE (m.sender.id = :id1 AND m.receiver.id = :id2) " +
+                            "   OR (m.sender.id = :id2 AND m.receiver.id = :id1)", Matching.class)
+                    .setParameter("id1", id1)
+                    .setParameter("id2", id2)
+                    .getSingleResult() != null;
         } catch (NoResultException e) {
-            log.warn("No matching found between {} and {}", member1, member2);
+            log.warn("No matching found between {} and {}", id1, id2);
             return false;
         }
     }

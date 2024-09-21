@@ -4,6 +4,7 @@ import com.now_here5.now_here.domain.matching.dto.*;
 import com.now_here5.now_here.domain.matching.service.MatchingService;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.response.ResponseCode;
+import com.twilio.http.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -27,8 +28,8 @@ public class MatchingController {
     private final MatchingService matchingService;
 
     @Operation(summary = "배너 매칭 목록 조회", description = "배너에 표시할 멤버 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "B001 - 배너 목록 조회 성공")
-    @ApiResponse(responseCode = "400", description = "B001 - 배너 목록 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L001 - 배너 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L001 - 배너 목록 조회 실패")
 
     @GetMapping("/banner")
     public ResponseEntity<ResponseForm> getMemberForBanner() {
@@ -43,13 +44,15 @@ public class MatchingController {
 
     @Operation(summary = "하트 보내기", description = "특정 사용자에게 하트를 보냅니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @Parameter(name = "receiverId", description = "받는 사람의 ID", required = true, schema = @Schema(example = "1"))
-    @ApiResponse(responseCode = "200", description = "L001 - 하트 보내기 성공")
-    @ApiResponse(responseCode = "400", description = "L001 - 하트 보내기 실패")
+    @Parameter(name = "isSpecialUsed", description = "특별하트 사용 여부", required = true, schema = @Schema(example = "false"))
+    @ApiResponse(responseCode = "200", description = "L002 - 하트 보내기 성공")
+    @ApiResponse(responseCode = "400", description = "L002 - 하트 보내기 실패")
 
     @PostMapping("/send/{receiverId}")
-    public ResponseEntity<ResponseForm> sendLove(@PathVariable(name = "receiverId") Long receiverId) {
+    public ResponseEntity<ResponseForm> sendLove(@PathVariable(name = "receiverId") Long receiverId,
+                                                 @RequestParam boolean isSpecialUsed) {
         try {
-            matchingService.sendLove(receiverId);
+            matchingService.sendLove(receiverId, isSpecialUsed);
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS));
         } catch (Exception e) {
             log.error("하트 보내기 중 오류 발생: {}", e.getMessage());
@@ -59,8 +62,8 @@ public class MatchingController {
 
     @Operation(summary = "하트 수락하기", description = "특정 사용자로부터 하트를 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @Parameter(name = "senderId", description = "보내는 사람의 ID", required = true, schema = @Schema(example = "1"))
-    @ApiResponse(responseCode = "200", description = "L002 - 하트 받기 성공")
-    @ApiResponse(responseCode = "400", description = "L002 - 하트 받기 실패")
+    @ApiResponse(responseCode = "200", description = "L003 - 하트 받기 성공")
+    @ApiResponse(responseCode = "400", description = "L003 - 하트 받기 실패")
 
     @PatchMapping("/receive/{senderId}")
     public ResponseEntity<ResponseForm> receiveLove(@PathVariable(name = "senderId") Long senderId) {
@@ -75,8 +78,8 @@ public class MatchingController {
 
     @Operation(summary = "하트 거절하기", description = "특정 사용자의 하트를 거절합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @Parameter(name = "senderId", description = "보내는 사람의 ID", required = true, schema = @Schema(example = "1"))
-    @ApiResponse(responseCode = "200", description = "L003 - 하트 거절 성공")
-    @ApiResponse(responseCode = "400", description = "L003 - 하트 거절 실패")
+    @ApiResponse(responseCode = "200", description = "L004 - 하트 거절 성공")
+    @ApiResponse(responseCode = "400", description = "L004 - 하트 거절 실패")
 
     @PatchMapping("/reject/{senderId}")
     public ResponseEntity<ResponseForm> rejecteLove(@PathVariable(name = "senderId") Long senderId) {
@@ -90,8 +93,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "매칭 요약 조회", description = "매칭 요약 정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "S001 - 요약 정보 조회 성공")
-    @ApiResponse(responseCode = "400", description = "S001 - 요약 정보 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L005 - 요약 정보 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L005 - 요약 정보 조회 실패")
 
     @GetMapping("/summary")
     public ResponseEntity<ResponseForm> getSummary() {
@@ -103,8 +106,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "받은 하트 페이지 조회", description = "하트를 보낸 사람 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "S002 - 보낸 사람 목록 조회 성공")
-    @ApiResponse(responseCode = "400", description = "S002 - 보낸 사람 목록 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L006 - 보낸 사람 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L006 - 보낸 사람 목록 조회 실패")
 
     @GetMapping("/senderList")
     public ResponseEntity<ResponseForm> getSenderList() {
@@ -116,8 +119,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "보낸 하트 페이지 조회", description = "하트를 받은 사람 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "R001 - 받은 사람 목록 조회 성공")
-    @ApiResponse(responseCode = "400", description = "R001 - 받은 사람 목록 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L007 - 받은 사람 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L007 - 받은 사람 목록 조회 실패")
 
     @GetMapping("/receiverList")
     public ResponseEntity<ResponseForm> getReceiverList() {
@@ -129,8 +132,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "매칭 현황 페이지 조회", description = "매칭 요약 상세 정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "S003 - 요약 상세 정보 조회 성공")
-    @ApiResponse(responseCode = "400", description = "S003 - 요약 상세 정보 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L005 - 요약 상세 정보 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L005 - 요약 상세 정보 조회 실패")
 
     @GetMapping("/summaryDetail")
     public ResponseEntity<ResponseForm> getSummaryDetail() {
@@ -142,8 +145,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "알림 목록 조회", description = "알림 목록을 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "N001 - 알림 목록 조회 성공")
-    @ApiResponse(responseCode = "400", description = "N001 - 알림 목록 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L009 - 알림 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L009 - 알림 목록 조회 실패")
 
     @GetMapping("/getNotificationList")
     public ResponseEntity<ResponseForm> getNotificationList() {
@@ -155,8 +158,8 @@ public class MatchingController {
     }
 
     @Operation(summary = "알림 개수 조회", description = "읽지 않은 알림의 개수를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponse(responseCode = "200", description = "N002 - 알림 개수 조회 성공")
-    @ApiResponse(responseCode = "400", description = "N002 - 알림 개수 조회 실패")
+    @ApiResponse(responseCode = "200", description = "L010 - 알림 개수 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L010 - 알림 개수 조회 실패")
 
     @GetMapping("/getNotification")
     public ResponseEntity<ResponseForm> getNotificationCount() {
@@ -167,5 +170,17 @@ public class MatchingController {
             log.error("알림 개수 조회 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.NOTIFICATION_COUNT_QUERY_FAIL, 0));
         }
+    }
+
+    @Operation(summary = "특별하트 개수 조회", description = "특별하트의 개수를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "L011 - 특별하트 개수 조회 성공")
+    @ApiResponse(responseCode = "400", description = "L011 - 특별하트 개수 조회 실패")
+    @GetMapping("/getSpecialHeart")
+    public ResponseEntity<ResponseForm> getSpecialHeartCount(){
+        Integer notificationCount = matchingService.getSpecialHeartCount();
+
+        return notificationCount != null ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.SPECIAL_HEART_COUNT_QUERY_SUCCESS, notificationCount)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.SPECIAL_HEART_COUNT_QUERY_FAIL));
     }
 }
