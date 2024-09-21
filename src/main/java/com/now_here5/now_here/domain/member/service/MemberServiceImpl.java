@@ -294,10 +294,7 @@ public class MemberServiceImpl implements MemberService {
     public void offerSpecialHeartIfQualified(Long memberId) {
         if(interactionRepository.isFeedbackFirstWritten(memberId)){
             log.info("Offer special heart to member: {}", memberId);
-            Member member = memberRepository.findMemberById(memberId);
-            member.updateSpecialHeartAndUnReadNotiCount(
-                    member.getSpecialHeart()+5,
-                    member.getUnreadNotiCount());
+            memberRepository.updateSpecialHeart(memberId, 5);
         }
     }
 }

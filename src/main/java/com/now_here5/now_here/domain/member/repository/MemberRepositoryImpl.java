@@ -187,5 +187,20 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Override
+    public void updateSpecialHeart(Long memberId, int specialHeartCount) {
+        try{
+            em.createQuery("update Member m " +
+                            "set m.specialHeart = :specialHeartCount " +
+                            "where m.id = :memberId")
+                    .setParameter("specialHeartCount", specialHeartCount)
+                    .setParameter("memberId", memberId)
+                    .executeUpdate();
+        }catch (Exception e){
+            log.error("Failed to update special heart: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 
 }

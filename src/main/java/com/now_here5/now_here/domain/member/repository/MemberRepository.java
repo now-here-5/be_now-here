@@ -29,5 +29,6 @@ public interface MemberRepository {
 
     int getSpecialHeartCountByMemberId(Long memberId);
 
+    void updateSpecialHeart(Long memberId, int specialHeartCount);
 
 }
