@@ -26,4 +26,6 @@ public interface InteractionService {
     void processInquiryResponse(Long inquiryId, String answer);
 
     boolean getFeedbackStatus();
+
+
 }

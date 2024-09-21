@@ -82,10 +82,13 @@ public class Member extends FullAudit {
     private String description;
 
     @Column(name = "popupCount", nullable = false)
-    private int popupCount; // 하루에 몇번이나 매칭 페이지를 조회했는지. (4번 : 팝업, null : 첫 매칭 이전, 0 : 첫 매칭 이후  )
+    private int popupCount; // 하루에 몇번이나 매칭 페이지를 조회했는지
 
     @Column(name = "unreadNotiCount")
     private Integer unreadNotiCount;// 읽지 않는 알림의 개수
+
+    @Column(name = "special_heart", nullable = false)
+    private int specialHeart; // 특별 하트 개수
 
     @Column(name = "noti_setting", nullable = false)
     private boolean notiSetting; // 알림 설정
@@ -126,6 +129,7 @@ public class Member extends FullAudit {
         this.unreadNotiCount = 0;
         this.notiSetting = true;
         this.popupCount = 0;
+        this.specialHeart =10; // 10번 무료로 알림 보낼 수 있음.
 
         setEvent(event);
     }
@@ -169,6 +173,11 @@ public class Member extends FullAudit {
 
     public void updateUnreadNotiCount(int unreadNotiCount) {
         this.unreadNotiCount = unreadNotiCount;
+    }
+
+    public void updateSpecialHeartAndUnReadNotiCount(int specialHeart, int unreadNotiCount) {
+        this.specialHeart = specialHeart;
+        updateUnreadNotiCount(unreadNotiCount);
     }
 
     // 상태 관리 메서드

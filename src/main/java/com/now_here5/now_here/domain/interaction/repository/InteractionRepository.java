@@ -16,6 +16,8 @@ public interface InteractionRepository {
 
     boolean isFeedbackFullyWrittenToday(Long memberId);
 
+    boolean isFeedbackFirstWritten(Long memberId);
+
     Feedback findFeedbackById(Long id);
 
     Inquiry findInquiryById(Long id);

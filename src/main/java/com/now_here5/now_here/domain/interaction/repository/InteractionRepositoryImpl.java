@@ -66,6 +66,19 @@ public class InteractionRepositoryImpl implements InteractionRepository {
         }
     }
 
+    @Override
+    public boolean isFeedbackFirstWritten(Long memberId) {
+        try{
+            return em.createQuery("select count(f) from Feedback f " +
+                            "where f.member.id = :memberId", Long.class)
+                    .setParameter("memberId", memberId)
+                    .getSingleResult() == 1;
+        } catch (Exception e) {
+            log.error("첫 피드백 작성 여부 조회에 실패했습니다: {}", e.getMessage());
+            return false;
+        }
+    }
+
     @Transactional(readOnly = true)
     @Override
     public Feedback findFeedbackById(Long id) {

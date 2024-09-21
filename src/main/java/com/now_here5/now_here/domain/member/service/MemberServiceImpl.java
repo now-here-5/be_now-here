@@ -5,6 +5,7 @@ import com.now_here5.now_here.domain.event.converter.EventListToDto;
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.event.repository.EventRepository;
+import com.now_here5.now_here.domain.interaction.repository.InteractionRepository;
 import com.now_here5.now_here.domain.matching.service.PreferenceBasedMBTIMatching;
 import com.now_here5.now_here.domain.member.converter.RegisterDtoToMember;
 import com.now_here5.now_here.domain.member.dto.MemberRecommendResponse;
@@ -18,6 +19,7 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.infra.notification.service.PhoneCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthUtil authUtil;
     private final EventListToDto eventListToDto;
     private final PreferenceBasedMBTIMatching matcher;
+    private final InteractionRepository interactionRepository;
 
     @Override
     public boolean sendCode(String phoneNumber) {
@@ -285,5 +288,13 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
+    @Async
+    @Override
+    @Transactional
+    public void offerSpecialHeartIfQualified(Long memberId) {
+        if(interactionRepository.isFeedbackFirstWritten(memberId)){
+            log.info("Offer special heart to member: {}", memberId);
+            memberRepository.updateSpecialHeart(memberId, 5);
+        }
+    }
 }

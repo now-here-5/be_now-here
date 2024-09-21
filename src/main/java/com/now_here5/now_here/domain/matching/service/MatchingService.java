@@ -7,10 +7,13 @@ import java.util.List;
 
 public interface MatchingService {
     List<BannerListResponse> getBannerList();
-    void sendLove(Long receiverId);
+
+    void sendLove(Long receiverId, boolean isSpecialUsed);
+
     void receiveLove(Long senderId);
 
     void rejectLove(Long senderId);
+
     List<SummaryResponse> getSummary();
 
     List<SenderResponse> getSenderList();
@@ -22,4 +25,6 @@ public interface MatchingService {
     List<NotificationResponse> getNotificationList();
 
     Integer getNotificationCount();
+
+    Integer getSpecialHeartCount();
 }
