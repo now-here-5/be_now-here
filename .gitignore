@@ -37,6 +37,8 @@ out/
 .vscode/
 
 ### PROPERTIES ###
-*key
-key*
-*json
+application-dev.properties
+
+### LOGS ###
+/logs
+*.log

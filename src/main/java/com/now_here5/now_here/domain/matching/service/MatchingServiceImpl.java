@@ -18,6 +18,7 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 import com.now_here5.now_here.infra.notification.service.SmsService;
+import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -43,6 +44,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final SmsService smsService;
     private final PreferenceBasedMBTIMatching matcher;
     private final CustomXOR xor;
+
 
     @Transactional(readOnly = true)
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
@@ -80,7 +82,7 @@ public class MatchingServiceImpl implements MatchingService {
                                     "지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/"+encryptEventId)
                             .phoneNumber(receiver.getPhoneNumber())
                             .build();
-                    
+
                     smsService.sendSms(smsRequest);
                     sender.updateSpecialHeartAndUnReadNotiCount(
                             sender.getSpecialHeart()-1, 

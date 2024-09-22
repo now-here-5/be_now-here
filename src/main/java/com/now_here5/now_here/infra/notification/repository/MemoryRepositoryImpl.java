@@ -59,4 +59,8 @@ public class MemoryRepositoryImpl implements MemoryRepository {
             }
         }
     }
+
+    public int getCheckCodeMapSize() {
+        return codeMaxMemorySize - checkCodeMap.size();
+    }
 }
