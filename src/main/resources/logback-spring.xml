@@ -22,4 +22,13 @@
     <root level="INFO">
         <appender-ref ref="ASYNC_ROLLING_FILE" />
     </root>
+
+    <!-- 트랜잭션 로깅 설정 -->
+    <logger name="org.springframework.transaction" level="DEBUG"/>
+
+    <!-- Spring Security 관련 권한 검사 로깅 -->
+    <logger name="org.springframework.security" level="INFO"/>
+
+    <!-- 캐싱 관련 로깅 설정 -->
+    <logger name="org.springframework.cache" level="DEBUG"/>
 </configuration>

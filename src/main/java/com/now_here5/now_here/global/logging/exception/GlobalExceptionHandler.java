@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.logging;
+package com.now_here5.now_here.global.logging.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
