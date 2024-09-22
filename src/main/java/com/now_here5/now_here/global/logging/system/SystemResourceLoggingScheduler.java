@@ -22,13 +22,13 @@ public class SystemResourceLoggingScheduler {
     // 통합된 로깅 메서드
     @Scheduled(fixedRate = 60000) // 매 60초마다 모든 로깅 호출
     public void logAllSystems() {
-        log.debug("Starting unified logging...");
+        log.debug("[System Resources Log starts] : Starting unified logging...");
         asyncThreadPoolLogging.logAsyncExecutorStatus();
         cacheLogging.logCacheStats();
         databaseThreadPoolLogging.logHikariCPStatus();
         serverResourceLogging.logSystemResources();
         schedulerThreadPoolLogging.logSchedulerStatus();
         memoryCacheLogging.logMemoryCacheStats();
-        log.debug("Unified logging completed.");
+        log.debug("[System Resources Log ends] :Unified logging completed.");
     }
 }
