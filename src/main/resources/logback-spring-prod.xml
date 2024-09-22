@@ -14,7 +14,8 @@
             <maxHistory>30</maxHistory> <!-- 로그 보관일 -->
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %c{36} : %m%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -23,12 +24,9 @@
         <appender-ref ref="ASYNC_ROLLING_FILE" />
     </root>
 
-    <!-- 트랜잭션 로깅 설정 -->
-    <logger name="org.springframework.transaction" level="DEBUG"/>
 
     <!-- Spring Security 관련 권한 검사 로깅 -->
     <logger name="org.springframework.security" level="INFO"/>
 
-    <!-- 캐싱 관련 로깅 설정 -->
-    <logger name="org.springframework.cache" level="DEBUG"/>
+
 </configuration>
