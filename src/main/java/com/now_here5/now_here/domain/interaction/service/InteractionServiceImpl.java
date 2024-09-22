@@ -10,6 +10,7 @@ import com.now_here5.now_here.domain.interaction.repository.InteractionRepositor
 import com.now_here5.now_here.domain.matching.repository.MatchingRepository;
 import com.now_here5.now_here.domain.member.entity.Member;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
+import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.infra.email.service.EmailInquiryService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
@@ -31,19 +32,32 @@ public class InteractionServiceImpl implements InteractionService {
     private final SlackInquiryHandlerService slackInquiryHandlerService;
     private final EmailInquiryService emailInquiryService;
     private final MatchingRepository matchingRepository;
+    private final MemberService memberservice;
+
 
     @Transactional
     @Override
     public void createFeedback(FeedbackRequect feedbackRequect) {
-        Long memberId = authUtil.getMemberByAuthentication().getMemberId();
-        Member member = memberRepository.findActiveMemberById(memberId);
-        Feedback feedback = Feedback.builder()
-                .content(feedbackRequect.getContent())
-                .member(member)
-                .field(feedbackRequect.getField())
-                .build();
-        interactionRepository.saveFeedback(feedback);
+        try{
+            Long memberId = authUtil.getMemberByAuthentication().getMemberId();
+            Member member = memberRepository.findActiveMemberById(memberId);
+            Feedback feedback = Feedback.builder()
+                    .content(feedbackRequect.getContent())
+                    .member(member)
+                    .field(feedbackRequect.getField())
+                    .build();
+            interactionRepository.saveFeedback(feedback);
+
+        }catch (Exception e) {
+            log.error("토큰이 없는 피드백 작성: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }finally {
+            // 피드백 작성 시, 하트는 제공 여부는 필히 판단 해야 됨.
+            memberservice.offerSpecialHeartIfQualified(authUtil.getMemberByAuthentication().getMemberId()); // 비동기적으로 처리
+        }
     }
+
+
 
     @Transactional
     @Override
@@ -74,7 +88,7 @@ public class InteractionServiceImpl implements InteractionService {
             foundInquiry.updateAnswer(answer);
 
             // SMS 전송
-            emailInquiryService.setUpEamilAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
+            emailInquiryService.setUpAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
         } else {
             log.info("Inquiry not found for ID: {}", inquiryId);
         }

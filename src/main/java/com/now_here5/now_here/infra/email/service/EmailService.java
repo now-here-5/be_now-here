@@ -1,5 +1,6 @@
 package com.now_here5.now_here.infra.email.service;
 
+import com.now_here5.now_here.global.logging.annotation.ExternalApiLogging;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ public class EmailService {
     private static final String ENCODING_UTF8 = "UTF-8";
     private final JavaMailSender javaMailSender;
 
+    @ExternalApiLogging
     @Async
     public void sendHtmlTextEmail(String subject, String content, String recipientEmail) {
         MimeMessage message = javaMailSender.createMimeMessage();

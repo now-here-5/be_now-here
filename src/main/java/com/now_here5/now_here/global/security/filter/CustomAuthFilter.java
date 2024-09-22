@@ -69,7 +69,7 @@ public class CustomAuthFilter extends GenericFilterBean {
                 return;
             }
         } else {
-            log.warn("토큰이 없는 요청");
+            log.info("토큰이 없는 요청");
         }
 
         filterChain.doFilter(request, response); // 다음 필터로 넘어가기 (토큰이 없는 경우는 로그인으로)

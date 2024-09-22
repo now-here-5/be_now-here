@@ -1,0 +1,33 @@
+name: Build and Push Docker Image to GitHub Container Registry
+
+on:
+  push:
+    branches:
+      - deploy-only  # Docker 이미지를 빌드하고 푸시할 브랜치
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHP_TOKEN }}
+
+      - name: Create log-network
+        run: |
+          docker network create log-network || true  
+
+      - name: Build Docker image
+        run: |
+          docker build -f Dockerfile.fluentd -t ghcr.io/${{ github.repository }}/custom-fluentd-image:latest .
+
+      - name: Push Docker image to GitHub Container Registry
+        run: |
+          docker push ghcr.io/${{ github.repository }}/custom-fluentd-image:latest

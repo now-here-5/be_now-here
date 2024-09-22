@@ -18,6 +18,7 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 import com.now_here5.now_here.infra.notification.service.SmsService;
+import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -44,6 +45,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final PreferenceBasedMBTIMatching matcher;
     private final CustomXOR xor;
 
+
     @Transactional(readOnly = true)
     @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
@@ -56,44 +58,43 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
-    public void sendLove(Long receiverId) {
+    public void sendLove(Long receiverId, boolean isSpecialUsed) {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
 
         try {
-            if (!matchingRepository.existsByMembers(sender, receiver)) {
+            if (!matchingRepository.isExistsByMemberIds(sender.getId(), receiver.getId())) {
                 Matching matching = Matching.builder()
                         .sender(sender)
                         .receiver(receiver)
                         .status(Status.PENDING)
                         .build();
-                receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
+                
                 matchingRepository.save(matching);
-
-                if (receiver.getGender() == MALE) {
+                
+                if(isSpecialUsed){ // 특별하트 사용 시
                     Long eventId = receiver.getEvent().getId();
                     String encryptEventId = xor.encrypt(eventId);
-
-//                    SmsRequest smsRequest = SmsRequest.builder()
-//                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️\n" +
-//                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/" + encryptEventId)
-//                            .phoneNumber(receiver.getPhoneNumber())
-//                            .build();
-
                     SmsRequest smsRequest = SmsRequest.builder()
-                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status")
+                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ " +
+                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/"+encryptEventId)
                             .phoneNumber(receiver.getPhoneNumber())
                             .build();
 
                     smsService.sendSms(smsRequest);
+                    sender.updateSpecialHeartAndUnReadNotiCount(
+                            sender.getSpecialHeart()-1, 
+                            receiver.getUnreadNotiCount() + 1);
+                    // 사용시 특별하트 감소, 상대방 알림수는 증가
                 }
             } else {
                 throw new IllegalArgumentException("Matching already exists");
             }
         } catch (Exception e) {
             log.error("Failed to send love from {} to {}: {}", senderId, receiverId, e.getMessage());
+            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
             throw e;
         }
     }
@@ -111,25 +112,21 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
             if (matching != null) {
+
                 matching.setStatus(Status.ACCEPTED);
-                matchingRepository.update(matching);
-
-                matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
-                matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
-
-//                SmsRequest smsRequest = SmsRequest.builder()
-//                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다." +
-//                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/" + encryptEventId)
-//                        .phoneNumber(sender.getPhoneNumber())
-//                        .build();
+//                matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. 지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status")
+                        .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. " +
+                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status/"+encryptEventId)
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
-                smsService.sendSms(smsRequest);
                 sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+                smsService.sendSms(smsRequest); // 먼저 요청한 사람에게 알림 보내기
+
+                matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
+                matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -138,7 +135,6 @@ public class MatchingServiceImpl implements MatchingService {
             throw e;
         }
     }
-
 
     @Override
     public void rejectLove(Long senderId) {
@@ -150,13 +146,11 @@ public class MatchingServiceImpl implements MatchingService {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
             if (matching != null) {
                 matching.setStatus(Status.REJECTED);
-                matchingRepository.update(matching);
-
-                matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
-                matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
+//                matchingRepository.update(matching);
 
                 sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
-
+                matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
+                matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), false);
             } else {
                 log.warn("No matching found between {} and {}", senderId, receiverId);
             }
@@ -265,7 +259,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<NotificationResponse> getNotificationList() {
+    public List<NotificationResponse> getNotificationList() { // TODO : 페이징 필수 - 알림을 직접 만들어야 하기 때문에 많이 조회될 수록 불리함.
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();
         Long memberId = authMember.getMemberId();
         Member member = memberRepository.findActiveMemberById(memberId);
@@ -294,6 +288,19 @@ public class MatchingServiceImpl implements MatchingService {
         } catch (Exception e) {
             log.error("Failed to get notification count for member {}: {}", memberId, e.getMessage());
             return 0;
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public Integer getSpecialHeartCount() {
+        try{
+            AuthenticatedMemberDto member = authUtil.getMemberByAuthentication();
+            return memberRepository.getSpecialHeartCountByMemberId(member.getMemberId());
+        }catch (Exception e){
+            log.error("Failed to get special heart count: {}", e.getMessage());
+            return null;
         }
     }
 

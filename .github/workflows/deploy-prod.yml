@@ -35,22 +35,6 @@ jobs:
                               -t ghcr.io/${{ github.repository }}:latest \
                               --push .
 
-      # PostgreSQL VM 접속 및 상태 확인 단계
-      - name: Check and Start PostgreSQL on Separate VM
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PS_VM_IP }}
-          username: ${{ secrets.PS_VM_USERNAME }}
-          key: ${{ secrets.PS_VM_PRIVATE_KEY }}
-          script: |
-            if systemctl is-active --quiet postgresql@14-main; then
-              echo "PostgreSQL is already running."
-            else
-              echo "PostgreSQL is not running. Starting PostgreSQL..."
-              sudo systemctl start postgresql
-            fi
-
-
       # 애플리케이션 VM 배포 단계
       - name: Deploy Spring Boot on OCI VM
         uses: appleboy/ssh-action@v1.0.3
@@ -73,9 +57,12 @@ jobs:
               exit 1
             fi
             
+            # 스크립트를 사용하여 Fluentd 체크 및 실행
+            bash check-custom-fluentd.sh
+
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
-            if ! sudo docker run -d --name now-here-server -p 8080:8080 \
+            if ! sudo docker run -d --name now-here-server --network log-network -p 8080:8080 \
               -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
               -e DB_PORT=${{ secrets.OC_DB_PORT }} \
               -e DB_NAME=${{ secrets.OC_DB_NAME }} \
@@ -99,3 +86,43 @@ jobs:
 
             # Show container logs for debugging
             sudo docker logs now-here-server
+
+  check-and-run-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check and Run PostgreSQL
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          script: |
+            # PostgreSQL 체크 스크립트 실행
+            bash check-postgresql.sh
+
+  check-and-run-fluentd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check and Run Fluentd
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          script: |
+            OCI_USER=${{ secrets.OCI_USER }} \
+            OCI_FINGERPRINT=${{ secrets.OCI_FINGERPRINT }} \
+            OCI_API_KEY="${{ secrets.OCI_API_KEY }}" \
+            OCI_TENANCY=${{ secrets.OCI_TENANCY }} \
+            OCI_REGION=${{ secrets.OCI_REGION }} \
+            COMPARTMENT_ID=${{ secrets.OCI_COMP_ID }} \
+            LOG_ID=${{ secrets.OCI_LOG_ID }} \
+            bash /usr/local/bin/generate-config.sh
+
+
+  
