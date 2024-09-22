@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.logging;
+package com.now_here5.now_here.global.logging.aop;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

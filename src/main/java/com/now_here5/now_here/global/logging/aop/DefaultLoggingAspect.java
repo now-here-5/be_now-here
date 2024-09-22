@@ -1,4 +1,4 @@
-package com.now_here5.now_here.global.logging;
+package com.now_here5.now_here.global.logging.aop;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class LoggingAspect {
+public class DefaultLoggingAspect {
 
     private final HttpServletRequest request;
 

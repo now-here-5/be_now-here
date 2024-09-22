@@ -10,6 +10,8 @@ public interface MemoryRepository {
     void saveCheckCode(String target, String checkCode);
 
     void delete(String target);
+
+    int getCheckCodeMapSize();
 }
 
 
