@@ -122,7 +122,7 @@ jobs:
             OCI_REGION=${{ secrets.OCI_REGION }} \
             COMPARTMENT_ID=${{ secrets.OCI_COMP_ID }} \
             LOG_ID=${{ secrets.OCI_LOG_ID }} \
-            OCI_CONFIG_FILE=/root/.oci/config \
-            bash check-custom-fluentd.sh
+            bash /usr/local/bin/generate-config.sh
+
 
   
