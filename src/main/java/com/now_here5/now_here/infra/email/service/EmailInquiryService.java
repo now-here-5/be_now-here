@@ -16,7 +16,7 @@ public class EmailInquiryService {
     private final SpringTemplateEngine templateEngine;
     private static final String INQUIRY_EMAIL_SUBJECT_POSTFIX = "문의사항에 대한 답변";
 
-    public void setUpEamilAndSendEmail(String email, String inquiry, String answer){
+    public void setUpAndSendEmail(String email, String inquiry, String answer){
         try{
             EmailFormDto emailForm = EmailFormDto.builder()
                     .email(email)
@@ -24,19 +24,19 @@ public class EmailInquiryService {
                     .answer(answer)
                     .build();
 
-            this.setUpEamilAndSendEmail(emailForm);
+            this.setUpAndSendEmail(emailForm);
         }catch(Exception e){
             log.error("Failed to send the answer email for inquiry: {}", e.getMessage());
             throw new RuntimeException("Failed to send email", e);
         }
     }
 
-    private void setUpEamilAndSendEmail(EmailFormDto emailForm) {
+    private void setUpAndSendEmail(EmailFormDto emailForm) {
         try {
             String emailContent = generateEmailContent(emailForm);
 
             emailService.sendHtmlTextEmail(
-                    emailForm.getEmail() + INQUIRY_EMAIL_SUBJECT_POSTFIX,
+                    INQUIRY_EMAIL_SUBJECT_POSTFIX,
                     emailContent,
                     emailForm.getEmail()
             );

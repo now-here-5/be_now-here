@@ -40,3 +40,7 @@ out/
 *key
 key*
 *json
+
+### LOGS ###
+/logs
+*.log
