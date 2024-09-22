@@ -46,6 +46,7 @@ public class SecurityConfig {
 
                                 // 매니저 대상
                                 .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**").permitAll()
                                 .requestMatchers("/slack/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "*/inquiry").permitAll()

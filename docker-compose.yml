@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 애플리케이션 서비스
+  app:
+    build: .
+    container_name: now-here-server
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST
+      - DB_PORT
+      - DB_NAME
+      - DB_USERNAME
+      - DB_PASSWORD
+      - XOR_KEY
+      - SLACK_WEBHOOK_URL
+      - SLACK_INQUIRY_WEBHOOK_URL
+      - MAIL_HOST
+      - MAIL_PORT
+      - MAIL_USERNAME
+      - MAIL_PASSWORD
+      - TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN
+      - TWILIO_TRIAL_NUMBER
+      - TZ=Asia/Seoul
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: app.log
+
+  # Fluentd 서비스
+  fluentd:
+    image: fluent/fluentd:latest
+    container_name: fluentd
+    ports:
+      - "24224:24224"
+    volumes:
+      - ./fluent.conf:/fluentd/etc/fluent.conf
+    environment:
+      - FLUENTD_CONF=fluent.conf
+      - COMPARTMENT_ID
+      - LOG_ID
+      - OCI_CONFIG_FILE

@@ -47,6 +47,9 @@ dependencies {
 	// cache
 	implementation 'com.github.ben-manes.caffeine:caffeine'
 
+	implementation("org.springframework:spring-core") {
+		exclude group: "commons-logging", module: "commons-logging"
+	}
 }
 
 tasks.named('test') {
