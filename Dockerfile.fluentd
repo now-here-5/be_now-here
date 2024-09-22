@@ -1,12 +1,12 @@
 # 베이스 이미지 선택
-FROM fluent/fluentd:latest
+FROM fluent/fluentd:v1.14-1
 
 # 필요한 패키지 설치
 USER root
 RUN apk add --no-cache bash
 
 # Fluentd 설정 파일 복사 및 스크립트 복사
-COPY generate-config.sh /usr/local/bin/generate-config.sh
+COPY scripts/generate-config.sh /usr/local/bin/generate-config.sh
 RUN chmod +x /usr/local/bin/generate-config.sh
 
 # OCI 설정 디렉터리 생성
