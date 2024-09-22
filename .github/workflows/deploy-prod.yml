@@ -1,4 +1,4 @@
-name: Build and Deploy Spring Boot to OCI using Docker Compose
+name: Build and Deploy Spring Boot to OCI using Docker
 
 on:
   push:
@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 3. Cache Docker layers
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -27,12 +24,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      # 4. Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
         run: |
           echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      # 5. Build and Push Docker Images
       - name: Build and Push Docker Image
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
@@ -40,23 +35,8 @@ jobs:
                               -t ghcr.io/${{ github.repository }}:latest \
                               --push .
 
-      # 6. PostgreSQL VM 접속 및 상태 확인
-      - name: Check and Start PostgreSQL on Separate VM
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PS_VM_IP }}
-          username: ${{ secrets.PS_VM_USERNAME }}
-          key: ${{ secrets.PS_VM_PRIVATE_KEY }}
-          script: |
-            if systemctl is-active --quiet postgresql@14-main; then
-              echo "PostgreSQL is already running."
-            else
-              echo "PostgreSQL is not running. Starting PostgreSQL..."
-              sudo systemctl start postgresql
-            fi
-
-      # 7. Docker Compose 파일 복사 및 환경 변수 사용하여 배포
-      - name: Deploy Application using Docker Compose
+      # 애플리케이션 VM 배포 단계
+      - name: Deploy Spring Boot on OCI VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.OCI_VM_IP }}
@@ -68,36 +48,81 @@ jobs:
               echo "Directory $DEPLOYMENT_DIR does not exist. Creating it."
               sudo mkdir -p "$DEPLOYMENT_DIR"
             fi
-
-            # VM에 docker-compose.yml 파일을 복사
-            echo "Copying docker-compose.yml to VM..."
-            scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.OCI_VM_USERNAME }}@${{ secrets.OCI_VM_IP }}:${DEPLOYMENT_DIR}/docker-compose.yml
-
+            
             cd "$DEPLOYMENT_DIR"
-
-            # GitHub Actions에서 주입된 환경 변수를 이용해 Docker Compose 실행
+            
             echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            if ! docker pull ghcr.io/${{ github.repository }}:latest; then
+              echo "Failed to pull Docker image"
+              exit 1
+            fi
+            
+            # 스크립트를 사용하여 Fluentd 체크 및 실행
+            bash check-custom-fluentd.sh
 
-            # 환경 변수를 런타임에 주입
-            DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
-            DB_PORT=${{ secrets.OC_DB_PORT }} \
-            DB_NAME=${{ secrets.OC_DB_NAME }} \
-            DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
-            DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
-            XOR_KEY=${{ secrets.XOR_KEY }} \
-            SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
-            SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
-            MAIL_HOST=${{ secrets.MAIL_HOST }} \
-            MAIL_PORT=${{ secrets.MAIL_PORT }} \
-            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
-            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-            TWILIO_ACCOUNT_SID=${{ secrets.TWILIO_ACCOUNT_SID }} \
-            TWILIO_AUTH_TOKEN=${{ secrets.TWILIO_AUTH_TOKEN }} \
-            TWILIO_TRIAL_NUMBER=${{ secrets.TWILIO_TRIAL_NUMBER }} \
-            COMPARTMENT_ID=${{ secrets.COMP_ID }} \
-            LOG_ID=${{ secrets.LOG_ID }} \
-            OCI_CONFIG_FILE=${{ secrets.OCI_CONFIG_FILE }} \
-            docker-compose -f docker-compose.yml up -d --remove-orphans
+            sudo docker stop now-here-server || true
+            sudo docker rm now-here-server || true
+            if ! sudo docker run -d --name now-here-server --network log-network -p 8080:8080 \
+              -e DB_HOST=${{ secrets.OC_DB_PV_HOST }} \
+              -e DB_PORT=${{ secrets.OC_DB_PORT }} \
+              -e DB_NAME=${{ secrets.OC_DB_NAME }} \
+              -e DB_USERNAME=${{ secrets.OC_DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
+              -e XOR_KEY=${{ secrets.XOR_KEY }} \
+              -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
+              -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
+              -e MAIL_HOST=${{ secrets.MAIL_HOST }} \
+              -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
+              -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
+              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e TWILOIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
+              -e TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
+              -e TWILIO_TRIAL_NUMBER=${{secrets.TWILIO_TRIAL_NUMBER}} \
+              -e TZ=Asia/Seoul \
+              ghcr.io/${{ github.repository }}:latest; then
+              echo "Failed to run Docker container"
+              exit 1
+            fi
 
             # Show container logs for debugging
             sudo docker logs now-here-server
+
+  check-and-run-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check and Run PostgreSQL
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          script: |
+            # PostgreSQL 체크 스크립트 실행
+            bash check-postgresql.sh
+
+  check-and-run-fluentd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check and Run Fluentd
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          script: |
+            OCI_USER=${{ secrets.OCI_USER }} \
+            OCI_FINGERPRINT=${{ secrets.OCI_FINGERPRINT }} \
+            OCI_API_KEY="${{ secrets.OCI_API_KEY }}" \
+            OCI_TENANCY=${{ secrets.OCI_TENANCY }} \
+            OCI_REGION=${{ secrets.OCI_REGION }} \
+            COMPARTMENT_ID=${{ secrets.OCI_COMP_ID }} \
+            LOG_ID=${{ secrets.OCI_LOG_ID }} \
+            OCI_CONFIG_FILE=/root/.oci/config \
+            bash check-custom-fluentd.sh
+
+  

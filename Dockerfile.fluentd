@@ -1,0 +1,22 @@
+# 베이스 이미지 선택
+FROM fluent/fluentd:latest
+
+# 필요한 패키지 설치
+USER root
+RUN apk add --no-cache bash
+
+# Fluentd 설정 파일 복사
+COPY fluent.conf /fluentd/etc/
+
+# OCI 설정 디렉터리 생성
+RUN mkdir -p /root/.oci
+
+# 환경 변수를 사용하여 OCI config 파일 생성
+CMD /bin/bash -c 'echo "[DEFAULT]" > /root/.oci/config && \
+                  echo "user=${OCI_USER}" >> /root/.oci/config && \
+                  echo "fingerprint=${OCI_FINGERPRINT}" >> /root/.oci/config && \
+                  echo "${OCI_API_KEY}" > /root/.oci/private_key.pem && \
+                  chmod 600 /root/.oci/private_key.pem && \
+                  echo "tenancy=${OCI_TENANCY}" >> /root/.oci/config && \
+                  echo "region=${OCI_REGION}" >> /root/.oci/config && \
+                  fluentd -c /fluentd/etc/fluent.conf'
