@@ -1,5 +1,6 @@
 package com.now_here5.now_here.infra.slack.service;
 
+import com.now_here5.now_here.global.logging.annotation.ExternalApiLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +20,9 @@ public class SlackNotificationService {
     private String webhookUrl;
     private final RestTemplate restTemplate;
 
+    @ExternalApiLogging
     public void sendNotification(String message) {
-
+        
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json; charset=UTF-8"); // UTF-8로 메시지를 인코딩
 
