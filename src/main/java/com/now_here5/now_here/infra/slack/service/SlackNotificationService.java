@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,9 +21,10 @@ public class SlackNotificationService {
     private String webhookUrl;
     private final RestTemplate restTemplate;
 
+    @Async
     @ExternalApiLogging
     public void sendNotification(String message) {
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json; charset=UTF-8"); // UTF-8로 메시지를 인코딩
 

@@ -15,6 +15,10 @@ public class ServerResourceLogging {
         long freeMemory = runtime.freeMemory();
         long maxMemory = runtime.maxMemory();
 
-        log.info("Memory usage: Total: {}, Free: {}, Max: {}", totalMemory, freeMemory, maxMemory);
+        log.info("Memory usage: Total: {} MB, Free: {} MB, Max: {} MB",
+                String.format("%.4f", (double) totalMemory / (1024 * 1024)),
+                String.format("%.2f", (double) freeMemory / (1024 * 1024)),
+                String.format("%.4f", (double) maxMemory / (1024 * 1024)));
+
     }
 }
