@@ -45,7 +45,7 @@ public class CustomAuthFilter extends GenericFilterBean {
         String customToken = resolveToken(httpServletRequest);
 
         String requestURI = httpServletRequest.getRequestURI();
-
+        log.info("resolveToken : {}, requestURI : {} ", customToken, requestURI);
 
         if (StringUtils.hasText(customToken)) { // 토큰이 있을 때만 검증
             try {
@@ -69,7 +69,7 @@ public class CustomAuthFilter extends GenericFilterBean {
                 return;
             }
         } else {
-            log.info("토큰이 없는 요청 - resolveToken : {}, requestURI : {} ", customToken, requestURI);
+            log.info("토큰이 없는 요청");
         }
 
         filterChain.doFilter(request, response); // 다음 필터로 넘어가기 (토큰이 없는 경우는 로그인으로)
