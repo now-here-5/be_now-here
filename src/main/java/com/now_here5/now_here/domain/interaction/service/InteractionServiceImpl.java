@@ -16,7 +16,6 @@ import com.now_here5.now_here.infra.email.service.EmailInquiryService;
 import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +88,7 @@ public class InteractionServiceImpl implements InteractionService {
             foundInquiry.updateAnswer(answer);
 
             // SMS 전송
-            emailInquiryService.setUpEamilAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
+            emailInquiryService.setUpAndSendEmail(foundInquiry.getEmail(), foundInquiry.getContent(), foundInquiry.getAnswer());
         } else {
             log.info("Inquiry not found for ID: {}", inquiryId);
         }
