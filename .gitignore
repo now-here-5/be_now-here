@@ -39,7 +39,3 @@ out/
 ### PROPERTIES ###
 key.properties
 *key*
-
-### LOGS ###
-/logs
-*.log

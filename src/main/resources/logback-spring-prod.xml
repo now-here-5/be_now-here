@@ -1,32 +1,30 @@
 <configuration>
-    <!-- 비동기 로깅 설정 -->
-    <appender name="ASYNC_ROLLING_FILE" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="ROLLING_FILE" />
-        <queueSize>5000</queueSize> <!-- 큐 크기 -->
-        <discardingThreshold>0</discardingThreshold> <!-- 큐가 가득 찰 경우 버릴 로그 레벨 설정 -->
-    </appender>
+    <!-- 공통 설정 -->
+    <springProperty scope="context" name="PID" source="pid" defaultValue="UNKNOWN"/>
 
-    <!-- 롤링 파일 설정 (비동기 처리) -->
-    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/app.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory> <!-- 로그 보관일 -->
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %c{36} : %m%n</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-    </appender>
+    <!-- 'prod' 프로필에서만 FLUENTD Appender 정의 -->
+    <springProfile name="prod">
+        <!-- Logstash TCP Socket Appender -->
+        <appender name="FLUENTD" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>custom-fluentd:24224</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"application":"spring-server", "environment":"prod", "type":"json"}</customFields>
+            </encoder>
+        </appender>
 
-    <!-- Root 로거 설정 (ASYNC_ROLLING_FILE 사용) -->
-    <root level="INFO">
-        <appender-ref ref="ASYNC_ROLLING_FILE" />
-    </root>
+        <!-- 콘솔 출력 Appender (색상 지원) -->
+        <appender name="COLOR_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!-- 스프링 기본 로그 패턴 -->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) --- [%thread] %cyan(%logger{36}) : %msg%n</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
 
-
-    <!-- Spring Security 관련 권한 검사 로깅 -->
-    <logger name="org.springframework.security" level="INFO"/>
-
-
+        <!-- Root Logger 설정 -->
+        <root level="INFO">
+            <appender-ref ref="FLUENTD" />
+            <appender-ref ref="COLOR_CONSOLE" />
+        </root>
+    </springProfile>
 </configuration>

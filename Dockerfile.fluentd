@@ -1,9 +1,15 @@
-# 베이스 이미지 선택
-FROM fluent/fluentd:v1.14-1
+# 베이스 이미지 선택 (Debian 기반)
+FROM fluent/fluentd:v1.14-debian-1
 
-# 필요한 패키지 설치
 USER root
-RUN apk add --no-cache bash
+
+# 개발 도구 및 필요한 라이브러리 설치
+RUN apt-get update && \
+    apt-get install -y build-essential ruby-dev libffi-dev libssl-dev && \
+    apt-get clean
+
+# OCI Logging 플러그인 설치
+RUN gem install fluent-plugin-oci-logging
 
 # Fluentd 설정 파일 복사 및 스크립트 복사
 COPY scripts/generate-config.sh /usr/local/bin/generate-config.sh
@@ -13,4 +19,4 @@ RUN chmod +x /usr/local/bin/generate-config.sh
 RUN mkdir -p /root/.oci
 
 # 스크립트를 실행하여 환경 변수 기반으로 설정 파일 생성 및 Fluentd 실행
-CMD /usr/local/bin/generate-config.sh
+CMD ["/usr/local/bin/generate-config.sh"]

@@ -9,6 +9,9 @@ COPY gradlew .
 COPY gradle ./gradle
 COPY build.gradle settings.gradle ./
 
+# Gradlew 파일에 실행 권한을 추가
+RUN chmod +x gradlew
+
 # Gradle 캐시를 활성화하는 설정 파일 추가
 COPY gradle.properties .
 
@@ -19,14 +22,13 @@ RUN ./gradlew --no-daemon build --refresh-dependencies || return 0
 COPY src ./src
 
 # 6. Gradle 빌드를 실행하여 JAR 파일 생성 (테스트를 건너뜀)
-RUN ./gradlew clean build -x test --no-daemon
+RUN ./gradlew clean build -x test --no-daemon --stacktrace
 
 # 7. 런타임 이미지 설정 (최종 단계)
 FROM eclipse-temurin:17-jre-alpine
 
 # 8. JAR 파일 복사 (정확한 JAR 이름으로)
-COPY --from=build /app/build/libs/now-here-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # 9. 애플리케이션 실행 명령어
 ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.profiles.active=prod"]
-

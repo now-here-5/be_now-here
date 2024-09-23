@@ -6,6 +6,7 @@ on:
       - prod
 
 jobs:
+
   build-and-deploy:
     runs-on: ubuntu-latest
 
@@ -32,7 +33,7 @@ jobs:
         run: |
           docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
                               --cache-to type=local,dest=/tmp/.buildx-cache \
-                              -t ghcr.io/${{ github.repository }}:latest \
+                              -t ghcr.io/${{ github.repository }}/now-here-server:latest \
                               --push .
 
       # 애플리케이션 VM 배포 단계
@@ -52,14 +53,15 @@ jobs:
             cd "$DEPLOYMENT_DIR"
             
             echo "${{ secrets.GHP_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-            if ! docker pull ghcr.io/${{ github.repository }}:latest; then
+            
+            # 네트워크 생성 (이미 존재할 경우 에러 무시)
+            sudo docker network create log-network || true
+            
+            if ! docker pull ghcr.io/${{ github.repository }}/now-here-server:latest; then
               echo "Failed to pull Docker image"
               exit 1
             fi
             
-            # 스크립트를 사용하여 Fluentd 체크 및 실행
-            bash check-custom-fluentd.sh
-
             sudo docker stop now-here-server || true
             sudo docker rm now-here-server || true
             if ! sudo docker run -d --name now-here-server --network log-network -p 8080:8080 \
@@ -79,27 +81,30 @@ jobs:
               -e TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
               -e TWILIO_TRIAL_NUMBER=${{secrets.TWILIO_TRIAL_NUMBER}} \
               -e TZ=Asia/Seoul \
-              ghcr.io/${{ github.repository }}:latest; then
+              ghcr.io/${{ github.repository }}/now-here-server:latest; then
               echo "Failed to run Docker container"
               exit 1
             fi
-
-            # Show container logs for debugging
-            sudo docker logs now-here-server
+            
 
   check-and-run-db:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check and Run PostgreSQL
+      - name: Check and Start PostgreSQL on Separate VM
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.OCI_VM_IP }}
-          username: ${{ secrets.OCI_VM_USERNAME }}
-          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          host: ${{ secrets.PS_VM_IP }}
+          username: ${{ secrets.PS_VM_USERNAME }}
+          key: ${{ secrets.PS_VM_PRIVATE_KEY }}
           script: |
-            # PostgreSQL 체크 스크립트 실행
-            bash check-postgresql.sh
+            if systemctl is-active --quiet postgresql@14-main; then
+              echo "PostgreSQL is already running."
+            else
+              echo "PostgreSQL is not running. Starting PostgreSQL..."
+              sudo systemctl start postgresql
+            fi
+
 
   check-and-run-fluentd:
     runs-on: ubuntu-latest
@@ -115,14 +120,24 @@ jobs:
           username: ${{ secrets.OCI_VM_USERNAME }}
           key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
           script: |
-            OCI_USER=${{ secrets.OCI_USER }} \
-            OCI_FINGERPRINT=${{ secrets.OCI_FINGERPRINT }} \
-            OCI_API_KEY="${{ secrets.OCI_API_KEY }}" \
-            OCI_TENANCY=${{ secrets.OCI_TENANCY }} \
-            OCI_REGION=${{ secrets.OCI_REGION }} \
-            COMPARTMENT_ID=${{ secrets.OCI_COMP_ID }} \
-            LOG_ID=${{ secrets.OCI_LOG_ID }} \
-            bash /usr/local/bin/generate-config.sh
+            # 네트워크 생성 (이미 존재할 경우 에러 무시)
+            sudo docker network create log-network || true
+            
+            sudo docker stop custom-fluentd || true
+            sudo docker rm custom-fluentd || true
+            
+            if ! docker pull ghcr.io/${{ github.repository }}/custom-fluentd-image:latest; then
+                echo "Failed to pull Docker image"
+                exit 1
+            fi
+            
+            sudo docker run -d --name custom-fluentd --network log-network -p 24224:24224 \
+            -e OCI_USER="${{ secrets.OCI_USER }}" \
+            -e OCI_FINGERPRINT="${{ secrets.OCI_FINGERPRINT }}" \
+            -e OCI_API_KEY="${{ secrets.OCI_API_KEY }}" \
+            -e OCI_TENANCY="${{ secrets.OCI_TENANCY }}" \
+            -e OCI_REGION="${{ secrets.OCI_REGION }}" \
+            -e COMPARTMENT_ID="${{ secrets.OCI_COMP_ID }}" \
+            -e LOG_ID="${{ secrets.OCI_LOG_ID }}" \
+            ghcr.io/${{ github.repository }}/custom-fluentd-image:latest
 
-
-  

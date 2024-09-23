@@ -1,0 +1,113 @@
+name: Deploy Docker Images to OCI
+
+on:
+  push:
+    branches:
+      - run-image
+
+jobs:
+
+  deploy-now-here-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy now-here-server on OCI VM
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          env:
+            GHP_TOKEN: ${{ secrets.GHP_TOKEN }}
+            OCI_DB_PV_HOST: ${{ secrets.OCI_DB_PV_HOST }}
+            OCI_DB_PORT: ${{ secrets.OCI_DB_PORT }}
+            OCI_DB_NAME: ${{ secrets.OCI_DB_NAME }}
+            OCI_DB_USERNAME: ${{ secrets.OCI_DB_USERNAME }}
+            OCI_DB_PASSWORD: ${{ secrets.OCI_DB_PASSWORD }}
+            XOR_KEY: ${{ secrets.XOR_KEY }}
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+            SLACK_INQUIRY_WEBHOOK_URL: ${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }}
+            MAIL_HOST: ${{ secrets.MAIL_HOST }}
+            MAIL_PORT: ${{ secrets.MAIL_PORT }}
+            MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+            TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+            TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+            TWILIO_TRIAL_NUMBER: ${{ secrets.TWILIO_TRIAL_NUMBER }}
+        script: |
+          # GitHub Container Registry에 로그인
+          echo "$GHP_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+          # Docker 네트워크 생성 (이미 존재할 경우 에러 무시)
+          sudo docker network create log-network || true
+
+          # 기존 컨테이너 중지 및 제거
+          sudo docker stop now-here-server || true
+          sudo docker rm now-here-server || true
+
+          # 새로운 컨테이너 실행
+          if ! sudo docker run -d --name now-here-server --network log-network -p 8080:8080 \
+            -e DB_HOST="$OCI_DB_PV_HOST" \
+            -e DB_PORT="$OCI_DB_PORT" \
+            -e DB_NAME="$OCI_DB_NAME" \
+            -e DB_USERNAME="$OCI_DB_USERNAME" \
+            -e DB_PASSWORD="$OCI_DB_PASSWORD" \
+            -e XOR_KEY="$XOR_KEY" \
+            -e SLACK_WEBHOOK_URL="$SLACK_WEBHOOK_URL" \
+            -e SLACK_INQUIRY_WEBHOOK_URL="$SLACK_INQUIRY_WEBHOOK_URL" \
+            -e MAIL_HOST="$MAIL_HOST" \
+            -e MAIL_PORT="$MAIL_PORT" \
+            -e MAIL_USERNAME="$MAIL_USERNAME" \
+            -e MAIL_PASSWORD="$MAIL_PASSWORD" \
+            -e TWILIO_ACCOUNT_SID="$TWILIO_ACCOUNT_SID" \
+            -e TWILIO_AUTH_TOKEN="$TWILIO_AUTH_TOKEN" \
+            -e TWILIO_TRIAL_NUMBER="$TWILIO_TRIAL_NUMBER" \
+            -e TZ=Asia/Seoul \
+            ghcr.io/${{ github.repository }}/now-here-server:latest; then
+            echo "Failed to run now-here-server container"
+            exit 1
+          fi
+
+  deploy-custom-fluentd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy custom-fluentd on OCI VM
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.OCI_VM_IP }}
+          username: ${{ secrets.OCI_VM_USERNAME }}
+          key: ${{ secrets.OCI_VM_PRIVATE_KEY }}
+          env:
+            GHP_TOKEN: ${{ secrets.GHP_TOKEN }}
+            OCI_USER: ${{ secrets.OCI_USER }}
+            OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+            OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
+            OCI_TENANCY: ${{ secrets.OCI_TENANCY }}
+            OCI_REGION: ${{ secrets.OCI_REGION }}
+            OCI_COMP_ID: ${{ secrets.OCI_COMP_ID }}
+            OCI_LOG_ID: ${{ secrets.OCI_LOG_ID }}
+        script: |
+          # GitHub Container Registry에 로그인
+          echo "$GHP_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+          # Docker 네트워크 생성 (이미 존재할 경우 에러 무시)
+          sudo docker network create log-network || true
+
+          # 기존 컨테이너 중지 및 제거
+          sudo docker stop custom-fluentd || true
+          sudo docker rm custom-fluentd || true
+
+          # 새로운 컨테이너 실행
+          if ! sudo docker run -d --name custom-fluentd --network log-network -p 24224:24224 \
+            -e OCI_USER="$OCI_USER" \
+            -e OCI_FINGERPRINT="$OCI_FINGERPRINT" \
+            -e OCI_API_KEY="$OCI_API_KEY" \
+            -e OCI_TENANCY="$OCI_TENANCY" \
+            -e OCI_REGION="$OCI_REGION" \
+            -e COMPARTMENT_ID="$OCI_COMP_ID" \
+            -e LOG_ID="$OCI_LOG_ID" \
+            ghcr.io/${{ github.repository }}/custom-fluentd-image:latest; then
+            echo "Failed to run custom-fluentd container"
+            exit 1
+          fi
