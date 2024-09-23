@@ -202,5 +202,22 @@ public class MemberRepositoryImpl implements MemberRepository {
         }
     }
 
+    @Override
+    public void updateHeartAndNotificationCount(Long memberId, int heartCount, int notificationCount) {
+        try{
+            em.createQuery("update Member m " +
+                            "set m.specialHeart = :heartCount, " +
+                            "m.unreadNotiCount = :notificationCount " +
+                            "where m.id = :memberId")
+                    .setParameter("heartCount", heartCount)
+                    .setParameter("notificationCount", notificationCount)
+                    .setParameter("memberId", memberId)
+                    .executeUpdate();
+        }catch (Exception e){
+            log.error("Failed to update heart and notification count: {}", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 
 }

@@ -4,7 +4,6 @@ import com.now_here5.now_here.domain.matching.dto.*;
 import com.now_here5.now_here.domain.matching.service.MatchingService;
 import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.response.ResponseCode;
-import com.twilio.http.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -43,16 +42,19 @@ public class MatchingController {
     }
 
     @Operation(summary = "하트 보내기", description = "특정 사용자에게 하트를 보냅니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @Parameter(name = "receiverId", description = "받는 사람의 ID", required = true, schema = @Schema(example = "1"))
-    @Parameter(name = "isSpecialUsed", description = "특별하트 사용 여부", required = true, schema = @Schema(example = "false"))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "하트 보내기 요청", required = true,
+            content = @io.swagger.v3.oas.annotations.media.Content(schema = @Schema(implementation = HeartRequest.class),
+            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\"receiverId\": 1, \"isSpecialUsed\": false}"))
+    )
+
     @ApiResponse(responseCode = "200", description = "L002 - 하트 보내기 성공")
     @ApiResponse(responseCode = "400", description = "L002 - 하트 보내기 실패")
 
-    @PostMapping("/send/{receiverId}")
-    public ResponseEntity<ResponseForm> sendLove(@PathVariable(name = "receiverId") Long receiverId,
-                                                 @RequestParam boolean isSpecialUsed) {
+    @PostMapping("/send")
+    public ResponseEntity<ResponseForm> sendLove(@RequestBody HeartRequest request) {
         try {
-            matchingService.sendLove(receiverId, isSpecialUsed);
+            matchingService.sendLove(request.getReceiverId(), request.isSpecialUsed());
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS));
         } catch (Exception e) {
             log.error("하트 보내기 중 오류 발생: {}", e.getMessage());

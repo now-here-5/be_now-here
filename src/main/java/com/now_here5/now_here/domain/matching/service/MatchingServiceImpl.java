@@ -57,47 +57,55 @@ public class MatchingServiceImpl implements MatchingService {
         return matchingListToDto.convertToBannerListResponse(results);
     }
 
+    @Transactional
     @Override
     public void sendLove(Long receiverId, boolean isSpecialUsed) {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
 
-        try {
-            if (!matchingRepository.isExistsByMemberIds(sender.getId(), receiver.getId())) {
-                Matching matching = Matching.builder()
-                        .sender(sender)
-                        .receiver(receiver)
-                        .status(Status.PENDING)
-                        .build();
+        // 존재하는 매칭 확인
+        if (matchingRepository.isExistsByMemberIds(sender.getId(), receiver.getId())) {
+            throw new IllegalArgumentException("Matching already exists");
+        }
 
-                
-                matchingRepository.save(matching);
-                
-                if(isSpecialUsed){ // 특별하트 사용 시
-                    Long eventId = receiver.getEvent().getId();
-                    String encryptEventId = xor.encrypt(eventId);
-                    SmsRequest smsRequest = SmsRequest.builder()
-                            .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ " +
-                                    "지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/"+encryptEventId)
-                            .phoneNumber(receiver.getPhoneNumber())
-                            .build();
+        Matching matching = createMatching(sender, receiver);
+        matchingRepository.save(matching);
 
-                    smsService.sendSms(smsRequest);
-                    sender.updateSpecialHeartAndUnReadNotiCount(
-                            sender.getSpecialHeart()-1, 
-                            receiver.getUnreadNotiCount() + 1);
-                    // 사용시 특별하트 감소, 상대방 알림수는 증가
-                }
-            } else {
-                throw new IllegalArgumentException("Matching already exists");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send love from {} to {}: {}", senderId, receiverId, e.getMessage());
-            receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
-            throw e;
+        if (isSpecialUsed) {
+            handleSpecialHeart(sender, receiver);
         }
     }
+
+    private Matching createMatching(Member sender, Member receiver) {
+        return Matching.builder()
+                .sender(sender)
+                .receiver(receiver)
+                .status(Status.PENDING)
+                .build();
+    }
+
+    private void handleSpecialHeart(Member sender, Member receiver) {
+        Long eventId = receiver.getEvent().getId();
+        String encryptEventId = xor.encrypt(eventId);
+        SmsRequest smsRequest = createSmsRequest(receiver, encryptEventId);
+
+        if (sender.getSpecialHeart() <= 0) {
+            throw new IllegalArgumentException("Special heart is not enough");
+        }
+        memberRepository.updateHeartAndNotificationCount(sender.getId(),
+                sender.getSpecialHeart() - 1, receiver.getUnreadNotiCount() + 1);
+        smsService.sendSms(smsRequest);
+    }
+
+    private SmsRequest createSmsRequest(Member receiver, String encryptEventId) {
+        String message = String.format("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/%s", encryptEventId);
+        return SmsRequest.builder()
+                .message(message)
+                .phoneNumber(receiver.getPhoneNumber())
+                .build();
+    }
+
 
 
     @Override
@@ -122,7 +130,7 @@ public class MatchingServiceImpl implements MatchingService {
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
-                sender.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+                sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
                 smsService.sendSms(smsRequest); // 먼저 요청한 사람에게 알림 보내기
 
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);

@@ -175,11 +175,6 @@ public class Member extends FullAudit {
         this.unreadNotiCount = unreadNotiCount;
     }
 
-    public void updateSpecialHeartAndUnReadNotiCount(int specialHeart, int unreadNotiCount) {
-        this.specialHeart = specialHeart;
-        updateUnreadNotiCount(unreadNotiCount);
-    }
-
     // 상태 관리 메서드
     public void activate() {
         this.active = true;
