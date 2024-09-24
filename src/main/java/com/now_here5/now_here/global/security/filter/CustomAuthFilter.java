@@ -64,7 +64,7 @@ public class CustomAuthFilter extends GenericFilterBean {
 
                 log.debug("Security Context에 '{}' 인증 정보를 저장.", SecurityContextHolder.getContext().getAuthentication().getName());
             } catch (AuthenticationException e) {
-                log.error("Access denied: {}", e.getMessage());
+                log.error("Authentication failed, Access denied: {}", e.getMessage());
                 authenticationEntryPoint.commence(httpServletRequest, httpServletResponse, e);
                 return;
             }
