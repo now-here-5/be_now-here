@@ -154,7 +154,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         try {
             return em.createQuery("SELECT m FROM Member m " +
                             "WHERE m.event.id = :eventId " +
-                            "AND m.gender = :gender " +
+                            "AND m.gender != :gender " +
                             "AND m.id != :memberId " +
                             "AND NOT EXISTS (" +
                             "   SELECT 1 FROM Matching match " +

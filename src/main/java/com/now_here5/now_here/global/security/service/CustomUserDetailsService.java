@@ -48,7 +48,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     ));
 
             if(member == null) {
-                log.warn("해당 phone_number : {} 로 이벤트 : {} 가입된 유저가 없습니다 ",eventId, phoneNumber);
+                log.warn("해당 phone_number : {} 로 이벤트 : {} 에 활성화된 유저가 없습니다 ", phoneNumber,eventId);
                 throw new UsernameNotFoundException("no user not found");
             }
 

@@ -10,13 +10,15 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception e) {
+    public ResponseEntity<Map<String, Object>> handleException(Exception e) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String requestUrl = request.getRequestURI();
         String httpMethod = request.getMethod();
@@ -27,9 +29,17 @@ public class GlobalExceptionHandler {
         log.error("Exception occurred at [{}] - Method: {}, URL: {}, Client IP: {}, Exception: {}",
                 timestamp, httpMethod, requestUrl, clientIp, e.getMessage(), e);
 
-        // 예외 응답
+        // 예외 응답 JSON 데이터
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("timestamp", timestamp.toString());
+        responseBody.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        responseBody.put("error", "Internal Server Error");
+        responseBody.put("message", "서버 내부 오류가 발생했습니다. 문제가 지속되면 관리자에게 문의하세요.");
+        responseBody.put("contact", "관리자 이메일: now.here.linker@gmail.com");
+        responseBody.put("path", requestUrl);
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("서버 내부 오류가 발생했습니다. 문제가 지속되면 관리자에게 문의하세요.");
+                .body(responseBody);
     }
 }
