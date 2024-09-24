@@ -8,9 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class SenderResponse {
-    private Long id;
+    private Long memberId;
     private String mbti;
-    private String birthday;
+    private String birthdate;
     private String nickname;
     private String gender;
     private String description;

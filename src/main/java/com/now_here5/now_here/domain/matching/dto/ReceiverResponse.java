@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class ReceiverResponse {
-    private final Long senderId;
+    private final Long memberId;
     private final String mbti;
     private final String birthdate;
     private final String nickname;
@@ -16,7 +16,7 @@ public class ReceiverResponse {
 
     @Builder
     public ReceiverResponse(Long senderId, String mbti, String birthdate, String nickname, String gender, String description) {
-        this.senderId = senderId;
+        this.memberId = senderId;
         this.mbti = mbti;
         this.birthdate = birthdate;
         this.nickname = nickname;
