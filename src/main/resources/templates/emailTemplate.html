@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +11,7 @@
             padding: 0;
             background-color: #f4f4f4;
             font-family: Arial, sans-serif;
+            color: #333333;
         }
 
         table {
@@ -19,15 +20,15 @@
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 26px; /* 28px → 26px */
             font-weight: bold;
             color: #333333;
-            text-align: center;
+            text-align: left;
             margin-bottom: 20px;
         }
 
         p {
-            font-size: 18px;
+            font-size: 16px; /* 18px → 16px */
             line-height: 1.5;
             color: #555555;
             margin-bottom: 20px;
@@ -37,17 +38,18 @@
             padding: 10px 15px;
             border-left: 4px solid #D55BAD;
             margin-bottom: 20px;
-            font-size: 16px;
+            font-size: 14px; /* 16px → 14px */
             font-style: italic;
+            background-color: #f9f9f9;
+            border-radius: 4px;
         }
 
         .inquiry {
-            background-color: #f9f9f9;
             color: #888888;
         }
 
         .answer {
-            background-color: #f4f4f4;
+            background-color: #ffffff;
             color: #333333;
             font-weight: bold;
         }
@@ -56,8 +58,11 @@
             font-size: 14px;
             color: #777777;
             border-top: 1px solid #dddddd;
-            padding-top: 20px;
+            padding: 20px;
             text-align: left;
+        }
+        .footer p:last-child {
+            font-size: 10px; /* 추가 문의사항 폰트 크기 줄이기 */
         }
 
         .footer strong {
@@ -67,60 +72,60 @@
         /* 작은 스마트폰 (최소 너비 320px) */
         @media only screen and (max-width: 320px) {
             h1 {
-                font-size: 18px;
+                font-size: 16px; /* 18px → 16px */
             }
             p, .inquiry, .answer {
-                font-size: 12px;
+                font-size: 10px; /* 12px → 10px */
             }
         }
 
         /* 일반적인 스마트폰 (최대 너비 375px) */
         @media only screen and (min-width: 321px) and (max-width: 375px) {
             h1 {
-                font-size: 20px;
+                font-size: 18px; /* 20px → 18px */
             }
             p, .inquiry, .answer {
-                font-size: 14px;
+                font-size: 12px; /* 14px → 12px */
             }
         }
 
         /* 큰 스마트폰 (최대 너비 428px) */
         @media only screen and (min-width: 376px) and (max-width: 428px) {
             h1 {
-                font-size: 22px;
+                font-size: 20px; /* 22px → 20px */
             }
             p, .inquiry, .answer {
-                font-size: 16px;
+                font-size: 14px; /* 16px → 14px */
             }
         }
 
         /* 태블릿 */
         @media only screen and (min-width: 429px) and (max-width: 1024px) {
             h1 {
-                font-size: 26px;
+                font-size: 24px; /* 26px → 24px */
             }
             p, .inquiry, .answer {
-                font-size: 16px;
+                font-size: 14px; /* 16px → 14px */
             }
         }
 
         /* 데스크탑 */
         @media only screen and (min-width: 1025px) and (max-width: 1920px) {
             h1 {
-                font-size: 28px;
+                font-size: 26px; /* 28px → 26px */
             }
             p, .inquiry, .answer {
-                font-size: 18px;
+                font-size: 16px; /* 18px → 16px */
             }
         }
 
         /* TV */
         @media only screen and (min-width: 1921px) {
             h1 {
-                font-size: 32px;
+                font-size: 30px; /* 32px → 30px */
             }
             p, .inquiry, .answer {
-                font-size: 20px;
+                font-size: 18px; /* 20px → 18px */
             }
         }
     </style>
@@ -128,7 +133,7 @@
 <body>
 
 <!-- 메일 전체를 감싸는 테이블 -->
-<table role="presentation" bgcolor="#f4f4f4">
+<table role="presentation" bgcolor="#f4f4f4" width="100%">
     <tr>
         <td align="center" style="padding: 20px 0;">
             <table role="presentation" bgcolor="#ffffff"
@@ -142,13 +147,13 @@
                         <p>먼저, 서비스 이용 중에 불편함을 드려 죄송합니다.🙇</p>
 
                         <!-- 문의 사항 -->
-                        <p>문의사항 : </p>
+                        <span style="padding-top: 20px;">문의사항 : </span>
                         <div class="inquiry">
                             <p th:text="${inquiry}">이전에 보냈던 문의사항 내용입니다.</p>
                         </div>
 
                         <!-- 답변 -->
-                        <p>답변 : </p>
+                        <span>답변 : </span>
                         <div class="answer">
                             <p th:text="${answer}">답변 내용입니다.</p>
                         </div>
@@ -159,7 +164,8 @@
                 <!-- 푸터 -->
                 <tr>
                     <td class="footer">
-                        <p><strong>"Now, here"</strong> 를 이용해주셔서 정말 감사드리며, 남은 축제 기간도 저희 서비스와 즐거운 시간 보내시길 바랍니다. :)</p>
+                        <p><strong>"Now, here"</strong> 를 이용해주셔서 정말 감사드리며, 남은 축제 기간도 저희 서비스와 함께 즐거운 시간 보내시길 바랍니다. :)</p>
+                        <p>문의 사항이 있으시면 언제든지 나우히어 문의 페이지나 <a href="mailto:now.here.linker@gmail.com" style="color: #D55BAD; text-decoration: none;">now.here.linker@gmail.com</a>으로 연락해 주세요.</p>
                     </td>
                 </tr>
             </table>
@@ -169,3 +175,4 @@
 
 </body>
 </html>
+```
