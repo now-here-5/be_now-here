@@ -86,7 +86,7 @@ jobs:
                   value: ${{ secrets.TWILIO_ACCOUNT_SID }}
                 - name: TWILIO_AUTH_TOKEN
                     value: ${{ secrets.TWILIO_AUTH_TOKEN }}
-                - name: TWILIO_TRIAL_NUMBER 
+                - name: TWILIO_TRIAL_NUMBER
                     value: ${{ secrets.TWILIO_TRIAL_NUMBER }}
 
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
