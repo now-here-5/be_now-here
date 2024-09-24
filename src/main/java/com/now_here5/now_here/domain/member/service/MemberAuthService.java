@@ -98,7 +98,7 @@ public class MemberAuthService {
 
         } catch (Exception e) {
             log.error("get Member By Token Error ={}", e.getMessage());
-            return null;
+            throw new AccessDeniedException("Member Not Found by Token");
         }
 
     }
