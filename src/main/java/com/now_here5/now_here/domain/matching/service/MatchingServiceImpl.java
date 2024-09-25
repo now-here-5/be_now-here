@@ -25,11 +25,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.now_here5.now_here.domain.member.entity.Gender.MALE;
 
 @Service
 @Slf4j
@@ -47,7 +45,7 @@ public class MatchingServiceImpl implements MatchingService {
 
 
     @Transactional(readOnly = true)
-    @Cacheable("bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
+    @Cacheable(cacheNames = "bannerListCache")// 메서드의 결과를 캐시하여 동일한 인자로 호출되면 캐시된 결과 반환
     @Override
     public List<BannerListResponse> getBannerList() {
         // 최적화된 쿼리로 데이터를 가져옴
@@ -93,8 +91,10 @@ public class MatchingServiceImpl implements MatchingService {
         if (sender.getSpecialHeart() <= 0) {
             throw new IllegalArgumentException("Special heart is not enough");
         }
-        memberRepository.updateHeartAndNotificationCount(sender.getId(),
-                sender.getSpecialHeart() - 1, receiver.getUnreadNotiCount() + 1);
+
+        sender.updateSpecialHeart(sender.getSpecialHeart() - 1);
+        receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+
         smsService.sendSms(smsRequest);
     }
 

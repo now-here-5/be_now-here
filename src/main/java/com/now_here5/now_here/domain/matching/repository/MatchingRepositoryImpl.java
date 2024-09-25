@@ -26,7 +26,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Transactional(readOnly = true)
     public List<Object[]> findMemberForBanner(Status status) {
         try {
-            return em.createQuery("SELECT s.nickname, s.mbti, s.gender, r.nickname, r.mbti, s.gender " +
+            return em.createQuery("SELECT s.nickname, s.mbti, s.gender, r.nickname, r.mbti, r.gender " +
                             "FROM Matching m " +
                             "JOIN m.sender s " +
                             "JOIN m.receiver r " +
