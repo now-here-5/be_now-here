@@ -288,7 +288,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Async
+
     @Override
     @Transactional
     public void offerSpecialHeartIfQualified(Long memberId, int specialHeartCount) {
