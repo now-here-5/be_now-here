@@ -99,9 +99,10 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     private SmsRequest createSmsRequest(Member receiver, String encryptEventId) {
-        String message = String.format("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/%s", encryptEventId);
+
         return SmsRequest.builder()
-                .message(message)
+                .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ " +
+                        "지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/received-hearts?eventCode="+encryptEventId)
                 .phoneNumber(receiver.getPhoneNumber())
                 .build();
     }
@@ -127,7 +128,7 @@ public class MatchingServiceImpl implements MatchingService {
 
                 SmsRequest smsRequest = SmsRequest.builder()
                         .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. " +
-                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status/"+encryptEventId)
+                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status?eventCode="+encryptEventId)
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 

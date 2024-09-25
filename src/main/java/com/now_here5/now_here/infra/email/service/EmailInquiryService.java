@@ -16,8 +16,8 @@ public class EmailInquiryService {
     private final SpringTemplateEngine templateEngine;
     private static final String INQUIRY_EMAIL_SUBJECT_POSTFIX = "문의사항에 대한 답변";
 
-    public void setUpAndSendEmail(String email, String inquiry, String answer){
-        try{
+    public void setUpAndSendEmail(String email, String inquiry, String answer) {
+        try {
             EmailFormDto emailForm = EmailFormDto.builder()
                     .email(email)
                     .inquiry(inquiry)
@@ -25,7 +25,7 @@ public class EmailInquiryService {
                     .build();
 
             this.setUpAndSendEmail(emailForm);
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Failed to send the answer email for inquiry: {}", e.getMessage());
             throw new RuntimeException("Failed to send email", e);
         }
@@ -51,6 +51,9 @@ public class EmailInquiryService {
 
         context.setVariable("inquiry", emailForm.getInquiry());
         context.setVariable("answer", emailForm.getAnswer());
-        return templateEngine.process("emailTemplate", context);  // Thymeleaf 템플릿 처리
+
+        // Gmail 사용 여부에 따라 템플릿 선택
+        String templateName = emailForm.getEmail().endsWith("@gmail.com") ? "emailTemplate" : "emailTemplateWithoutCss";
+        return templateEngine.process(templateName, context);  // Thymeleaf 템플릿 처리
     }
 }
