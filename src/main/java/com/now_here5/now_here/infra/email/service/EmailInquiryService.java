@@ -14,7 +14,7 @@ public class EmailInquiryService {
 
     private final EmailService emailService;
     private final SpringTemplateEngine templateEngine;
-    private static final String INQUIRY_EMAIL_SUBJECT_POSTFIX = "문의사항에 대한 답변";
+    private static final String INQUIRY_EMAIL_SUBJECT = "[Now, Here] 문의사항에 대한 답변드립니다.";
 
     public void setUpAndSendEmail(String email, String inquiry, String answer) {
         try {
@@ -36,7 +36,7 @@ public class EmailInquiryService {
             String emailContent = generateEmailContent(emailForm);
 
             emailService.sendHtmlTextEmail(
-                    INQUIRY_EMAIL_SUBJECT_POSTFIX,
+                    INQUIRY_EMAIL_SUBJECT,
                     emailContent,
                     emailForm.getEmail()
             );
