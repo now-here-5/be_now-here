@@ -18,21 +18,6 @@ import java.util.List;
 public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<Member> findActiveMemberByPhoneNumber(String phoneNumber) {
-        try{
-            return em.createQuery("select m from Member m " +
-                            "join fetch m.event " +
-                            "where m.phoneNumber = :phoneNumber " , Member.class)
-                    .setParameter("phoneNumber", phoneNumber)
-                    .getResultList();
-        }catch (Exception e){
-            log.error("Failed to find active member by phoneNumber: {}", phoneNumber);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
     @Override
     public boolean deactivateMember(Long memberId) {
        try {

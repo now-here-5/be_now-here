@@ -99,9 +99,10 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     private SmsRequest createSmsRequest(Member receiver, String encryptEventId) {
-        String message = String.format("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ 지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/status/%s", encryptEventId);
+
         return SmsRequest.builder()
-                .message(message)
+                .message("나우히어에서 누군가 당신에게 하트를 보냈습니다!❤️ " +
+                        "지금 바로 확인하고 응답해보세요: https://www.now-here.site/match/received-hearts?eventCode="+encryptEventId)
                 .phoneNumber(receiver.getPhoneNumber())
                 .build();
     }
@@ -110,6 +111,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     @CacheEvict(value = "bannerListCache", allEntries = true)
+    @Transactional
     public void receiveLove(Long senderId) {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
@@ -122,11 +124,11 @@ public class MatchingServiceImpl implements MatchingService {
             if (matching != null) {
 
                 matching.setStatus(Status.ACCEPTED);
-//                matchingRepository.update(matching);
+                matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
                         .message("축하합니다! 🎉 나우히어에서 매칭이 성사되었습니다. " +
-                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status/"+encryptEventId)
+                                "지금 바로 상대와 연락을 시작해보세요: https://www.now-here.site/match/status?eventCode="+encryptEventId)
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
@@ -145,6 +147,7 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
+    @Transactional
     public void rejectLove(Long senderId) {
         Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
@@ -154,7 +157,7 @@ public class MatchingServiceImpl implements MatchingService {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
             if (matching != null) {
                 matching.setStatus(Status.REJECTED);
-//                matchingRepository.update(matching);
+                matchingRepository.update(matching);
 
                 sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), false);
@@ -265,7 +268,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public List<NotificationResponse> getNotificationList() { // TODO : 페이징 필수 - 알림을 직접 만들어야 하기 때문에 많이 조회될 수록 불리함.
         AuthenticatedMemberDto authMember = authUtil.getMemberByAuthentication();

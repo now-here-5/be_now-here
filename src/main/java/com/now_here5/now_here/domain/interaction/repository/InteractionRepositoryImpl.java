@@ -25,6 +25,7 @@ public class InteractionRepositoryImpl implements InteractionRepository {
     public void saveFeedback(Feedback feedback) {
         try {
             em.persist(feedback);
+            em.flush();
         } catch (Exception e) {
             log.error("피드백 저장에 실패했습니다: {}", e.getMessage());
             throw new RuntimeException("피드백 저장에 실패했습니다", e);

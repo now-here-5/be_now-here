@@ -288,13 +288,13 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Async
+
     @Override
     @Transactional
-    public void offerSpecialHeartIfQualified(Long memberId) {
+    public void offerSpecialHeartIfQualified(Long memberId, int specialHeartCount) {
         if(interactionRepository.isFeedbackFirstWritten(memberId)){
             log.info("Offer special heart to member: {}", memberId);
-            memberRepository.updateSpecialHeart(memberId, 5);
+            memberRepository.updateSpecialHeart(memberId, specialHeartCount);
         }
     }
 }

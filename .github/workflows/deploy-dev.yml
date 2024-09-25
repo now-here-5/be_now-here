@@ -70,7 +70,15 @@ jobs:
                   value: ${{ secrets.MAIL_USERNAME }}
                 - name: MAIL_PASSWORD
                   value: ${{ secrets.MAIL_PASSWORD }}
-
+            
+                # Twilio configuration
+                - name: TWILIO_ACCOUNT_SID
+                  value: ${{ secrets.TWILIO_ACCOUNT_SID }}
+                - name: TWILIO_AUTH_TOKEN
+                  value: ${{ secrets.TWILIO_AUTH_TOKEN }}
+                - name: TWILIO_TRIAL_NUMBER
+                  value: ${{ secrets.TWILIO_TRIAL_NUMBER }}
+            
                 # Slack Webhook configuration
                 - name: SLACK_WEBHOOK_URL
                   value: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -81,13 +89,7 @@ jobs:
                 - name: XOR_KEY
                   value: ${{ secrets.XOR_KEY }}
                 
-                # Twilio configuration
-                - name: TWILIO_ACCOUNT_SID
-                  value: ${{ secrets.TWILIO_ACCOUNT_SID }}
-                - name: TWILIO_AUTH_TOKEN
-                    value: ${{ secrets.TWILIO_AUTH_TOKEN }}
-                - name: TWILIO_TRIAL_NUMBER
-                    value: ${{ secrets.TWILIO_TRIAL_NUMBER }}
+                
 
               # Start Command를 사용하여 키 복사 후 애플리케이션 시작
               start: |

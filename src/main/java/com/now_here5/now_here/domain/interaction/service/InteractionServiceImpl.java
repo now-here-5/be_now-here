@@ -47,13 +47,10 @@ public class InteractionServiceImpl implements InteractionService {
                     .field(feedbackRequect.getField())
                     .build();
             interactionRepository.saveFeedback(feedback);
-
+            memberservice.offerSpecialHeartIfQualified(authUtil.getMemberByAuthentication().getMemberId(),member.getSpecialHeart()+5 ); // 비동기적으로 처리
         }catch (Exception e) {
             log.error("토큰이 없는 피드백 작성: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
-        }finally {
-            // 피드백 작성 시, 하트는 제공 여부는 필히 판단 해야 됨.
-            memberservice.offerSpecialHeartIfQualified(authUtil.getMemberByAuthentication().getMemberId()); // 비동기적으로 처리
         }
     }
 
