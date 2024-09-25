@@ -148,8 +148,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public List<Matching> findByReceiverId(Long memberId) {
         try {
-            return em.createQuery("SELECT m FROM Matching m WHERE m.receiver.id = :memberId", Matching.class)
+            return em.createQuery("SELECT m FROM Matching m " +
+                            "WHERE m.receiver.id = :memberId and " +
+                            "m.status= : status", Matching.class)
                     .setParameter("memberId", memberId)
+                    .setParameter("status", Status.PENDING)
                     .getResultList();
         } catch (Exception e) {
             log.error("받는 이로 매칭 조회 중 실패: {}", memberId, e);
@@ -161,8 +164,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public List<Matching> findBySenderId(Long memberId) {
         try {
-            return em.createQuery("SELECT m FROM Matching m WHERE m.sender.id = :memberId", Matching.class)
+            return em.createQuery("SELECT m FROM Matching m " +
+                            "WHERE m.sender.id = :memberId and " +
+                            "m.status = :status", Matching.class)
                     .setParameter("memberId", memberId)
+                    .setParameter("status", Status.PENDING)
                     .getResultList();
         } catch (Exception e) {
             log.error("보낸 이로 매칭 조회 중 실패: {}", memberId, e);

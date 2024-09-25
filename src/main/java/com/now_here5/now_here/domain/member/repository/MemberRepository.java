@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface MemberRepository {
 
-    List<Member> findActiveMemberByPhoneNumber(String phoneNumber);
-
     boolean deactivateMember(Long memberId);
 
     void deactivateBulkMembersByEventId(Long eventId);
