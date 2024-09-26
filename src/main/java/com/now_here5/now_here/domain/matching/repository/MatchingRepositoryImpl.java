@@ -88,8 +88,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public Long countByReceiverId(Long memberId) {
         try {
-            return em.createQuery("SELECT COUNT(m) FROM Matching m WHERE m.receiver.id = :memberId", Long.class)
+            return em.createQuery("SELECT COUNT(m) FROM Matching m " +
+                            " WHERE m.receiver.id = :memberId and " +
+                            "m.status = : status", Long.class)
                     .setParameter("memberId", memberId)
+                    .setParameter("status", Status.PENDING)
                     .getSingleResult();
         } catch (Exception e) {
             log.error("Failed to count matchings by receiverId: {}", memberId, e);
@@ -101,8 +104,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     @Override
     public Long countBySenderId(Long memberId) {
         try {
-            return em.createQuery("SELECT COUNT(m) FROM Matching m WHERE m.sender.id = :memberId", Long.class)
+            return em.createQuery("SELECT COUNT(m) FROM Matching m " +
+                            " WHERE m.sender.id = :memberId and " +
+                            "m.status = : status", Long.class)
                     .setParameter("memberId", memberId)
+                    .setParameter("status", Status.PENDING)
                     .getSingleResult();
         } catch (Exception e) {
             log.error("Failed to count matchings by senderId: {}", memberId, e);
