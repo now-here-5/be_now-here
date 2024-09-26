@@ -21,14 +21,14 @@ public class ExternalApiLoggingAspect {
         // 메서드 이름과 파라미터 로깅
         Object[] args = joinPoint.getArgs();
         String apiUrl = null;
-        Object requestParams = null;
+        String requestParams = null;
 
         if (args.length > 0) {
-            apiUrl = (String) args[0]; // API URL
+            apiUrl = objectMapper.writeValueAsString(args[0]); // API URL
             if (args.length > 1) {
-                requestParams = args[1]; // 파라미터
+                requestParams = objectMapper.writeValueAsString(args[1]); // 파라미터
             }
-            log.info("External API call to {} with params {}", apiUrl, requestParams != null ? requestParams : "No parameters");
+            log.info("External API call to {} with params {}", apiUrl, requestParams != null ? objectMapper.writeValueAsString(requestParams) : "No parameters");
         } else {
             log.warn("No parameters passed to external API call.");
         }
