@@ -91,6 +91,8 @@ public class SecurityConfig {
         configuration.addAllowedMethod("POST");
         configuration.addAllowedMethod("PUT");
         configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedMethod("PATCH");
+
         // 허용할 헤더 제한 (보안 강화)
         configuration.addAllowedHeader("Authorization");
         configuration.addAllowedHeader("Content-Type");
