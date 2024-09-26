@@ -70,8 +70,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     // 유저 권한을 설정하는 메서드
     private Collection<? extends GrantedAuthority> getAuthorities(RoleNamesDto roleNamesDto) {
         return roleNamesDto.getRoleNames().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+
     }
 
 }

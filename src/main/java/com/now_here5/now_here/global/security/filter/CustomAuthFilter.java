@@ -51,13 +51,17 @@ public class CustomAuthFilter extends GenericFilterBean {
             try {
                 AuthenticatedMemberDto memberDto = memberAuthService.getMemberByToken(customToken);
 
+
                 List<GrantedAuthority> authorities =
                         memberDto.getRoleNamesDto() != null ?
                                 memberDto.getRoleNamesDto().getRoleNames().stream()
-                                        .map(SimpleGrantedAuthority::new)
+                                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                                         .collect(Collectors.toList())
                                 : new ArrayList<>();
-
+                log.info("member id {} has following authorities", memberDto.getMemberId());
+                for(GrantedAuthority grantedAuthority : authorities) {
+                    log.info("grantedAuthority : {}", grantedAuthority.getAuthority());
+                }
                 // 인증 성공 시 SecurityContextHolder 설정
                 SecurityContextHolder.getContext()
                         .setAuthentication(new UsernamePasswordAuthenticationToken(memberDto, null, authorities));

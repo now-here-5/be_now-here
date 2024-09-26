@@ -1,4 +1,4 @@
-package com.now_here5.now_here.admin.controller;
+package com.now_here5.now_here.admin.Member.controller;
 
 
 import com.now_here5.now_here.domain.member.service.MemberAuthService;

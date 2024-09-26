@@ -13,6 +13,8 @@ import com.now_here5.now_here.domain.member.dto.PersonalInfoResponse;
 import com.now_here5.now_here.domain.member.dto.ProfileResponse;
 import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.*;
+import com.now_here5.now_here.domain.member.entity.role.Role;
+import com.now_here5.now_here.domain.member.entity.role.RoleName;
 import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
@@ -38,7 +40,7 @@ public class MemberServiceImpl implements MemberService {
     private final EventListToDto eventListToDto;
     private final PreferenceBasedMBTIMatching matcher;
     private final InteractionRepository interactionRepository;
-
+    private final RoleAdminService roleAdminService;
     @Override
     public boolean sendCode(String phoneNumber) {
         try{
@@ -64,8 +66,8 @@ public class MemberServiceImpl implements MemberService {
                 log.error("Phone number is not verified");
                 return "";
             }
-
-            Member member = registerDtoToMember.converter(registerMemberRequest);
+            List<Role> roles = roleAdminService.findRoleByName(List.of(RoleName.USER, RoleName.ANONYMOUS));
+            Member member = registerDtoToMember.converter(registerMemberRequest, roles);
             Event event  =  eventRepository.getEventDetail(eventId);
 
             member.setEvent(event);
