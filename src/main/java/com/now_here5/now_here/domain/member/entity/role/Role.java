@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -22,10 +23,10 @@ public class Role {
     private RoleName roleName;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberRole> memberRoleList;
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RolePrivilege> rolePrivilegeList;
+    private List<RolePrivilege> rolePrivilegeList = new ArrayList<>();
 
     protected Role() {
         this.roleName = RoleName.USER;

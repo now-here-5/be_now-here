@@ -3,6 +3,7 @@ package com.now_here5.now_here.domain.member.entity;
 import com.now_here5.now_here.domain.event.entity.Event;
 import com.now_here5.now_here.domain.matching.entity.Matching;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
+import com.now_here5.now_here.domain.member.entity.role.Role;
 import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.CascadeType;
@@ -113,7 +114,7 @@ public class Member extends FullAudit {
     @Builder
     public Member(String token, LocalDate birthday, String phoneNumber, String nickname,
                   String password, Gender gender, MBTI mbti, String description,
-                  boolean active, Event event) {
+                  boolean active, Event event, List<Role> roleList) {
         this.token = token;
         this.birthday = birthday;
         this.phoneNumber = phoneNumber;
@@ -132,6 +133,7 @@ public class Member extends FullAudit {
         this.specialHeart =10; // 10번 무료로 알림 보낼 수 있음.
 
         setEvent(event);
+        setMemberRoles(roleList);
     }
 
     // 회원 수정 가능 필드용 업데이트 메서드
@@ -168,6 +170,14 @@ public class Member extends FullAudit {
         this.event = event;
         if (event != null && !event.getMemberList().contains(this)) {
             event.getMemberList().add(this);
+        }
+    }
+
+    public void setMemberRoles(List<Role> roles) {
+        if(roles == null) {
+            for(Role role : roles) {
+                this.memberRoleList.add(new MemberRole(this, role));
+            }
         }
     }
 

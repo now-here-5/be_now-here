@@ -1,4 +1,4 @@
-package com.now_here5.now_here.admin.controller;
+package com.now_here5.now_here.admin.event.controller;
 
 import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.dto.EventResponse;

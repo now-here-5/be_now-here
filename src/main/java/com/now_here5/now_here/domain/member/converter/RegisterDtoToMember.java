@@ -5,12 +5,15 @@ import com.now_here5.now_here.domain.member.dto.RegisterMemberRequest;
 import com.now_here5.now_here.domain.member.entity.Gender;
 import com.now_here5.now_here.domain.member.entity.MBTI;
 import com.now_here5.now_here.domain.member.entity.Member;
+import com.now_here5.now_here.domain.member.entity.role.Role;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
 
 @Builder
 @Getter
@@ -20,7 +23,7 @@ public class RegisterDtoToMember {
     private final PasswordEncoder passwordEncoder;
     private final TokenGenerator tokenGenerator;
 
-    public Member converter(RegisterMemberRequest registerRequest) {
+    public Member converter(RegisterMemberRequest registerRequest, List<Role> roles) {
         String encryptedPassword = passwordEncoder.encode(registerRequest.getPassword());
         return Member.builder()
                 .phoneNumber(registerRequest.getPhoneNumber())
@@ -32,6 +35,7 @@ public class RegisterDtoToMember {
                 .token(tokenGenerator.generateUniqueToken())
                 .description(registerRequest.getDescription())
                 .birthday(registerRequest.getBirth())
+                .roleList(roles)
                 .build();
     }
 }

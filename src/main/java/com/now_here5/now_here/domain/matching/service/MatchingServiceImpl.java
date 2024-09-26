@@ -73,6 +73,8 @@ public class MatchingServiceImpl implements MatchingService {
         if (isSpecialUsed) {
             handleSpecialHeart(sender, receiver);
         }
+
+        receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
     }
 
     private Matching createMatching(Member sender, Member receiver) {
@@ -91,9 +93,7 @@ public class MatchingServiceImpl implements MatchingService {
         if (sender.getSpecialHeart() <= 0) {
             throw new IllegalArgumentException("Special heart is not enough");
         }
-
         sender.updateSpecialHeart(sender.getSpecialHeart() - 1);
-        receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
         smsService.sendSms(smsRequest);
     }

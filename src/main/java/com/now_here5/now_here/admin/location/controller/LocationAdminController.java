@@ -1,4 +1,4 @@
-package com.now_here5.now_here.admin.controller;
+package com.now_here5.now_here.admin.location.controller;
 
 import com.now_here5.now_here.domain.event.dto.LocationResponse;
 import com.now_here5.now_here.domain.event.dto.NewLocationRequest;

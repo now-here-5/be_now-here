@@ -4,7 +4,6 @@ package com.now_here5.now_here.global.security.converter;
 import com.now_here5.now_here.domain.member.entity.role.MemberRole;
 import com.now_here5.now_here.global.security.dto.RoleNamesDto;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
