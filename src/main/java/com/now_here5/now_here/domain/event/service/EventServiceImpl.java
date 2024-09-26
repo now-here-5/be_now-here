@@ -46,10 +46,10 @@ public class EventServiceImpl implements EventService {
 
     @Transactional(readOnly = true)
     @Override
-    public EventListResponse getEventList(boolean status) {
+    public EventListResponse getEventList(boolean status, boolean isAdmin) {
         try{
             List<Event> eventList = eventRepository.getEventList(status);
-            return eventListToDto.converter(eventList);
+            return eventListToDto.converter(eventList, isAdmin);
         }catch(Exception e){
             return null;
         }

@@ -40,7 +40,7 @@ public class EventAdminController {
     public ResponseEntity<ResponseForm> getEventList(
             @RequestParam(name = "status") boolean status) {
 
-        EventListResponse eventList = eventService.getEventList(status);
+        EventListResponse eventList = eventService.getEventList(status, true);
 
         return eventList != null ?
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_SUCCESS, eventList)) :

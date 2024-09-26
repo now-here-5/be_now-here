@@ -8,15 +8,15 @@ public interface EventService {
 
     EventResponse getEventDetail(Long eventId);
 
-    EventListResponse getEventList(boolean status);
+    EventListResponse getEventList(boolean status, boolean isAdmin);
 
-   EventTimeResponse getEventTime();
+    EventTimeResponse getEventTime();
 
-   boolean createLocation(NewLocationRequest newLocationRequest);
+    boolean createLocation(NewLocationRequest newLocationRequest);
 
-   List<LocationResponse> getLocationList();
+    List<LocationResponse> getLocationList();
 
-   String  getLocation(Long locationId);
+    String getLocation(Long locationId);
 
-   boolean deleteLocation(Long locationId);
+    boolean deleteLocation(Long locationId);
 }

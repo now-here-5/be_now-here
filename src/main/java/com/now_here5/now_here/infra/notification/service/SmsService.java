@@ -15,21 +15,17 @@ import org.springframework.stereotype.Service;
 public class SmsService {
 
     private final SmsSender smsSender;
-    private final SlackNotificationService slackNotificationService;
-    
+
     @Autowired
     public SmsService(@Qualifier("twilio") TwilioSmsSender smsSender, SlackNotificationService slackNotificationService) {
         this.smsSender = smsSender;
         // 임시 방편
-        this.slackNotificationService = slackNotificationService;
-        
     }
 
     @Async
     public void sendSms(SmsRequest smsRequest) {
         // Uncomment the line below to actually send the SMS
-        // smsSender.sendSms(smsRequest);
-        slackNotificationService.sendNotification("SMS sent to " + smsRequest.getPhoneNumber() + " with message: " + smsRequest.getMessage());
+        smsSender.sendSms(smsRequest);
         log.info("Sending SMS to phone number: {}, with message: {}",
                 smsRequest.getPhoneNumber(),
                 smsRequest.getMessage());

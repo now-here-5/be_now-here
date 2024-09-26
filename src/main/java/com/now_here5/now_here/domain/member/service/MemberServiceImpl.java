@@ -152,7 +152,7 @@ public class MemberServiceImpl implements MemberService {
         try{
             List<Event> events =  eventRepository.getSignedEventsByMember(true,
                     authUtil.getMemberByAuthentication().getMemberId());
-            return eventListToDto.converter(events);
+            return eventListToDto.converter(events,false);
         }catch (Exception e){
             log.error("Failed to get assigned events by member: {}", e.getMessage());
             return null;

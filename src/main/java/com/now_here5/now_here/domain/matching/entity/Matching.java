@@ -1,7 +1,7 @@
 package com.now_here5.now_here.domain.matching.entity;
 
 import com.now_here5.now_here.domain.member.entity.Member;
-import com.now_here5.now_here.global.entity.CreatedDateAudit;
+import com.now_here5.now_here.global.entity.FullAudit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,7 +25,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 )
 @Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Matching extends CreatedDateAudit {
+public class Matching extends FullAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

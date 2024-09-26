@@ -44,9 +44,10 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").anonymous() // 개발 시.
 
                         // 익명 사용자만 접근 가능한 URL
-                        .requestMatchers("/images/**", "/css/**", "/js/**").anonymous()
+                        .requestMatchers(HttpMethod.GET, "/css/**", "/js/**").anonymous()
                         .requestMatchers("/slack/**").anonymous()
                         .requestMatchers("/dev/login").anonymous()
+                        .requestMatchers(HttpMethod.GET, "/event/list").anonymous()
                         .requestMatchers(HttpMethod.POST, "/inquiry").anonymous()
                         .requestMatchers(HttpMethod.GET, "*/verify/**").anonymous()
                         .requestMatchers(HttpMethod.POST, "*/verify/**").anonymous()

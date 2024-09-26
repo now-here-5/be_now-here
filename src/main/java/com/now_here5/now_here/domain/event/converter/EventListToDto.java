@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventListToDto {
     private final CustomXOR customXOR;
-    public EventListResponse converter(List<Event> eventList) {
+    public EventListResponse converter(List<Event> eventList, boolean isAdmin) {
         return EventListResponse.builder()
                 .eventList(
                         eventList.stream()
                                 .map(event -> EventResponse.builder()
-                                        .eventId(event.getId())
+                                        .eventId(isAdmin ? event.getId() : null)
                                         .encodedId(customXOR.encrypt(event.getId()))
                                         .eventName(event.getField())
                                         .location(event.getLocation().getLocationName())

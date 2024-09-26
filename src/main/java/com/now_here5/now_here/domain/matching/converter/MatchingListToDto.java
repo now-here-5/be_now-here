@@ -18,10 +18,10 @@ public class MatchingListToDto {
                 .map(result -> BannerListResponse.builder()
                         .senderNickname((String) result[0])
                         .senderMbti(result[1] instanceof MBTI ? ((MBTI) result[1]).name() : (String) result[1])
-                        .senderGender(result[2] instanceof Gender ? ((Gender) result[2]).getValue() : (String) result[2])
+                        .senderGender(result[2] instanceof Gender ? ((Gender) result[2]).getValue().toUpperCase() : (String) result[2])
                         .receiverNickname((String) result[3])
                         .receiverMbti(result[4] instanceof MBTI ? ((MBTI) result[4]).name() : (String) result[4])
-                        .receiverGender(result[5] instanceof Gender ? ((Gender) result[5]).getValue() : (String) result[5])
+                        .receiverGender(result[5] instanceof Gender ? ((Gender) result[5]).getValue().toUpperCase() : (String) result[5])
                         .build())
                 .collect(Collectors.toList());
     }

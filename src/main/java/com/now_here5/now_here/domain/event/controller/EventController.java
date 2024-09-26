@@ -1,5 +1,6 @@
 package com.now_here5.now_here.domain.event.controller;
 
+import com.now_here5.now_here.domain.event.dto.EventListResponse;
 import com.now_here5.now_here.domain.event.dto.EventResponse;
 import com.now_here5.now_here.domain.event.dto.EventTimeResponse;
 import com.now_here5.now_here.domain.event.service.EventService;
@@ -8,6 +9,7 @@ import com.now_here5.now_here.global.response.ResponseForm;
 import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,4 +57,21 @@ public class EventController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_BY_TOKEN_SUCCESS, eventDetail)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENT_QUERY_BY_TOKEN_FAIL));
     }
+
+    @Operation(summary = "이벤트 목록 조회", description = "상태에 따라 이벤트 목록을 조회합니다.")
+    @Parameter(name = "status", description = "이벤트 상태", required = true, schema = @Schema(example = "true"))
+    @ApiResponse(responseCode = "200", description = "E001 - 이벤트 목록 조회 성공")
+    @ApiResponse(responseCode = "400", description = "E001 - 이벤트 목록 조회 실패")
+
+    @GetMapping("/list")
+    public ResponseEntity<ResponseForm> getEventList(
+            @RequestParam(name = "status") boolean status) {
+
+        EventListResponse eventList = eventService.getEventList(status, false);
+
+        return eventList != null ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_SUCCESS, eventList)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.EVENTLIST_QUERY_FAIL));
+    }
+
 }

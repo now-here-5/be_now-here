@@ -215,7 +215,8 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         try {
             return em.createQuery("SELECT m FROM Matching m " +
                             "WHERE m.status = :status AND " +
-                            "(m.sender.id = :memberId OR m.receiver.id = :memberId)", Matching.class)
+                            "(m.sender.id = :memberId OR m.receiver.id = :memberId) " +
+                            "Order by m.modifiedAt desc ", Matching.class)
                     .setParameter("status", Status.ACCEPTED)
                     .setParameter("memberId", memberId)
                     .getResultList();
