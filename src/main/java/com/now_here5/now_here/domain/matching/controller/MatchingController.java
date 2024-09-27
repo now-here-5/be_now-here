@@ -54,8 +54,8 @@ public class MatchingController {
     @PostMapping("/send")
     public ResponseEntity<ResponseForm> sendLove(@RequestBody HeartRequest request) {
         try {
-            matchingService.sendLove(request.getReceiverId(), request.isSpecialUsed());
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS));
+            boolean isNotificationSentWhenEnabled  = matchingService.sendLove(request.getReceiverId(), request.isSpecialUsed());
+            return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS, isNotificationSentWhenEnabled));
         } catch (Exception e) {
             log.error("하트 보내기 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_FAIL));

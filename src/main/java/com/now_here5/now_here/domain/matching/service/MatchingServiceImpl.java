@@ -18,13 +18,13 @@ import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 import com.now_here5.now_here.infra.notification.service.SmsService;
-import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,7 +57,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Transactional
     @Override
-    public void sendLove(Long receiverId, boolean isSpecialUsed) {
+    public boolean sendLove(Long receiverId, boolean isSpecialUsed) {
         Long senderId = authUtil.getMemberByAuthentication().getMemberId();
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
@@ -69,12 +69,12 @@ public class MatchingServiceImpl implements MatchingService {
 
         Matching matching = createMatching(sender, receiver);
         matchingRepository.save(matching);
+        receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
 
         if (isSpecialUsed && receiver.isNotiSetting()) { // when receiver has allowed notification
             handleSpecialHeart(sender, receiver);
-        }
-
-        receiver.updateUnreadNotiCount(receiver.getUnreadNotiCount() + 1);
+            return true;
+        } else return !isSpecialUsed;
     }
 
     private Matching createMatching(Member sender, Member receiver) {
@@ -101,11 +101,11 @@ public class MatchingServiceImpl implements MatchingService {
     private SmsRequest createSmsRequest(Member receiver, String encryptEventId) {
 
         return SmsRequest.builder()
-                .message("하트가 도착했어요!: https://www.now-here.site/match/received-hearts?eventCode="+encryptEventId)
+//                .message("하트가 도착했어요!: https://www.now-here.site/match/received-hearts?eventCode=" + encryptEventId)
+                .message("하트가 도착했어요! 지금 확인하고 응답해보세요 : https://나우히어.lrl.kr")
                 .phoneNumber(receiver.getPhoneNumber())
                 .build();
     }
-
 
 
     @Override
@@ -126,7 +126,7 @@ public class MatchingServiceImpl implements MatchingService {
                 matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("매칭되었어요!: https://www.now-here.site/match/status?eventCode="+encryptEventId)
+                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : https://나우히어.lrl.kr")
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
@@ -134,7 +134,7 @@ public class MatchingServiceImpl implements MatchingService {
 
                 // send notification to the person who sent heart first
                 // if the person has allowed notification
-                if(sender.isNotiSetting()) smsService.sendSms(smsRequest);
+                if (sender.isNotiSetting()) smsService.sendSms(smsRequest);
 
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
@@ -307,10 +307,10 @@ public class MatchingServiceImpl implements MatchingService {
     @Transactional(readOnly = true)
     @Override
     public Integer getSpecialHeartCount() {
-        try{
+        try {
             AuthenticatedMemberDto member = authUtil.getMemberByAuthentication();
             return memberRepository.getSpecialHeartCountByMemberId(member.getMemberId());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to get special heart count: {}", e.getMessage());
             return null;
         }

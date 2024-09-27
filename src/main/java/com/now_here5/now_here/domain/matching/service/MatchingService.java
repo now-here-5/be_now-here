@@ -8,7 +8,7 @@ import java.util.List;
 public interface MatchingService {
     List<BannerListResponse> getBannerList();
 
-    void sendLove(Long receiverId, boolean isSpecialUsed);
+    boolean sendLove(Long receiverId, boolean isSpecialUsed);
 
     void receiveLove(Long senderId);
 
