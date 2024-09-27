@@ -22,7 +22,8 @@ public class PhoneCodeService {
             log.info("send to phone number : {}, verification code : {}", phoneNumber, randomCode);
 
             memoryRepository.saveCheckCode(phoneNumber, randomCode); // 랜덤 번호, 이메일 저장.
-            SmsRequest smsrequest = SmsRequest.builder().phoneNumber(phoneNumber).message(randomCode).build();
+
+            SmsRequest smsrequest = SmsRequest.builder().phoneNumber(phoneNumber).message("Now, Here 인증코드 : " + randomCode).build();
             smsService.sendSms(smsrequest);
             return true;
 
