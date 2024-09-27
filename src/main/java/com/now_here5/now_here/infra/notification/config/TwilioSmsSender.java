@@ -7,6 +7,7 @@ import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.type.PhoneNumber;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service("twilio")
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TwilioSmsSender implements SmsSender {
 
-    private final TwilioConfiguration twilioConfiguration;
+    @Value("${twilio.phone_number}")
+    private String twilioNumber;
 
     @Override
     @ExternalApiLogging
@@ -27,7 +29,7 @@ public class TwilioSmsSender implements SmsSender {
             try {
                 // Twilio API 사용하여 SMS 전송
                 PhoneNumber to = new PhoneNumber(phoneNumber);
-                PhoneNumber from = new PhoneNumber(twilioConfiguration.getTrialNumber());
+                PhoneNumber from = new PhoneNumber(twilioNumber);
                 MessageCreator creator = Message.creator(to, from, messageContent);
                 Message message = creator.create();
 
@@ -35,7 +37,7 @@ public class TwilioSmsSender implements SmsSender {
                 log.info("SMS sent successfully to {}. Message SID: {}", phoneNumber, message.getSid());
             } catch (Exception e) {
                 // 예외 처리 및 오류 로그
-                log.error("Failed to send SMS to {}. Error: {}", phoneNumber, e.getMessage(), e);
+                log.error("Failed to send SMS to {}. Error: {}", phoneNumber, e.getMessage());
                 throw new RuntimeException("Failed to send SMS", e);
             }
         } else {
