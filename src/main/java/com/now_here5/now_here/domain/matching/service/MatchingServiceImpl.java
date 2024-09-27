@@ -126,7 +126,7 @@ public class MatchingServiceImpl implements MatchingService {
                 matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : https://나우히어 .lrl.kr")
+                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : https://_나우히어.lrl.kr")
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 
