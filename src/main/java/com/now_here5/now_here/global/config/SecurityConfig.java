@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/slack/**").anonymous()
                         .requestMatchers("/dev/login").anonymous()
                         .requestMatchers(HttpMethod.GET, "/event/list").anonymous()
-                        .requestMatchers(HttpMethod.POST, "/inquiry").anonymous()
+                        .requestMatchers(HttpMethod.POST, "*/inquiry").anonymous()
                         .requestMatchers(HttpMethod.GET, "*/verify/**").anonymous()
                         .requestMatchers(HttpMethod.POST, "*/verify/**").anonymous()
                         .requestMatchers(HttpMethod.POST, "*/register/**").anonymous()
