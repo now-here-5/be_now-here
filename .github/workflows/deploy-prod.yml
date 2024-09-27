@@ -77,7 +77,7 @@ jobs:
               -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
               -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-              -e TWILOIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
+              -e TWILIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
               -e TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
               -e TWILIO_PHONE_NUMBER=${{secrets.TWILIO_PHONE_NUMBER}} \
               -e TZ=Asia/Seoul \
