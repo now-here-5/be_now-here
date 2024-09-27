@@ -70,7 +70,7 @@ public class MatchingServiceImpl implements MatchingService {
         Matching matching = createMatching(sender, receiver);
         matchingRepository.save(matching);
 
-        if (isSpecialUsed) {
+        if (isSpecialUsed && receiver.isNotiSetting()) { // when receiver has allowed notification
             handleSpecialHeart(sender, receiver);
         }
 
@@ -133,7 +133,10 @@ public class MatchingServiceImpl implements MatchingService {
                         .build();
 
                 sender.updateUnreadNotiCount(sender.getUnreadNotiCount() + 1);
-                smsService.sendSms(smsRequest); // 먼저 요청한 사람에게 알림 보내기
+
+                // send notification to the person who sent heart first
+                // if the person has allowed notification
+                if(sender.isNotiSetting()) smsService.sendSms(smsRequest);
 
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
