@@ -34,7 +34,7 @@ jobs:
             TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
             TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
             TWILIO_TRIAL_NUMBER: ${{ secrets.TWILIO_TRIAL_NUMBER }}
-        script: |
+          script: |
           # GitHub Container Registry에 로그인
           echo "$GHP_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
