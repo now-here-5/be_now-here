@@ -85,18 +85,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // 명시적 도메인 설정
-        configuration.addAllowedOrigin("https://www.now-here.site");
-        // 필요한 HTTP 메서드만 허용 (보안 강화)
-        configuration.addAllowedMethod("GET");
-        configuration.addAllowedMethod("POST");
-        configuration.addAllowedMethod("PUT");
-        configuration.addAllowedMethod("DELETE");
-        configuration.addAllowedMethod("PATCH");
-
-        // 허용할 헤더 제한 (보안 강화)
-        configuration.addAllowedHeader("Authorization");
-        configuration.addAllowedHeader("Content-Type");
-        configuration.addAllowedHeader("Accept");
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
 
         configuration.setAllowCredentials(false);  // 자격 증명 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
