@@ -4,8 +4,7 @@ import lombok.Getter;
 
 
 @Getter
-
-public class ProfileResponse extends MemberRecommendResponse {
+public class ProfileResponse extends CommonMemberResponse {
     public ProfileResponse(Long memberId, String mbti, String nickname, String birthdate, String gender, String description) {
         super(memberId, mbti, nickname, birthdate, gender, description);
     }

@@ -3,7 +3,7 @@ package com.now_here5.now_here.domain.member.dto;
 import lombok.Getter;
 
 @Getter
-public class PersonalInfoResponse extends ProfileResponse {
+public class PersonalInfoResponse extends CommonMemberResponse {
     private final String phoneNumber;
 
     public PersonalInfoResponse(Long memberId, String phoneNumber,

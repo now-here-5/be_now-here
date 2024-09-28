@@ -137,7 +137,8 @@ public class MemberServiceImpl implements MemberService {
                             result.getMatch().getNickname(),  // 닉네임
                             result.getMatch().getBirthday().toString(),  // 생일
                             result.getMatch().getGender().toString(),  // 성별
-                            result.getMatch().getDescription()  // 설명
+                            result.getMatch().getDescription(),  // 설명
+                            result.getMatch().isNotificationOn()
                     ))
                     .toList();
 

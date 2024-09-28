@@ -150,6 +150,10 @@ public class PreferenceBasedMBTIMatching {
         public String getDescription() {
             return member.getDescription();
         }
+
+        public boolean isNotificationOn() {
+            return member.isNotiSetting();
+        }
     }
 
     // 매칭 결과를 표현하는 내부 클래스
