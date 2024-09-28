@@ -87,8 +87,8 @@ public class MatchingServiceImpl implements MatchingService {
 
     private void handleSpecialHeart(Member sender, Member receiver) {
         Long eventId = receiver.getEvent().getId();
-        String encryptEventId = xor.encrypt(eventId);
-        SmsRequest smsRequest = createSmsRequest(receiver, encryptEventId);
+        //String encryptEventId = xor.encrypt(eventId);
+        SmsRequest smsRequest = createSmsRequest(receiver, eventId.toString());
 
         if (sender.getSpecialHeart() <= 0) {
             throw new IllegalArgumentException("Special heart is not enough");
@@ -98,11 +98,18 @@ public class MatchingServiceImpl implements MatchingService {
         smsService.sendSms(smsRequest);
     }
 
-    private SmsRequest createSmsRequest(Member receiver, String encryptEventId) {
+    private SmsRequest createSmsRequest(Member receiver, String eventId) {
+        String url = switch(eventId) {
+            case "1" : yield "https://www.now-here.site/match/received-hearts?eventCode=MTAyOTM4NDY";
+            case "2" : yield "https://나우히어.lrl.kr";
+            case "3" : yield "https://나우히어_가을.lrl.kr";
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + eventId);
+        };
 
         return SmsRequest.builder()
-//                .message("하트가 도착했어요!: https://www.now-here.site/match/received-hearts?eventCode=" + encryptEventId)
-                .message("하트가 도착했어요! 지금 확인하고 응답해보세요 : https://나우히어.lrl.kr")
+                .message("하트가 도착했어요! 지금 확인하고 응답해보세요 : "+url)
                 .phoneNumber(receiver.getPhoneNumber())
                 .build();
     }
@@ -116,8 +123,16 @@ public class MatchingServiceImpl implements MatchingService {
         Member sender = memberRepository.findActiveMemberById(senderId);
         Member receiver = memberRepository.findActiveMemberById(receiverId);
         Long eventId = sender.getEvent().getId();
-        String encryptEventId = xor.encrypt(eventId);
+        //String encryptEventId = xor.encrypt(eventId);
 
+        String url = switch(eventId.toString()) {
+            case "1" : yield "https://www.now-here.site/match/status?eventCode=MTAyOTM4NDY";
+            case "2" : yield "https://_나우히어.lrl.kr";
+            case "3" : yield "https://가을_나우히어.lrl.kr";
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + eventId);
+        };
         try {
             Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
             if (matching != null) {
@@ -126,7 +141,7 @@ public class MatchingServiceImpl implements MatchingService {
                 matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : https://_나우히어.lrl.kr")
+                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : "+url)
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 

@@ -44,6 +44,7 @@ public class MemberAuthService {
         }
     }
 
+    @Transactional
     public TokenDto login(LoginRequest loginRequest, Long eventId) {
         try {
             setAuthentication(loginRequest, eventId); // 인증 & 인가
