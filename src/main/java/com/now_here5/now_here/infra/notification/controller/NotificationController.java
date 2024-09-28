@@ -20,11 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class NotificationController {
 
     private final SmsService smsService;
-    private final SlackNotificationService slackNotificationService;
 
     @PostMapping
     public void sendSms(@Valid @RequestBody SmsRequest smsRequest) {
-        // smsService.sendSms(smsRequest);
-        slackNotificationService.sendNotification("send to "+ smsRequest.getPhoneNumber() + " : " + smsRequest.getMessage());
+        smsService.sendSms(smsRequest);
     }
 }
