@@ -76,9 +76,9 @@ jobs:
                   value: ${{ secrets.TWILIO_ACCOUNT_SID }}
                 - name: TWILIO_AUTH_TOKEN
                   value: ${{ secrets.TWILIO_AUTH_TOKEN }}
-                - name: TWILIO_TRIAL_NUMBER
-                  value: ${{ secrets.TWILIO_TRIAL_NUMBER }}
-            
+                - name: TWILIO_PHONE_NUMBER
+                  value: ${{ secrets.TWILIO_PHONE_NUMBER }}  
+                
                 # Slack Webhook configuration
                 - name: SLACK_WEBHOOK_URL
                   value: ${{ secrets.SLACK_WEBHOOK_URL }}
