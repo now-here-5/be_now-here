@@ -7,16 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Aspect
-@Component
+@Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultLoggingAspect {
 
     private final HttpServletRequest request;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Around("execution(* com.now_here5.now_here.domain.member.controller.MemberController.*(..)) || " +
             "execution(* com.now_here5.now_here.domain.member.controller.MemberInfoController.*(..)) || " +

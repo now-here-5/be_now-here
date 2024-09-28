@@ -1,18 +1,22 @@
 package com.now_here5.now_here.global.logging.aop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Aspect
 @Component
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class ExternalApiLoggingAspect {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     // @ExternalApiLogging 어노테이션이 적용된 메소드에만 AOP 적용
     @Around("@annotation(com.now_here5.now_here.global.logging.annotation.ExternalApiLogging)")

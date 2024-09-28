@@ -52,10 +52,6 @@ dependencies {
 	implementation("org.springframework:spring-core") {
 		exclude group: "commons-logging", module: "commons-logging"
 	}
-
-	// Jackson
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-
 }
 
 tasks.named('test') {
