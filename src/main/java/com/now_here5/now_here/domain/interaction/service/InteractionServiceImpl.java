@@ -13,13 +13,14 @@ import com.now_here5.now_here.domain.member.repository.MemberRepository;
 import com.now_here5.now_here.domain.member.service.MemberService;
 import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.infra.email.service.EmailInquiryService;
-import com.now_here5.now_here.infra.slack.service.SlackInquiryHandlerService;
+import com.now_here5.now_here.infra.slack.service.SlackNotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class InteractionServiceImpl implements InteractionService {
     private final InteractionRepository interactionRepository;
     private final MemberRepository memberRepository;
     private final AuthUtil authUtil;
-    private final SlackInquiryHandlerService slackInquiryHandlerService;
+    private final SlackNotificationService slackNotificationService;
     private final EmailInquiryService emailInquiryService;
     private final MatchingRepository matchingRepository;
     private final MemberService memberservice;
@@ -44,10 +45,11 @@ public class InteractionServiceImpl implements InteractionService {
             Feedback feedback = Feedback.builder()
                     .content(feedbackRequect.getContent())
                     .member(member)
-                    .field(feedbackRequect.getField())
+                    .field(Optional.of(feedbackRequect.getField()).orElse(0))
                     .build();
             interactionRepository.saveFeedback(feedback);
             memberservice.offerSpecialHeartIfQualified(authUtil.getMemberByAuthentication().getMemberId(),member.getSpecialHeart()+5 ); // 비동기적으로 처리
+            slackNotificationService.sendSlackNotification(feedback.getId(), member.getId(), member.getNickname(), feedback.getField(), feedback.getContent());
         }catch (Exception e) {
             log.error("토큰이 없는 피드백 작성: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -72,7 +74,7 @@ public class InteractionServiceImpl implements InteractionService {
 
         Inquiry newInquiry = builder.build();
         interactionRepository.saveInquiry(newInquiry);
-        slackInquiryHandlerService.sendSlackNotification(newInquiry.getId(), newInquiry.getContent(), newInquiry.getEmail());
+        slackNotificationService.sendSlackNotification(newInquiry.getId(), newInquiry.getContent(), newInquiry.getEmail());
     }
 
     @Transactional
