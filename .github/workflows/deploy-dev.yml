@@ -84,6 +84,8 @@ jobs:
                   value: ${{ secrets.SLACK_WEBHOOK_URL }}
                 - name: SLACK_INQUIRY_WEBHOOK_URL
                   value: ${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }}
+                - name: SLACK_FEEDBACK_WEBHOOK_URL
+                  value: ${{ sercrets.SLACK_FEEDBACK_WEBHOOK_URL }}
 
                 # Encryption key
                 - name: XOR_KEY
