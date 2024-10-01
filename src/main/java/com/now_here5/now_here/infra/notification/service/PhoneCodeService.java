@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PhoneCodeService {
     private final MemoryRepository memoryRepository;
-    private final SmsService smsService;
+    private final NotificationService notificationService;
 
     public boolean sendVerificationCode(String phoneNumber) {
         try {
@@ -22,9 +22,8 @@ public class PhoneCodeService {
             log.info("send to phone number : {}, verification code : {}", phoneNumber, randomCode);
 
             memoryRepository.saveCheckCode(phoneNumber, randomCode); // 랜덤 번호, 이메일 저장.
-
             SmsRequest smsrequest = SmsRequest.builder().phoneNumber(phoneNumber).message("Now, Here 인증코드 : " + randomCode).build();
-            smsService.sendSms(smsrequest);
+            notificationService.sendSms(smsrequest);
             return true;
 
         } catch (Exception e) {

@@ -17,7 +17,7 @@ import com.now_here5.now_here.global.security.dto.AuthenticatedMemberDto;
 import com.now_here5.now_here.global.util.AuthUtil;
 import com.now_here5.now_here.global.util.CustomXOR;
 import com.now_here5.now_here.infra.notification.dto.SmsRequest;
-import com.now_here5.now_here.infra.notification.service.SmsService;
+import com.now_here5.now_here.infra.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,7 +39,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final MatchingListToDto matchingListToDto;
     private final AuthUtil authUtil;
     private final MemberRepository memberRepository;
-    private final SmsService smsService;
+    private final NotificationService notificationService;
     private final PreferenceBasedMBTIMatching matcher;
     private final CustomXOR xor;
 
@@ -95,7 +95,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
         sender.updateSpecialHeart(sender.getSpecialHeart() - 1);
 
-        smsService.sendSms(smsRequest);
+        notificationService.sendSms(smsRequest);
     }
 
     private SmsRequest createSmsRequest(Member receiver, String eventId) {
@@ -134,7 +134,7 @@ public class MatchingServiceImpl implements MatchingService {
                 throw new IllegalStateException("Unexpected value: " + eventId);
         };
         try {
-            Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
+            Matching matching = matchingRepository.findBySenderAndReceiver(sender.getId(), receiver.getId());
             if (matching != null) {
 
                 matching.setStatus(Status.ACCEPTED);
@@ -149,7 +149,7 @@ public class MatchingServiceImpl implements MatchingService {
 
                 // send notification to the person who sent heart first
                 // if the person has allowed notification
-                if (sender.isNotiSetting()) smsService.sendSms(smsRequest);
+                if (sender.isNotiSetting()) notificationService.sendSms(smsRequest);
 
                 matcher.updatePreferences(sender.getMbti(), receiver.getMbti(), sender.getGender(), true);
                 matcher.updatePreferences(receiver.getMbti(), sender.getMbti(), receiver.getGender(), true);
@@ -170,7 +170,7 @@ public class MatchingServiceImpl implements MatchingService {
         Member receiver = memberRepository.findActiveMemberById(receiverId);
 
         try {
-            Matching matching = matchingRepository.findBySenderAndReceiver(sender, receiver);
+            Matching matching = matchingRepository.findBySenderAndReceiver(sender.getId(), receiver.getId());
             if (matching != null) {
                 matching.setStatus(Status.REJECTED);
                 matchingRepository.update(matching);
