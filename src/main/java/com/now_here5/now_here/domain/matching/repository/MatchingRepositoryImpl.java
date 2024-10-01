@@ -90,7 +90,8 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         try {
             return em.createQuery("SELECT COUNT(m) FROM Matching m " +
                             " WHERE m.receiver.id = :memberId and " +
-                            "m.status = : status", Long.class)
+                            "m.status = : status and " +
+                            "m.sender.active = true ", Long.class)
                     .setParameter("memberId", memberId)
                     .setParameter("status", Status.PENDING)
                     .getSingleResult();
@@ -106,7 +107,8 @@ public class MatchingRepositoryImpl implements MatchingRepository {
         try {
             return em.createQuery("SELECT COUNT(m) FROM Matching m " +
                             " WHERE m.sender.id = :memberId and " +
-                            "m.status = : status", Long.class)
+                            "m.status = : status and " +
+                            "m.receiver.active = true", Long.class)
                     .setParameter("memberId", memberId)
                     .setParameter("status", Status.PENDING)
                     .getSingleResult();

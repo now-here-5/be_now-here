@@ -104,6 +104,7 @@ public class MatchingServiceImpl implements MatchingService {
             case "2" : yield "https://나우히어.lrl.kr";
             case "3" : yield "https://나우히어_가을.lrl.kr";
 
+
             default:
                 throw new IllegalStateException("Unexpected value: " + eventId);
         };
@@ -189,9 +190,9 @@ public class MatchingServiceImpl implements MatchingService {
     @Transactional(readOnly = true)
     @Override
     public List<SummaryResponse> getSummary() {
-        Long receiverId = authUtil.getMemberByAuthentication().getMemberId();
-        Long receiveLove = matchingRepository.countByReceiverId(receiverId);
-        Long sendLove = matchingRepository.countBySenderId(receiverId);
+        Long targetId = authUtil.getMemberByAuthentication().getMemberId();
+        Long receiveLove = matchingRepository.countByReceiverId(targetId);
+        Long sendLove = matchingRepository.countBySenderId(targetId);
 
         return List.of(SummaryResponse.builder()
                 .receiveLove(String.valueOf(receiveLove))
