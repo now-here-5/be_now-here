@@ -72,7 +72,7 @@ jobs:
               -e DB_PASSWORD=${{ secrets.OC_DB_PASSWORD }} \
               -e XOR_KEY=${{ secrets.XOR_KEY }} \
               -e SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }} \
-              -e SLACK_FEEDBACK_WEBHOOK_URL=${{ sercrets.SLACK_FEEDBACK_WEBHOOK_URL }} \
+              -e SLACK_FEEDBACK_WEBHOOK_URL=${{ secrets.SLACK_FEEDBACK_WEBHOOK_URL }} \
               -e SLACK_INQUIRY_WEBHOOK_URL=${{ secrets.SLACK_INQUIRY_WEBHOOK_URL }} \
               -e MAIL_HOST=${{ secrets.MAIL_HOST }} \
               -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
