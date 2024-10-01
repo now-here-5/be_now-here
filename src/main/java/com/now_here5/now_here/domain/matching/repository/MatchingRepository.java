@@ -19,7 +19,7 @@ public interface MatchingRepository {
     // memberId가 sender인 매칭의 수를 찾음
     Long countBySenderId(Long memberId);
 
-    Matching findBySenderAndReceiver(Member sender, Member receiver);
+    Matching findBySenderAndReceiver(Long senderId, Long receiverId);
 
     boolean isExistsByMemberIds(Long memberId1, Long memberId2);
 

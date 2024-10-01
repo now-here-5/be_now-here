@@ -1,6 +1,8 @@
 package com.now_here5.now_here.infra.notification.service;
 
 
-public interface NotificationService {
+import com.now_here5.now_here.infra.notification.dto.SmsRequest;
 
+public interface NotificationService {
+    void sendSms(SmsRequest smsRequest);
 }
