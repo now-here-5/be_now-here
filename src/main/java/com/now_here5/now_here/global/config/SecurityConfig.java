@@ -35,11 +35,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/notification/send").hasRole("ADMIN")
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").anonymous()
                         .requestMatchers(HttpMethod.GET, "**/*.css", "**/*.png", "**/*.html").anonymous()
                         .requestMatchers("/slack/**").anonymous()
                         .requestMatchers("/dev/login").anonymous()
-                        .requestMatchers("/notification/send").permitAll()
                         .requestMatchers(HttpMethod.GET, "/event/list").anonymous()
                         .requestMatchers(HttpMethod.POST, "*/inquiry").permitAll()
                         .requestMatchers(HttpMethod.GET, "*/verify/**").permitAll()
