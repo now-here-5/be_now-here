@@ -118,18 +118,18 @@ public class MatchingRepositoryImpl implements MatchingRepository {
 
     @Transactional(readOnly = true)
     @Override
-    public Matching findBySenderAndReceiver(Member sender, Member receiver) {
+    public Matching findBySenderAndReceiver(Long senderId, Long receiverId) {
         try {
             return em.createQuery("SELECT m FROM Matching m " +
-                            "WHERE m.sender = :sender AND m.receiver = :receiver", Matching.class)
-                    .setParameter("sender", sender)
-                    .setParameter("receiver", receiver)
+                            "WHERE m.sender.id = :senderId AND m.receiver.id = :receiverId", Matching.class)
+                    .setParameter("senderId", senderId)
+                    .setParameter("receiverId", receiverId)
                     .getSingleResult();
         } catch (NoResultException e) {
-            log.warn("No matching found between sender {} and receiver {}.", sender.getId(), receiver.getId());
+            log.warn("No matching found between sender {} and receiver {}.", senderId, receiverId);
             return null; // 결과가 없을 때 null 반환
         } catch (Exception e) {
-            log.error("보낸이와 받는이로 매칭 조회 중 실패: {} {}", sender, receiver, e);
+            log.error("보낸이와 받는이로 매칭 조회 중 에러 발생", e);
             return null;
         }
     }
@@ -155,8 +155,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     public List<Matching> findByReceiverId(Long memberId) {
         try {
             return em.createQuery("SELECT m FROM Matching m " +
-                            "WHERE m.receiver.id = :memberId and " +
-                            "m.status= : status", Matching.class)
+                            "JOIN FETCH m.receiver r " +
+                            "JOIN FETCH m.sender s " +
+                            "WHERE r.id = :memberId AND " +
+                            "m.status = :status AND " +
+                            "s.active = true", Matching.class) // 계정이 활성화된 유저만 조회해야 됨.
                     .setParameter("memberId", memberId)
                     .setParameter("status", Status.PENDING)
                     .getResultList();
@@ -171,8 +174,11 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     public List<Matching> findBySenderId(Long memberId) {
         try {
             return em.createQuery("SELECT m FROM Matching m " +
-                            "WHERE m.sender.id = :memberId and " +
-                            "m.status = :status", Matching.class)
+                            "JOIN FETCH m.receiver r " +
+                            "JOIN FETCH m.sender s " +
+                            "WHERE s.id = :memberId and " +
+                            "m.status = :status and " +
+                            "r.active = true", Matching.class) // 계정이 활성화된 유저만 조회해야 됨.
                     .setParameter("memberId", memberId)
                     .setParameter("status", Status.PENDING)
                     .getResultList();
