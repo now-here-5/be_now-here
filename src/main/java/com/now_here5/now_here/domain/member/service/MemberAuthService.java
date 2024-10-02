@@ -10,12 +10,14 @@ import com.now_here5.now_here.global.security.dto.TokenDto;
 import com.now_here5.now_here.global.security.provider.TokenGenerator;
 import com.now_here5.now_here.global.security.service.CustomAuthenticationToken;
 import com.now_here5.now_here.global.util.AuthUtil;
+import com.now_here5.now_here.infra.notification.service.PhoneCodeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,25 @@ public class MemberAuthService {
     private final TokenGenerator tokenGenerator;
     private final AuthUtil authUtil;
     private final ListRolesToDto listRolesToDto;
+    private final PhoneCodeService phoneCodeService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public boolean updatePassword(LoginRequest loginRequest, Long eventId){
+        try{
+            if(!phoneCodeService.isPhoneVerified(loginRequest.getPhoneNumber())){
+                log.error("Phone number is not verified");
+                return false;
+            }
+            Member foundMember =  memberAuthRepository.findMemberWithRolesByPhoneNumber(loginRequest.getPhoneNumber(), eventId);
+            foundMember.updatePassword(passwordEncoder.encode(loginRequest.getPassword()));
+            return true;
+        }catch(Exception e ){
+            log.error("updating password failed : {}", e.getMessage());
+            return false;
+        }
+    }
+
 
     @Transactional
     public boolean reactivateMember(Long memberId) {

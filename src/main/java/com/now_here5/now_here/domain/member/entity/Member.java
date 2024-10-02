@@ -154,6 +154,9 @@ public class Member extends FullAudit {
         return this.popupCount;
     }
 
+    public void updatePassword(String password){
+        this.password = password;
+    }
     public void updateMbti(MBTI mbti) {
         this.mbti = mbti;
     }
@@ -174,7 +177,7 @@ public class Member extends FullAudit {
     }
 
     public void setMemberRoles(List<Role> roles) {
-        if(roles == null) {
+        if(roles != null) {
             for(Role role : roles) {
                 this.memberRoleList.add(new MemberRole(this, role));
             }

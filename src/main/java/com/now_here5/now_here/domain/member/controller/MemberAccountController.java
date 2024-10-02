@@ -39,6 +39,7 @@ public class MemberAccountController {
             "따라서 인증번호를 요청하면, 중복 조회도 가능합니다.")
     @Parameter(name = "event_id", description = "이벤트 ID", required = true, schema = @Schema(example = "MTAyOTM4NDY"))
     @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
+    @Parameter(name = "forReset", description = "비밀번호 재설정을 위한 요청인지 여부", schema = @Schema(example = "false"))
     @ApiResponse(responseCode = "400", description = "A001 - 현재 이벤트로 이미 가입된 번호입니다.")
     @ApiResponse(responseCode = "200", description = "A001 - 휴대폰 인증을 요청했습니다.")
     @ApiResponse(responseCode = "400", description = "A001 - 휴대폰 인증에 실패했습니다.")
@@ -46,12 +47,15 @@ public class MemberAccountController {
     @GetMapping("/verify/phone/{event_id}")
     public ResponseEntity<ResponseForm> verifyPhone(
             @PathVariable(name = "event_id") String eventId,
-            @RequestParam(name = "phoneNumber") String phoneNumber ) {
+            @RequestParam(name = "phoneNumber") String phoneNumber,
+            @RequestParam(name = "forReset" , defaultValue = "false") boolean forReset) {
 
-        boolean duplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phoneNumber);
+        if(!forReset) {
+            boolean duplicated = memberService.checkIfPhoneDuplicated(customXOR.decrypt(eventId), phoneNumber);
 
-        if (duplicated) {
-            return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
+            if (duplicated) {
+                return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
+            }
         }
 
         boolean sent = memberService.sendCode(phoneNumber);
@@ -60,6 +64,7 @@ public class MemberAccountController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_REQUEST)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_VERIFY_FAIL));
     }
+
 
     @Operation(summary = "인증 코드 조회", description = "개발용으로 휴대폰 번호를 사용하여 인증 코드를 조회합니다.")
     @Parameter(name = "phoneNumber", description = "휴대폰 번호", required = true, schema = @Schema(example = "01012345678"))
