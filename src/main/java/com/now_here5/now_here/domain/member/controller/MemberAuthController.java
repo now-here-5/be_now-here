@@ -72,4 +72,18 @@ public class MemberAuthController {
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGOUT_SUCCESS)) :
                 ResponseEntity.ok(ResponseForm.of(ResponseCode.LOGOUT_FAIL));
     }
+
+    @Operation(summary = "비밀번호 재설정", description = "")
+    @ApiResponse(responseCode = "200", description = "M002 - 비밀번호 재설정 성공")
+    @ApiResponse(responseCode = "400", description = "M002 - 비밀번호 재설정 실패")
+
+    @PatchMapping("/update/password/{event_id}")
+    public ResponseEntity<ResponseForm> updatePassword(
+            @RequestBody LoginRequest loginRequest,
+            @PathVariable(value = "event_id") String eventId) {
+        boolean isUpdated = memberAuthService.updatePassword(loginRequest, customXOR.decrypt(eventId));
+        return isUpdated ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.PASSWORD_UPDATE_SUCCESS)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.PASSWORD_UPDATE_FAIL));
+    }
 }

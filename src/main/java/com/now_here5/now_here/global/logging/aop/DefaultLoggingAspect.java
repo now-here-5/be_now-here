@@ -20,6 +20,8 @@ public class DefaultLoggingAspect {
 
     @Around("execution(* com.now_here5.now_here.domain.member.controller.MemberController.*(..)) || " +
             "execution(* com.now_here5.now_here.domain.member.controller.MemberInfoController.*(..)) || " +
+            "execution(* com.now_here5.now_here.domain.member.controller.MemberAccountController.*(..)) || " +
+            "execution(* com.now_here5.now_here.domain.member.controller.MemberAuthController.*(..)) || " +
             "execution(* com.now_here5.now_here.domain.event.controller.EventController.*(..)) || " +
             "execution(* com.now_here5.now_here.domain.interaction.controller.InteractionController.*(..)) || " +
             "execution(* com.now_here5.now_here.domain.matching.controller.MatchingController.*(..))")

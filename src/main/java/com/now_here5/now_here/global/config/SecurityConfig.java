@@ -3,15 +3,12 @@ import com.now_here5.now_here.global.security.exception.CustomAccessDeniedHandle
 import com.now_here5.now_here.global.security.exception.CustomAuthenticationEntryPoint;
 import com.now_here5.now_here.global.security.filter.CustomAuthFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -46,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "*/verify/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "*/register/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "*/login/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "*/update/password/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/health").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -59,10 +57,5 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(customAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
