@@ -210,6 +210,7 @@ public class MatchingRepositoryImpl implements MatchingRepository {
                     .setParameter("memberId", memberId)
                     .setParameter("pendingStatus", Status.PENDING)
                     .setParameter("rejectedStatus", Status.REJECTED)
+                    .setMaxResults(30) // 최대 최근 25개로 제한 (성능 문제)
                     .getResultList();
         } catch (Exception e) {
             log.error("Failed to find matchings with counterpart nickname: memberId={}, error={}", memberId, e.getMessage());
