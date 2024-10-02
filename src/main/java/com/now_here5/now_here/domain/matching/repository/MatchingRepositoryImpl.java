@@ -197,15 +197,15 @@ public class MatchingRepositoryImpl implements MatchingRepository {
             return em.createQuery("SELECT new com.now_here5.now_here.domain.matching.dto.MatchingWithNicknameResponse(" +
                             "m, " +
                             "CASE " +
-                            "WHEN m.sender.id = :memberId THEN r.nickname " +
-                            "WHEN m.receiver.id = :memberId THEN s.nickname " +
+                            "WHEN s.id = :memberId THEN r.nickname " +
+                            "WHEN r.id = :memberId THEN s.nickname " +
                             "END" +
                             ") " +
                             "FROM Matching m " +
                             "JOIN FETCH m.sender s " +
                             "JOIN FETCH m.receiver r " +
-                            "WHERE (m.sender.id = :memberId AND m.status <> :pendingStatus) " +
-                            "   OR (m.receiver.id = :memberId AND m.status <> :rejectedStatus) " +
+                            "WHERE (s.id = :memberId AND m.status <> :pendingStatus AND r.active = true) " +
+                            "   OR (r.id = :memberId AND m.status <> :rejectedStatus AND s.active = true) " +
                             "ORDER BY m.createdAt DESC", MatchingWithNicknameResponse.class)
                     .setParameter("memberId", memberId)
                     .setParameter("pendingStatus", Status.PENDING)
