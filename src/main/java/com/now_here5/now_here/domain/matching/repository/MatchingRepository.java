@@ -12,7 +12,7 @@ public interface MatchingRepository {
     void save(Matching matching);
     Matching findById(Long matchingId);
     void update(Matching matching);
-    void delete(Long matchingId);
+    void removeSentHeart(Long senderId, Long receiverId);
 
     // memberId가 receiver인 매칭의 수를 찾음
     Long countByReceiverId(Long memberId);

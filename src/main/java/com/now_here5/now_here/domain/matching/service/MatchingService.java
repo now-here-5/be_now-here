@@ -10,6 +10,8 @@ public interface MatchingService {
 
     boolean sendLove(Long receiverId, boolean isSpecialUsed);
 
+    boolean removeHeart(Long receiverId);
+
     void receiveLove(Long senderId);
 
     void rejectLove(Long senderId);
@@ -27,4 +29,6 @@ public interface MatchingService {
     Integer getNotificationCount();
 
     Integer getSpecialHeartCount();
+
+
 }
