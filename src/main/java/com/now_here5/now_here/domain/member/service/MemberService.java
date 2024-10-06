@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface MemberService {
+    boolean doesMemberExistByPhoneNumber(String phoneNumber, Long eventId);
 
     boolean sendCode(String phoneNumber);
 

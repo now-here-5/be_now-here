@@ -6,6 +6,7 @@ import com.now_here5.now_here.domain.member.entity.Member;
 import java.util.List;
 
 public interface MemberRepository {
+    boolean doesMemberExistByPhoneNumber(String phoneNumber, Long eventId);
 
     boolean deactivateMember(Long memberId);
 

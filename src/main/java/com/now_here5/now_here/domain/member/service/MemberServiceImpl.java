@@ -41,9 +41,20 @@ public class MemberServiceImpl implements MemberService {
     private final PreferenceBasedMBTIMatching matcher;
     private final InteractionRepository interactionRepository;
     private final RoleAdminService roleAdminService;
+
+    @Override
+    public boolean doesMemberExistByPhoneNumber(String phoneNumber, Long eventId) {
+        try {
+            return memberRepository.doesMemberExistByPhoneNumber(phoneNumber, eventId);
+        } catch (Exception e) {
+            log.error("cannot find if member with {} signed to event {}", phoneNumber, eventId);
+            return false;
+        }
+    }
+
     @Override
     public boolean sendCode(String phoneNumber) {
-        try{
+        try {
             return phoneCodeService.sendVerificationCode(phoneNumber);
         } catch (Exception e) {
             log.error("Failed to send verification code to notification number: {}", phoneNumber);
@@ -60,21 +71,21 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public String registerMember(Long eventId, RegisterMemberRequest registerMemberRequest) {
         log.warn("event id : {}", eventId);
-        try{
+        try {
 
-            if(!phoneCodeService.isPhoneVerified(registerMemberRequest.getPhoneNumber())){
+            if (!phoneCodeService.isPhoneVerified(registerMemberRequest.getPhoneNumber())) {
                 log.error("Phone number is not verified");
                 return "";
             }
             List<Role> roles = roleAdminService.findRoleByName(List.of(RoleName.USER, RoleName.ANONYMOUS));
             Member member = registerDtoToMember.converter(registerMemberRequest, roles);
-            Event event  =  eventRepository.getEventDetail(eventId);
+            Event event = eventRepository.getEventDetail(eventId);
 
             member.setEvent(event);
             memberRepository.save(member);
             return member.getToken();
 
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Failed to register member: {}", e.getMessage());
             return "";
         }
@@ -85,10 +96,10 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public boolean deactivateMember() {
-        try{
-            AuthenticatedMemberDto memberDto =  authUtil.getMemberByAuthentication();
+        try {
+            AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
             return memberRepository.deactivateMember(memberDto.getMemberId());
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Failed to inactivate member: {}", e.getMessage());
             return false;
         }
@@ -150,11 +161,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional(readOnly = true)
     public EventListResponse getAssignedEventsByMember() {
-        try{
-            List<Event> events =  eventRepository.getSignedEventsByMember(true,
+        try {
+            List<Event> events = eventRepository.getSignedEventsByMember(true,
                     authUtil.getMemberByAuthentication().getMemberId());
-            return eventListToDto.converter(events,false);
-        }catch (Exception e){
+            return eventListToDto.converter(events, false);
+        } catch (Exception e) {
             log.error("Failed to get assigned events by member: {}", e.getMessage());
             return null;
         }
@@ -163,11 +174,11 @@ public class MemberServiceImpl implements MemberService {
     @Transactional(readOnly = true)
     @Override
     public boolean getNotificationSetting() {
-        try{
+        try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
             return member.isNotiSetting();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to get notification setting: {}", e.getMessage());
             throw new RuntimeException("Failed to get notification setting");
         }
@@ -221,7 +232,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public  boolean updateMbti(String mbti){
+    public boolean updateMbti(String mbti) {
         try {
             AuthenticatedMemberDto memberDto = authUtil.getMemberByAuthentication();
             Member member = memberRepository.findMemberById(memberDto.getMemberId());
@@ -283,7 +294,7 @@ public class MemberServiceImpl implements MemberService {
                     member.getGender().toString(),
                     member.getBirthday().toString(),
                     member.getDescription()
-                    );
+            );
 
         } catch (Exception e) {
             log.error("Failed to get personal info: {}", e.getMessage());
@@ -295,7 +306,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void offerSpecialHeartIfQualified(Long memberId, int specialHeartCount) {
-        if(interactionRepository.isFeedbackFirstWritten(memberId)){
+        if (interactionRepository.isFeedbackFirstWritten(memberId)) {
             log.info("Offer special heart to member: {}", memberId);
             memberRepository.updateSpecialHeart(memberId, specialHeartCount);
         }

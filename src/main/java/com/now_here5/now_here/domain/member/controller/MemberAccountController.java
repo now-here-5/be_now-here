@@ -56,6 +56,12 @@ public class MemberAccountController {
             if (duplicated) {
                 return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_DUPLICATED));
             }
+        }else{
+
+            boolean exists =  memberService.doesMemberExistByPhoneNumber(phoneNumber, customXOR.decrypt(eventId));
+            if (!exists) {
+                return ResponseEntity.ok(ResponseForm.of(ResponseCode.PHONE_NOT_SIGNED));
+            }
         }
 
         boolean sent = memberService.sendCode(phoneNumber);

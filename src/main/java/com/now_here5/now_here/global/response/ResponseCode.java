@@ -45,6 +45,7 @@ public enum ResponseCode {
     PHONE_VERIFY_SUCCESS(200, "A003", "휴대폰 인증에 성공했습니다."),
     PHONE_VERIFY_FAIL(400, "A003", "휴대폰 인증에 실패했습니다."),
     PHONE_QUALIFIED(200, "A004", "사용 가능한 번호입니다."),
+    PHONE_NOT_SIGNED(400, "A005", "이벤트에 가입되지 않은 전화번호입니다."),
 
     // Member - 'M'ember
     LOGIN_SUCCESS(200, "M001", "로그인에 성공했습니다."),
