@@ -71,16 +71,16 @@ public class MatchingRepositoryImpl implements MatchingRepository {
     }
 
     @Override
-    public void delete(Long matchingId) {
-        try {
-            Matching matching = em.find(Matching.class, matchingId);
-            if (matching != null) {
-                em.remove(matching);
-            } else {
-                log.warn("ID로 매칭 못 찾음: {}", matchingId);
-            }
-        } catch (Exception e) {
-            log.error("ID로 매칭 삭제 중 실패: {}", matchingId, e);
+    public void removeSentHeart(Long senderId, Long receiverId) {
+        try{
+            em.createQuery("delete from Matching m where " +
+                            "m.sender.id =:senderId and " +
+                            "m.receiver.id =:receiverId")
+                    .setParameter("senderId", senderId)
+                    .setParameter("receiverId", receiverId)
+                    .executeUpdate();
+        }catch(Exception e) {
+            log.error("보낸 하트 취소 실패 : {}" , e.getMessage());
         }
     }
 

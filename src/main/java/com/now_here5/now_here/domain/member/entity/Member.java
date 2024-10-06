@@ -178,9 +178,10 @@ public class Member extends FullAudit {
 
     public void setMemberRoles(List<Role> roles) {
         if(roles != null) {
-            for(Role role : roles) {
-                this.memberRoleList.add(new MemberRole(this, role));
-            }
+//            for(Role role : roles) {
+//                this.memberRoleList.add(new MemberRole(this, role));
+//            }
+            // TODO : 이거 되는데, 서비스 도중 바꾸면 에러 터질거 같아서 대기.
         }
     }
 

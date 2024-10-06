@@ -18,31 +18,46 @@ public class MemberRepositoryImpl implements MemberRepository {
     private final EntityManager em;
 
     @Override
-    public boolean deactivateMember(Long memberId) {
-       try {
-           em.createQuery("UPDATE Member m " +
-                           "SET m.active = false, m.token = null " +
-                           "WHERE m.id = :memberId")
-                   .setParameter("memberId", memberId)
-                   .executeUpdate();
-           em.flush();
+    public boolean doesMemberExistByPhoneNumber(String phoneNumber, Long eventId) {
+        try {
+            return em.createQuery("select count(m.id) from Member m " +
+                            "where m.phoneNumber =:phoneNumber and " +
+                            "m.event.id =:eventId", Long.class)
+                    .setParameter("phoneNumber", phoneNumber)
+                    .setParameter("eventId", eventId)
+                    .getSingleResult() == 1;
+        } catch (Exception e) {
+            log.error("error occurred: {}", e.getMessage());
+            return false;
+        }
+    }
 
-           return true;
-       }catch (Exception e){
-           log.error("Failed to inactive member: {}", e.getMessage());
-           return false;
-       }
+    @Override
+    public boolean deactivateMember(Long memberId) {
+        try {
+            em.createQuery("UPDATE Member m " +
+                            "SET m.active = false, m.token = null " +
+                            "WHERE m.id = :memberId")
+                    .setParameter("memberId", memberId)
+                    .executeUpdate();
+            em.flush();
+
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to inactive member: {}", e.getMessage());
+            return false;
+        }
     }
 
     @Override
     public void deactivateBulkMembersByEventId(Long eventId) {
-        try{
+        try {
             em.createQuery("update Member m " +
                             "set m.active = false, m.token = null " +
                             "where m.event.id = :eventId")
                     .setParameter("eventId", eventId)
                     .executeUpdate();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to inactive members by event id: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
@@ -51,14 +66,14 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Transactional(readOnly = true)
     @Override
     public Member findActiveMemberById(Long memberId) {
-        try{
+        try {
             return em.createQuery("select am from Member am " +
                             "join fetch am.event " +
                             "where am.id = :memberId " +
                             "and am.active = true", Member.class)
                     .setParameter("memberId", memberId)
                     .getSingleResult();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to find active member: {}", e.getMessage());
             return null;
         }
@@ -67,14 +82,14 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Transactional(readOnly = true)
     @Override
     public boolean isNickNameDuplicatedInEvent(String nickname, Long eventId) {
-        try{
+        try {
             return em.createQuery("select count(am) from Member am " +
                             "where am.nickname = :nickname " +
                             "and am.event.id = :eventId", Long.class)
                     .setParameter("nickname", nickname)
                     .setParameter("eventId", eventId)
                     .getSingleResult() > 0;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to check nickname duplication: {}", e.getMessage());
             return false;
         }
@@ -83,23 +98,23 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Transactional(readOnly = true)
     @Override
     public boolean isPhoneDuplicated(String phoneNumber, Long eventId) {
-        try{
+        try {
             return em.createQuery("select count(am) from Member am " +
                             "where am.phoneNumber = :phoneNumber " +
                             "and am.event.id = :eventId", Long.class)
                     .setParameter("phoneNumber", phoneNumber)
                     .setParameter("eventId", eventId)
                     .getSingleResult() > 0;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to check phone number duplication: {}", e.getMessage());
             return false;
         }
     }
 
     public void save(Member activeMember) {
-        try{
+        try {
             em.persist(activeMember);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to check nickname duplication: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
@@ -114,7 +129,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                             "WHEN popupCount <= 0 " +
                             "THEN 0 ELSE 1 " +
                             "END")
-            .executeUpdate();
+                    .executeUpdate();
         } catch (Exception e) {
             log.error("Failed to initialize popup value: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -124,9 +139,9 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Transactional(readOnly = true)
     @Override
     public Member findMemberById(Long memberId) {
-        try{
+        try {
             return em.find(Member.class, memberId);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to find member by id: {}", e.getMessage());
             return null;
         }
@@ -160,12 +175,12 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     @Override
     public int getSpecialHeartCountByMemberId(Long memberId) {
-        try{
+        try {
             return em.createQuery("select m.specialHeart from Member m " +
                             "where m.id = :memberId", Integer.class)
                     .setParameter("memberId", memberId)
                     .getSingleResult();
-        }catch(NoResultException e){
+        } catch (NoResultException e) {
             log.error("Failed to get special heart count by memberId: {}", e.getMessage());
             throw e;
         }
@@ -173,14 +188,14 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     @Override
     public void updateSpecialHeart(Long memberId, int specialHeartCount) {
-        try{
+        try {
             em.createQuery("update Member m " +
                             "set m.specialHeart = :specialHeartCount " +
                             "where m.id = :memberId")
                     .setParameter("specialHeartCount", specialHeartCount)
                     .setParameter("memberId", memberId)
                     .executeUpdate();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to update special heart: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }

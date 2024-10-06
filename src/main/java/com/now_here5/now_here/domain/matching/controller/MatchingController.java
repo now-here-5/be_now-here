@@ -45,7 +45,7 @@ public class MatchingController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "하트 보내기 요청", required = true,
             content = @io.swagger.v3.oas.annotations.media.Content(schema = @Schema(implementation = HeartRequest.class),
-            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\"receiverId\": 1, \"isSpecialUsed\": false}"))
+                    examples = @io.swagger.v3.oas.annotations.media.ExampleObject(value = "{\"receiverId\": 1, \"isSpecialUsed\": false}"))
     )
 
     @ApiResponse(responseCode = "200", description = "L002 - 하트 보내기 성공")
@@ -54,7 +54,7 @@ public class MatchingController {
     @PostMapping("/send")
     public ResponseEntity<ResponseForm> sendLove(@RequestBody HeartRequest request) {
         try {
-            boolean isNotificationSentWhenEnabled  = matchingService.sendLove(request.getReceiverId(), request.isSpecialUsed());
+            boolean isNotificationSentWhenEnabled = matchingService.sendLove(request.getReceiverId(), request.isSpecialUsed());
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_SEND_SUCCESS, isNotificationSentWhenEnabled));
         } catch (Exception e) {
             log.error("하트 보내기 중 오류 발생: {}", e.getMessage());
@@ -93,6 +93,18 @@ public class MatchingController {
             return ResponseEntity.ok(ResponseForm.of(ResponseCode.LOVE_REJECT_FAIL));
         }
     }
+    @Operation(summary = "하트 취소하기", description = "이전에 보낸 하트를 취소합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Parameter(name = "receiverId", description = "내가 하트를 보낸 사람의 ID", required = true, schema = @Schema(example = "1"))
+    @ApiResponse(responseCode = "200", description = "L012 - 하트 취소 성공")
+    @ApiResponse(responseCode = "400", description = "L012 - 하트 취소 실패")
+    @DeleteMapping("/remove/heart")
+    public ResponseEntity<ResponseForm> removeHeart(@RequestParam Long receiverId) {
+        boolean isRemoved = matchingService.removeHeart(receiverId);
+        return isRemoved ?
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.HEART_REMOVAL_SUCCESS)) :
+                ResponseEntity.ok(ResponseForm.of(ResponseCode.HEART_REMOVAL_FAIL));
+    }
+
 
     @Operation(summary = "매칭 요약 조회", description = "매칭 요약 정보를 조회합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponse(responseCode = "200", description = "L005 - 요약 정보 조회 성공")
@@ -178,7 +190,7 @@ public class MatchingController {
     @ApiResponse(responseCode = "200", description = "L011 - 특별하트 개수 조회 성공")
     @ApiResponse(responseCode = "400", description = "L011 - 특별하트 개수 조회 실패")
     @GetMapping("/getSpecialHeart")
-    public ResponseEntity<ResponseForm> getSpecialHeartCount(){
+    public ResponseEntity<ResponseForm> getSpecialHeartCount() {
         Integer notificationCount = matchingService.getSpecialHeartCount();
 
         return notificationCount != null ?

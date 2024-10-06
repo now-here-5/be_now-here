@@ -77,6 +77,18 @@ public class MatchingServiceImpl implements MatchingService {
         } else return !isSpecialUsed;
     }
 
+    @Transactional
+    @Override
+    public boolean removeHeart(Long receiverId) {
+        try {
+            AuthenticatedMemberDto member = authUtil.getMemberByAuthentication();
+            matchingRepository.removeSentHeart(member.getMemberId(), receiverId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private Matching createMatching(Member sender, Member receiver) {
         return Matching.builder()
                 .sender(sender)
@@ -99,10 +111,13 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     private SmsRequest createSmsRequest(Member receiver, String eventId) {
-        String url = switch(eventId) {
-            case "1" : yield "https://www.now-here.site/match/received-hearts?eventCode=MTAyOTM4NDY";
-            case "2" : yield "https://나우히어.lrl.kr";
-            case "3" : yield "https://나우히어_가을.lrl.kr";
+        String url = switch (eventId) {
+            case "1":
+                yield "https://www.now-here.site/match/received-hearts?eventCode=MTAyOTM4NDY";
+            case "2":
+                yield "https://나우히어.lrl.kr";
+            case "3":
+                yield "https://나우히어_가을.lrl.kr";
 
 
             default:
@@ -110,7 +125,7 @@ public class MatchingServiceImpl implements MatchingService {
         };
 
         return SmsRequest.builder()
-                .message("하트가 도착했어요! 지금 확인하고 응답해보세요 : "+url)
+                .message("하트가 도착했어요! 지금 확인하고 응답해보세요 : " + url)
                 .phoneNumber(receiver.getPhoneNumber())
                 .build();
     }
@@ -126,10 +141,13 @@ public class MatchingServiceImpl implements MatchingService {
         Long eventId = sender.getEvent().getId();
         //String encryptEventId = xor.encrypt(eventId);
 
-        String url = switch(eventId.toString()) {
-            case "1" : yield "https://www.now-here.site/match/status?eventCode=MTAyOTM4NDY";
-            case "2" : yield "https://_나우히어.lrl.kr";
-            case "3" : yield "https://가을_나우히어.lrl.kr";
+        String url = switch (eventId.toString()) {
+            case "1":
+                yield "https://www.now-here.site/match/status?eventCode=MTAyOTM4NDY";
+            case "2":
+                yield "https://_나우히어.lrl.kr";
+            case "3":
+                yield "https://가을_나우히어.lrl.kr";
 
             default:
                 throw new IllegalStateException("Unexpected value: " + eventId);
@@ -142,7 +160,7 @@ public class MatchingServiceImpl implements MatchingService {
                 matchingRepository.update(matching);
 
                 SmsRequest smsRequest = SmsRequest.builder()
-                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : "+url)
+                        .message("매칭되었습니다! 지금 바로 상대와 연락을 시작해보세요 : " + url)
                         .phoneNumber(sender.getPhoneNumber())
                         .build();
 

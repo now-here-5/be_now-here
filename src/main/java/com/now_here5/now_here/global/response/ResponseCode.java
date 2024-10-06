@@ -45,6 +45,7 @@ public enum ResponseCode {
     PHONE_VERIFY_SUCCESS(200, "A003", "휴대폰 인증에 성공했습니다."),
     PHONE_VERIFY_FAIL(400, "A003", "휴대폰 인증에 실패했습니다."),
     PHONE_QUALIFIED(200, "A004", "사용 가능한 번호입니다."),
+    PHONE_NOT_SIGNED(400, "A005", "이벤트에 가입되지 않은 전화번호입니다."),
 
     // Member - 'M'ember
     LOGIN_SUCCESS(200, "M001", "로그인에 성공했습니다."),
@@ -144,7 +145,8 @@ public enum ResponseCode {
     NOTIFICATION_COUNT_QUERY_FAIL(400, "L010", "알림 개수 조회에 실패했습니다."),
     SPECIAL_HEART_COUNT_QUERY_SUCCESS(200, "L011", "특별하트 개수 조회에 성공했습니다."),
     SPECIAL_HEART_COUNT_QUERY_FAIL(400, "L011", "특별하트 개수 조회에 실패했습니다."),
-
+    HEART_REMOVAL_SUCCESS(200, "L012", "보낸 하트 취소에 성공했습니다."),
+    HEART_REMOVAL_FAIL(400, "L012", "보낸 하트 취소에 실패했습니다."),
     // Interaction - 'I'nteraction
     FEEDBACK_CREATE_SUCCESS(200, "I001", "FEEDBACK 생성에 성공했습니다."),
     FEEDBACK_CREATE_FAIL(400, "I001", "FEEDBACK 생성에 실패했습니다."),
