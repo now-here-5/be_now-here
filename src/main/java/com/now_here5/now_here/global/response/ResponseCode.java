@@ -145,7 +145,8 @@ public enum ResponseCode {
     NOTIFICATION_COUNT_QUERY_FAIL(400, "L010", "알림 개수 조회에 실패했습니다."),
     SPECIAL_HEART_COUNT_QUERY_SUCCESS(200, "L011", "특별하트 개수 조회에 성공했습니다."),
     SPECIAL_HEART_COUNT_QUERY_FAIL(400, "L011", "특별하트 개수 조회에 실패했습니다."),
-
+    HEART_REMOVAL_SUCCESS(200, "L012", "보낸 하트 취소에 성공했습니다."),
+    HEART_REMOVAL_FAIL(400, "L012", "보낸 하트 취소에 실패했습니다."),
     // Interaction - 'I'nteraction
     FEEDBACK_CREATE_SUCCESS(200, "I001", "FEEDBACK 생성에 성공했습니다."),
     FEEDBACK_CREATE_FAIL(400, "I001", "FEEDBACK 생성에 실패했습니다."),
